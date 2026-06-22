@@ -514,7 +514,8 @@ input[type="checkbox"] { cursor: pointer; }
 <div class="modal-bg" id="modal-upload">
   <div class="modal" style="width:500px;">
     <h2>엑셀 업로드</h2>
-    <p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: 매장코드 / 매장명 / 상품코드 / 상품명 / 단위 / 입수 / 출고횟수 / 공급가 / 출고수량 / 출고단가 / 출고부가세 / 출고합계금액 / 비고</p>
+    <p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>날짜</strong> / 매장코드 / 매장명 / 상품코드 / 상품명 / 단위 / 입수 / 출고횟수 / 공급가 / 출고수량 / 출고단가 / 출고부가세 / 출고합계금액 / 비고</p>
+    <p style="font-size:11px;color:#2563eb;margin-bottom:10px;">📋 여러 시트 업로드 가능 — 각 시트의 데이터가 자동으로 통합됩니다.</p>
     <div class="upload-area" onclick="document.getElementById('excel-input').click()">
       <div style="font-size:24px;">📂</div>
       <p>클릭하여 엑셀 파일 선택 (.xlsx / .xls / .csv)</p>
@@ -745,35 +746,55 @@ function previewExcel(input) {
   const reader = new FileReader();
   reader.onload = e => {
     const wb = XLSX.read(e.target.result, {type:'binary'});
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws, {header:1});
-    uploadedRows = rows.slice(1).filter(r=>r.length>0);
+    uploadedRows = [];
+    let sheetInfo = [];
+    wb.SheetNames.forEach(name => {
+      const ws = wb.Sheets[name];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:1});
+      const dataRows = rows.slice(1).filter(r=>r.length>0);
+      uploadedRows = uploadedRows.concat(dataRows);
+      sheetInfo.push(`${name}(${dataRows.length}건)`);
+    });
     const prev = document.getElementById('upload-preview');
     prev.style.display = 'block';
-    prev.textContent = `✅ ${uploadedRows.length}건 감지됨 (헤더 제외) — 미리보기: ${uploadedRows.slice(0,2).map(r=>r[1]||'').join(', ')} ...`;
+    prev.innerHTML = `✅ 총 <strong>${uploadedRows.length}건</strong> 감지됨 — 시트: ${sheetInfo.join(', ')}<br>
+    미리보기: ${uploadedRows.slice(0,2).map(r=>r[1]||'').join(', ')} ...`;
   };
   reader.readAsBinaryString(file);
 }
 
 function importExcel() {
   if(!uploadedRows.length) { alert('파일을 먼저 선택해주세요.'); return; }
+  const cnt = uploadedRows.length;
   uploadedRows.forEach(r => {
-    const outVat   = parseFloat(r[10])||0;
-    const outTotal = parseFloat(r[11])||0;
+    // 날짜가 맨 앞 컬럼 (index 0)
+    const rawDate = r[0];
+    let date = new Date().toISOString().slice(0,10);
+    if(rawDate) {
+      if(typeof rawDate === 'number') {
+        // 엑셀 날짜 시리얼 변환
+        const d = new Date(Math.round((rawDate - 25569) * 86400 * 1000));
+        date = d.toISOString().slice(0,10);
+      } else {
+        date = String(rawDate).replace(/\./g,'-').replace(/(\d{4})-(\d{1,2})-(\d{1,2})/,(_,y,m,d)=>`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
+      }
+    }
+    const outVat   = parseFloat(r[11])||0;
+    const outTotal = parseFloat(r[12])||0;
     salesData.unshift({
       id: nextId++,
-      date: new Date().toISOString().slice(0,10),
-      storeCode:   String(r[0]||''), storeName:   String(r[1]||''),
-      productCode: String(r[2]||''), productName: String(r[3]||''),
-      unit: String(r[4]||''),
-      inQty:    parseFloat(r[5])||0,
-      outCount: parseFloat(r[6])||0,
-      supply:   parseFloat(r[7])||0,
-      outQty:   parseFloat(r[8])||0,
-      outPrice: parseFloat(r[9])||0,
+      date,
+      storeCode:   String(r[1]||''), storeName:   String(r[2]||''),
+      productCode: String(r[3]||''), productName: String(r[4]||''),
+      unit:     String(r[5]||''),
+      inQty:    parseFloat(r[6])||0,
+      outCount: parseFloat(r[7])||0,
+      supply:   parseFloat(r[8])||0,
+      outQty:   parseFloat(r[9])||0,
+      outPrice: parseFloat(r[10])||0,
       outVat, outTotal,
       taxType: outVat > 0 ? '과세' : '면세',
-      note: String(r[12]||''),
+      note: String(r[13]||''),
     });
   });
   uploadedRows = [];
@@ -781,12 +802,12 @@ function importExcel() {
   document.getElementById('excel-input').value = '';
   closeModal('modal-upload');
   applyFilter();
-  alert(`${uploadedRows.length || salesData.length}건 업로드 완료`);
+  alert(`${cnt}건 업로드 완료`);
 }
 
 // 엑셀 다운로드
 function exportExcel() {
-  const rows = [['날짜','매장코드','매장명','상품코드','상품명','단위','입수','출고횟수','공급가','출고수량','출고단가','출고부가세','출고합계금액','과세구분','비고']];
+  const rows = [['날짜','매장코드','매장명','상품코드','상품명','단위','입수','출고횟수','공급가','출고수량','출고단가','출고부가세','출고합계금액','과세구분','비고']]; // 날짜 맨앞
   filteredData.forEach(r => rows.push([r.date,r.storeCode,r.storeName,r.productCode,r.productName,r.unit,r.inQty,r.outCount,r.supply,r.outQty,r.outPrice,r.outVat,r.outTotal,r.taxType,r.note]));
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), '매출내역');
@@ -1527,7 +1548,8 @@ function saveNoteTypes(){
 function openDepUpload(){
   const html=`<div class="modal" style="width:500px;">
     <h2>예금내역 엑셀 업로드</h2>
-    <p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼: 코드 / 은행명 / 계좌번호 / 비고유형 / 전잔액 / 입금 / 출금 / 최종잔액 / 상세내역 / 비고 / 일자</p>
+    <p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>일자</strong> / 코드 / 은행명 / 계좌번호 / 비고유형 / 전잔액 / 입금 / 출금 / 최종잔액 / 상세내역 / 비고</p>
+    <p style="font-size:11px;color:#2563eb;margin-bottom:10px;">📋 여러 시트 업로드 가능 — 각 시트의 데이터가 자동으로 통합됩니다.</p>
     <div class="upload-area" onclick="document.getElementById('dep-xl-input').click()">
       <div style="font-size:24px;">📂</div>
       <p>클릭하여 엑셀 파일 선택 (.xlsx / .xls / .csv)</p>
@@ -1547,37 +1569,58 @@ function previewDepExcel(input){
   const reader=new FileReader();
   reader.onload=e=>{
     const wb=XLSX.read(e.target.result,{type:'binary'});
-    const ws=wb.Sheets[wb.SheetNames[0]];
-    const rows=XLSX.utils.sheet_to_json(ws,{header:1});
-    depUploadRows=rows.slice(1).filter(r=>r.length>0);
+    depUploadRows=[];
+    let sheetInfo=[];
+    wb.SheetNames.forEach(name=>{
+      const ws=wb.Sheets[name];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1});
+      const dataRows=rows.slice(1).filter(r=>r.length>0);
+      depUploadRows=depUploadRows.concat(dataRows);
+      sheetInfo.push(`${name}(${dataRows.length}건)`);
+    });
     const prev=document.getElementById('dep-xl-preview');
     prev.style.display='block';
-    prev.textContent=`✅ ${depUploadRows.length}건 감지됨 — 미리보기: ${depUploadRows.slice(0,2).map(r=>r[2]||'').join(', ')}...`;
+    prev.innerHTML=`✅ 총 <strong>${depUploadRows.length}건</strong> 감지됨 — 시트: ${sheetInfo.join(', ')}<br>미리보기: ${depUploadRows.slice(0,2).map(r=>r[1]||'').join(', ')}...`;
   };
   reader.readAsBinaryString(file);
 }
 
 function importDepExcel(){
   if(!depUploadRows.length){alert('파일을 먼저 선택해주세요.');return;}
+  const cnt=depUploadRows.length;
   depUploadRows.forEach(r=>{
+    // 일자 맨 앞 (index 0)
+    const rawDate=r[0];
+    let date=new Date().toISOString().slice(0,10);
+    if(rawDate){
+      if(typeof rawDate==='number'){
+        const d=new Date(Math.round((rawDate-25569)*86400*1000));
+        date=d.toISOString().slice(0,10);
+      } else {
+        date=String(rawDate).replace(/\./g,'-').replace(/(\d{4})-(\d{1,2})-(\d{1,2})/,(_,y,m,d)=>`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
+      }
+    }
     depData.unshift({
       id:depNextId++,
-      code:String(r[0]||''), bank:String(r[1]||''), accNo:String(r[2]||''),
-      noteType:String(r[3]||''),
-      prevBal:parseFloat(r[4])||0, inAmt:parseFloat(r[5])||0,
-      outAmt:parseFloat(r[6])||0, finalBal:parseFloat(r[7])||0,
-      detail:String(r[8]||''), note:String(r[9]||''),
-      date:String(r[10]||new Date().toISOString().slice(0,10)),
+      date,
+      code:String(r[1]||''), bank:String(r[2]||''), accNo:String(r[3]||''),
+      noteType:String(r[4]||''),
+      prevBal:parseFloat(r[5])||0,
+      inAmt:parseFloat(r[6])||0,
+      outAmt:parseFloat(r[7])||0,
+      finalBal:parseFloat(r[8])||0,
+      detail:String(r[9]||''),
+      note:String(r[10]||''),
     });
   });
-  const cnt=depUploadRows.length; depUploadRows=[];
+  depUploadRows=[];
   closeAccModal(); applyDepFilter();
   alert(cnt+'건 업로드 완료');
 }
 
 function exportDepExcel(){
-  const rows=[['코드','은행명','계좌번호','비고유형','전잔액','입금','출금','최종잔액','상세내역','비고','일자']];
-  depFiltered.forEach(r=>rows.push([r.code,r.bank,r.accNo,r.noteType,r.prevBal,r.inAmt,r.outAmt,r.finalBal,r.detail,r.note,r.date]));
+  const rows=[['일자','코드','은행명','계좌번호','비고유형','전잔액','입금','출금','최종잔액','상세내역','비고']];
+  depFiltered.forEach(r=>rows.push([r.date,r.code,r.bank,r.accNo,r.noteType,r.prevBal,r.inAmt,r.outAmt,r.finalBal,r.detail,r.note]));
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'예금내역');
   XLSX.writeFile(wb,'예금내역.xlsx');
