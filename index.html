@@ -764,10 +764,10 @@ function setStatus(type, ok, msg) {
 async function initFirebase() {
   try {
     const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
-    const { getFirestore, collection, getDocs, setDoc, doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, writeBatch } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
     fbApp = initializeApp(FIREBASE_CONFIG);
     fbDb = getFirestore(fbApp);
-    window._fbFs = { collection, getDocs, setDoc, doc, deleteDoc, getFirestore };
+    window._fbFs = { collection, getDocs, setDoc, doc, deleteDoc, writeBatch };
     fbReady = true;
     setStatus('fb', true, 'Firebase 연결됨');
     await loadFromFirebase();
@@ -781,34 +781,38 @@ async function loadFromFirebase() {
   if(!fbReady) return;
   const { collection, getDocs } = window._fbFs;
   try {
-    // 매출
-    const salesSnap = await getDocs(collection(fbDb,'sales'));
-    if(!salesSnap.empty) { salesData=[]; salesSnap.forEach(d=>salesData.push({id:d.id,...d.data()})); renderTable(salesData); }
-    // 예금
-    const depSnap = await getDocs(collection(fbDb,'deposit'));
-    if(!depSnap.empty) { depData=[]; depSnap.forEach(d=>depData.push({id:d.id,...d.data()})); }
-    // 계좌
-    const accSnap = await getDocs(collection(fbDb,'accounts'));
-    if(!accSnap.empty) { accData=[]; accSnap.forEach(d=>accData.push({id:d.id,...d.data()})); }
-    // 대출
-    const loanSnap = await getDocs(collection(fbDb,'loans'));
-    if(!loanSnap.empty) { loanData=[]; loanSnap.forEach(d=>loanData.push({id:d.id,...d.data()})); }
-    setStatus('fb', true, 'Firebase 로드완료');
+    const load = async (name) => {
+      const snap = await getDocs(collection(fbDb, name));
+      return snap.docs.map(d => ({...d.data(), _docId: d.id}));
+    };
+    const [sSnap, dSnap, aSnap, lSnap] = await Promise.all([
+      load('sales'), load('deposit'), load('accounts'), load('loans')
+    ]);
+    if(sSnap.length) { salesData = sSnap; filteredData = [...salesData]; renderTable(salesData); }
+    if(dSnap.length) { depData = dSnap; }
+    if(aSnap.length) { accData = aSnap; }
+    if(lSnap.length) { loanData = lSnap; }
+    setStatus('fb', true, `Firebase 로드완료`);
   } catch(e) {
     setStatus('fb', false, 'Firebase 로드오류');
+    console.error(e);
   }
 }
 
 async function saveToFirebase(collectionName, data) {
   if(!fbReady) return;
-  const { collection, setDoc, doc } = window._fbFs;
+  const { collection, setDoc, doc, writeBatch } = window._fbFs;
   try {
-    for(const row of data) {
-      await setDoc(doc(fbDb, collectionName, String(row.id)), row);
-    }
+    const batch = writeBatch(fbDb);
+    data.forEach(row => {
+      const clean = JSON.parse(JSON.stringify(row)); // undefined 제거
+      batch.set(doc(fbDb, collectionName, String(row.id||row._docId||Date.now())), clean);
+    });
+    await batch.commit();
     setStatus('fb', true, 'Firebase 저장완료');
   } catch(e) {
     setStatus('fb', false, 'Firebase 저장오류');
+    console.error(e);
   }
 }
 
