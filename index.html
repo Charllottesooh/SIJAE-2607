@@ -801,14 +801,24 @@ async function loadFromFirebase() {
 
 async function saveToFirebase(collectionName, data) {
   if(!fbReady) return;
-  const { collection, setDoc, doc, writeBatch } = window._fbFs;
+  const { collection, getDocs, doc, writeBatch } = window._fbFs;
   try {
-    const batch = writeBatch(fbDb);
-    data.forEach(row => {
-      const clean = JSON.parse(JSON.stringify(row)); // undefined 제거
-      batch.set(doc(fbDb, collectionName, String(row.id||row._docId||Date.now())), clean);
-    });
-    await batch.commit();
+    // 1. 기존 컬렉션 전체 삭제
+    const existing = await getDocs(collection(fbDb, collectionName));
+    if(!existing.empty) {
+      const delBatch = writeBatch(fbDb);
+      existing.docs.forEach(d => delBatch.delete(doc(fbDb, collectionName, d.id)));
+      await delBatch.commit();
+    }
+    // 2. 현재 데이터 전체 재저장
+    if(data.length > 0) {
+      const setBatch = writeBatch(fbDb);
+      data.forEach((row, i) => {
+        const clean = JSON.parse(JSON.stringify(row));
+        setBatch.set(doc(fbDb, collectionName, String(row.id || i+1)), clean);
+      });
+      await setBatch.commit();
+    }
     setStatus('fb', true, 'Firebase 저장완료');
   } catch(e) {
     setStatus('fb', false, 'Firebase 저장오류');
