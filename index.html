@@ -888,10 +888,19 @@ async function loadFromFirebase() {
     const [sSnap, dSnap, aSnap, lSnap] = await Promise.all([
       load('sales'), load('deposit'), load('accounts'), load('loans')
     ]);
-    if(sSnap.length) { salesData = sSnap; filteredData = [...salesData]; renderTable(salesData); }
-    if(dSnap.length) { depData = dSnap; }
-    if(aSnap.length) { accData = aSnap; }
-    if(lSnap.length) { loanData = lSnap; }
+    if(sSnap.length) {
+      salesData = sSnap;
+      // ★ 최신날짜 정렬
+      salesData.sort((a,b) => b.date.localeCompare(a.date));
+      filteredData = [...salesData];
+      renderTable(filteredData);
+    }
+    if(dSnap.length) {
+      depData = dSnap;
+      // ★ depNoteTypes는 Firebase에서 덮어쓰지 않음 — 코드 기본값 유지
+    }
+    if(aSnap.length) accData = aSnap;
+    if(lSnap.length) loanData = lSnap;
     setStatus('fb', true, `Firebase 로드완료`);
   } catch(e) {
     setStatus('fb', false, 'Firebase 로드오류');
@@ -1328,7 +1337,11 @@ let depAccounts = [
   {code:'ACC016', bank:'하나', accNo:'581-910058-20904'},
 ];
 
-let depNoteTypes = [{name:'가맹점 입금',color:'#2563eb'},{name:'결산이자',color:'#0F6E56'},{name:'기타',color:'#888'}];
+let depNoteTypes = [
+  {name:'가맹점 입금', color:'#2563eb'},
+  {name:'결산이자',    color:'#0F6E56'},
+  {name:'기타',        color:'#888'}
+];
 
 let depData = [
   {id:1, code:'ACC001', bank:'기업', accNo:'148-023233-04-166', noteType:'가맹점 입금', prevBal:1790183, inAmt:8572158, outAmt:0, finalBal:10362341, detail:'가맹점 입금', note:'-', date:'2026-06-21'},
