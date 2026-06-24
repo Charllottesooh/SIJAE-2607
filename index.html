@@ -616,6 +616,8 @@ function applyFilter() {
     if(tax && r.taxType !== tax) return false;
     return true;
   });
+  // ★ 최신날짜 정렬 추가
+  filteredData.sort((a,b) => b.date.localeCompare(a.date));
   renderTable(filteredData);
 }
 
@@ -1301,7 +1303,9 @@ function exportRptExcel(){
 }
 
 // 초기 렌더
-renderTable(salesData);
+salesData.sort((a,b) => b.date.localeCompare(a.date));
+filteredData = [...salesData];
+renderTable(filteredData);
 
 
 // ===== 예금관리 =====
