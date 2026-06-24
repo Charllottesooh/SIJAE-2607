@@ -1355,8 +1355,13 @@ function initDepSelects() {
   const codeEl = document.getElementById('dep-f-code');
   const typeEl = document.getElementById('dep-f-type');
   if(!codeEl||!typeEl) return;
-  codeEl.innerHTML = '<option value="">전체 계좌</option>' + depAccounts.map(a=>`<option value="${a.code}">${a.code} ${a.accNo}</option>`).join('');
-  typeEl.innerHTML = '<option value="">비고유형 전체</option>' + depNoteTypes.map(t=>`<option value="${t.name}">${t.name}</option>`).join('');
+  // ★ 계좌번호 옆 계좌별명 추가
+  codeEl.innerHTML = '<option value="">전체 계좌</option>' + depAccounts.map(a=>
+    `<option value="${a.code}">${a.code} ${a.accNo}${a.alias ? ' ('+a.alias+')' : ''}</option>`
+  ).join('');
+  typeEl.innerHTML = '<option value="">비고유형 전체</option>' + depNoteTypes.map(t=>
+    `<option value="${t.name}">${t.name}</option>`
+  ).join('');
 }
 
 function renderDep(data) {
@@ -1441,7 +1446,7 @@ function openDepModal(id) {
   const r = id ? depData.find(x=>x.id===id) : null;
   const today = new Date().toISOString().slice(0,10);
   const accOpts = depAccounts.map(a=>`<option value="${a.code}" ${r&&r.code===a.code?'selected':''}>${a.code} - ${a.bank} ${a.accNo}</option>`).join('');
-  const typeOpts = depNoteTypes.map(t=>`<option value="${t}" ${r&&r.noteType===t?'selected':''}>${t}</option>`).join('');
+ const typeOpts = depNoteTypes.map(t=>`<option value="${t.name}" ${r&&r.noteType===t.name?'selected':''}>${t.name}</option>`).join('');
   const html = `<div class="modal" style="width:560px;">
     <h2>${r?'내역 수정':'내역 추가'}</h2>
     <div class="form-grid">
