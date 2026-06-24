@@ -1464,12 +1464,24 @@ function renderRpt(rows){
   document.getElementById('rpt-final').textContent='₩'+depFinal.toLocaleString();
   const accMap={};
   rows.forEach(r=>{const key=r.section+'||'+r.account;if(!accMap[key])accMap[key]={section:r.section,account:r.account,cnt:0,inAmt:0,outAmt:0,amt:0};accMap[key].cnt++;accMap[key].inAmt+=r.inAmt;accMap[key].outAmt+=r.outAmt;accMap[key].amt+=r.amt;});
-  const accTbody=document.getElementById('rpt-acc-tbody');accTbody.innerHTML='';
+  const accTbody=document.getElementById('rpt-acc-tbody');
+const accHtml=Object.values(accMap).map(g=>`<tr>...</tr>`).join('');
+accTbody.innerHTML=accHtml;
   Object.values(accMap).forEach(g=>{accTbody.innerHTML+=`<tr><td style="font-size:11px;padding:4px 8px;border-radius:4px;background:#f0f0f0;">${g.section}</td><td style="font-weight:500;">${g.account}</td><td class="num">${g.cnt}건</td><td class="num" style="color:#2563eb;">${g.inAmt>0?'₩'+g.inAmt.toLocaleString():'-'}</td><td class="num" style="color:#D42020;">${g.outAmt>0?'₩'+g.outAmt.toLocaleString():'-'}</td><td class="num" style="font-weight:600;">₩${g.amt.toLocaleString()}</td></tr>`;});
   const tI=Object.values(accMap).reduce((s,g)=>s+g.inAmt,0), tO=Object.values(accMap).reduce((s,g)=>s+g.outAmt,0), tA=Object.values(accMap).reduce((s,g)=>s+g.amt,0);
   accTbody.innerHTML+=`<tr style="background:#f9f9f9;font-weight:600;"><td colspan="2" style="padding:10px 12px;">합계</td><td class="num" style="padding:10px 12px;">${rows.length}건</td><td class="num" style="padding:10px 12px;color:#2563eb;">₩${tI.toLocaleString()}</td><td class="num" style="padding:10px 12px;color:#D42020;">₩${tO.toLocaleString()}</td><td class="num" style="padding:10px 12px;">₩${tA.toLocaleString()}</td></tr>`;
-  const detailTbody=document.getElementById('rpt-detail-tbody');detailTbody.innerHTML='';
-  rows.forEach(r=>{detailTbody.innerHTML+=`<tr><td>${r.date}</td><td style="font-size:11px;">${r.section}</td><td>${r.account}</td><td>${r.target}</td><td class="num" style="color:#2563eb;">${r.inAmt>0?'₩'+r.inAmt.toLocaleString():'-'}</td><td class="num" style="color:#D42020;">${r.outAmt>0?'₩'+r.outAmt.toLocaleString():'-'}</td><td class="num" style="font-weight:500;">₩${r.amt.toLocaleString()}</td><td style="font-size:11px;">${r.note}</td></tr>`;});
+  const detailTbody=document.getElementById('rpt-detail-tbody');
+const detailHtml=rows.map(r=>`<tr>
+  <td>${r.date}</td>
+  <td style="font-size:11px;">${r.section}</td>
+  <td>${r.account}</td>
+  <td>${r.target}</td>
+  <td class="num" style="color:#2563eb;">${r.inAmt>0?'₩'+r.inAmt.toLocaleString():'-'}</td>
+  <td class="num" style="color:#D42020;">${r.outAmt>0?'₩'+r.outAmt.toLocaleString():'-'}</td>
+  <td class="num" style="font-weight:500;">₩${r.amt.toLocaleString()}</td>
+  <td style="font-size:11px;">${r.note}</td>
+</tr>`).join('');
+detailTbody.innerHTML=detailHtml;
   document.getElementById('rpt-count').textContent=`(${rows.length}건)`;
 }
 function resetRptFilter(){document.getElementById('rpt-f-start').value='2026-06-01';document.getElementById('rpt-f-end').value='2026-06-30';document.getElementById('rpt-f-menu').value='all';document.getElementById('rpt-acc-tbody').innerHTML='';document.getElementById('rpt-detail-tbody').innerHTML='';['rpt-sales-fr','rpt-sales-etc','rpt-in-fr','rpt-in-etc','rpt-final'].forEach(id=>document.getElementById(id).textContent='₩0');}
