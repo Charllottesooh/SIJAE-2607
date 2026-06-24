@@ -115,6 +115,7 @@ input[type="checkbox"] { cursor: pointer; }
   <div class="menu-group">
   <div class="menu-group-label">거래처</div>
   <div class="menu-item" onclick="showPage('store',this)">거래처관리</div>
+  <div class="menu-item" onclick="showPage('arpage',this)">미수금관리</div>
 </div>
 <div class="menu-group">
   <div class="menu-group-label">자금관리</div>
@@ -176,7 +177,7 @@ input[type="checkbox"] { cursor: pointer; }
         <input type="date" id="f-start" value="2026-06-01">
         <span style="font-size:12px;color:#aaa;">~</span>
         <input type="date" id="f-end" value="2026-06-30">
-        <input type="text" id="f-store" placeholder="매장코드/매장명" style="width:140px;">
+        <input type="text" id="f-store" placeholder="매장코드/매장명 검색" style="width:180px;" oninput="applyFilter()">
         <input type="text" id="f-product" placeholder="상품코드/상품명" style="width:140px;">
         <select id="f-tax">
           <option value="">과세/면세 전체</option>
@@ -313,7 +314,87 @@ input[type="checkbox"] { cursor: pointer; }
     <button onclick="openStoreUpload()">엑셀 업로드</button>
     <button onclick="exportStoreExcel()">엑셀 다운로드</button>
   </div>
+<!-- 미수금관리 -->
+<div id="page-arpage" class="page">
 
+  <!-- 필터바 -->
+  <div class="filter-bar">
+    <input type="date" id="ar-f-start" value="2026-06-01">
+    <span style="font-size:12px;color:#aaa;">~</span>
+    <input type="date" id="ar-f-end" value="2026-06-30">
+    <input type="text" id="ar-f-keyword" placeholder="가맹점코드/명 검색" style="width:180px;">
+    <select id="ar-f-status">
+      <option value="">전체 상태</option>
+      <option value="정상">정상</option>
+      <option value="휴업">휴업</option>
+      <option value="폐업">폐업</option>
+    </select>
+    <select id="ar-f-ar">
+      <option value="">전체</option>
+      <option value="over">미수금 있음</option>
+      <option value="zero">미수금 없음</option>
+      <option value="minus">초과입금</option>
+    </select>
+    <button class="search" onclick="applyArFilter()">조회</button>
+    <button onclick="resetArFilter()">초기화</button>
+    <button onclick="exportArExcel()">엑셀 다운로드</button>
+  </div>
+
+  <!-- 요약 카드 -->
+  <div class="card-section" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
+    <div class="summary-card color-red">
+      <div class="label">총 미수금</div>
+      <div class="value" id="ar-total">₩0</div>
+      <div class="sub" id="ar-total-cnt">0개 가맹점</div>
+    </div>
+    <div class="summary-card color-orange">
+      <div class="label">미수금 발생</div>
+      <div class="value" id="ar-over">₩0</div>
+      <div class="sub" id="ar-over-cnt">0개</div>
+    </div>
+    <div class="summary-card color-blue">
+      <div class="label">총 매출합계</div>
+      <div class="value" id="ar-sales">₩0</div>
+      <div class="sub" id="ar-sales-cnt">0건</div>
+    </div>
+    <div class="summary-card color-green">
+      <div class="label">총 입금합계</div>
+      <div class="value" id="ar-income">₩0</div>
+      <div class="sub" id="ar-income-cnt">0건</div>
+    </div>
+  </div>
+
+  <!-- 테이블 -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <span class="title">가맹점별 미수금 현황 
+        <span id="ar-count" style="font-size:11px;color:#aaa;font-weight:400;"></span>
+      </span>
+      <div class="actions">
+        <button onclick="exportArExcel()">엑셀 다운로드</button>
+      </div>
+    </div>
+    <div class="tbl-scroll">
+      <table id="ar-table">
+        <thead><tr>
+          <th>가맹점코드</th>
+          <th>가맹점명</th>
+          <th>대표자</th>
+          <th>상태</th>
+          <th class="num">한도금액</th>
+          <th class="num">초기미수금</th>
+          <th class="num">기간매출</th>
+          <th class="num">기간입금</th>
+          <th class="num" style="color:#D42020;">미수금</th>
+          <th class="num">한도잔여</th>
+          <th>비고1</th>
+        </tr></thead>
+        <tbody id="ar-tbody"></tbody>
+        <tfoot id="ar-tfoot"></tfoot>
+      </table>
+    </div>
+  </div>
+</div>
   <!-- 요약 카드 -->
   <div class="card-section" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
     <div class="summary-card color-blue"><div class="label">전체 가맹점</div><div class="value" id="store-cnt-all">0개</div></div>
@@ -430,9 +511,10 @@ input[type="checkbox"] { cursor: pointer; }
         <input type="date" id="dep-f-start" value="2026-06-01">
         <span style="font-size:12px;color:#aaa;">~</span>
         <input type="date" id="dep-f-end" value="2026-06-21">
-        <select id="dep-f-code" style="width:130px;">
-          <option value="">전체 계좌</option>
-        </select>
+        <input type="text" id="dep-f-store" placeholder="가맹점코드/명 검색" style="width:160px;">
+<select id="dep-f-code" style="width:130px;">
+  <option value="">전체 계좌</option>
+</select>
         <select id="dep-f-type" style="width:110px;">
           <option value="">비고유형 전체</option>
         </select>
@@ -457,7 +539,8 @@ input[type="checkbox"] { cursor: pointer; }
           <table>
             <thead><tr>
               <th><input type="checkbox" id="dep-chk-all" onchange="depToggleAll(this)"></th>
-              <th>코드</th><th>은행명</th><th>계좌번호</th><th>비고유형</th>
+<th>코드</th><th>은행명</th><th>계좌번호</th>
+<th>가맹점코드</th><th>가맹점명</th><th>비고유형</th>
               <th class="num">전잔액</th><th class="num" style="color:#2563eb;">입금</th>
               <th class="num" style="color:#D42020;">출금</th>
               <th class="num" style="color:#0F6E56;">최종잔액</th>
@@ -624,7 +707,7 @@ function renderTable(data) {
     tr.innerHTML = `
       <td><input type="checkbox" class="row-chk" value="${r.id}" onclick="e=>e.stopPropagation()"></td>
       <td>${r.date}</td>
-      <td>${r.storeCode}</td>
+      <td style="cursor:pointer;color:#2563eb;" onclick="showStoreTip('${r.storeCode}')">${r.storeCode}</td>
       <td>${r.storeName}</td>
       <td>${r.productCode}</td>
       <td>${r.productName}</td>
@@ -888,11 +971,9 @@ function showPage(key, el) {
   document.getElementById('page-'+key).classList.add('active');
   document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('page-title').textContent = {sales:'매출내역',account:'계좌 및 대출',deposit:'입출금내역',report:'리포트',store:'거래처관리'}[key];
-if(key==='account') renderAcc();
-if(key==='deposit') { initDepSelects(); depFiltered=[...depData]; renderDep(depFiltered); }
-if(key==='report') { resetRptFilter(); }
-if(key==='store') { initStoreAccSelect(); storeFiltered=[...storeData]; renderStore(storeFiltered); }
+  document.getElementById('page-title').textContent = {sales:'매출내역',account:'계좌 및 대출',deposit:'입출금내역',report:'리포트',store:'거래처관리',arpage:'미수금관리'}[key];
+if(key==='store')  { initStoreAccSelect(); storeFiltered=[...storeData]; renderStore(storeFiltered); }
+if(key==='arpage') { applyArFilter(); }
 }
 
 
@@ -1444,10 +1525,10 @@ function renderDep(data) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><input type="checkbox" class="dep-chk" value="${r.id}"></td>
-      <td style="font-size:11px;color:#888;">${r.code}</td>
-      <td>${r.bank}</td><td style="font-size:11px;">${r.accNo}</td>
-      <td>${(()=>{const nt=depNoteTypes.find(x=>x.name===r.noteType);return r.noteType?`<span class="tax-badge" style="background:${nt?nt.color+'22':'#eee'};color:${nt?nt.color:'#888'};border:0.5px solid ${nt?nt.color+'55':'#ddd'}">${r.noteType}</span>`:'-';})()}</td>
-      <td class="num">${r.prevBal.toLocaleString()}</td>
+      <td style="font-size:11px;">${r.accNo}</td>
+<td style="font-size:11px;color:#2563eb;font-weight:500;">${r.storeCode||'-'}</td>
+<td style="font-size:11px;">${r.storeName||'-'}</td>
+<td>${(()=>{...비고유형...})()}</td>
       <td class="num" style="color:#2563eb;font-weight:500;">${r.inAmt>0?r.inAmt.toLocaleString():'-'}</td>
       <td class="num" style="color:#D42020;font-weight:500;">${r.outAmt>0?r.outAmt.toLocaleString():'-'}</td>
       <td class="num" style="color:#0F6E56;font-weight:500;">${r.finalBal.toLocaleString()}</td>
@@ -1488,20 +1569,7 @@ function updateDepCards(data) {
   document.getElementById('dep-bal-sub').textContent  = depAccounts.length+'개 계좌';
 }
 
-function applyDepFilter() {
-  const start = document.getElementById('dep-f-start').value;
-  const end   = document.getElementById('dep-f-end').value;
-  const code  = document.getElementById('dep-f-code').value;
-  const type  = document.getElementById('dep-f-type').value;
-  depFiltered = depData.filter(r => {
-    if(start && r.date < start) return false;
-    if(end   && r.date > end)   return false;
-    if(code  && r.code !== code) return false;
-    if(type  && r.noteType !== type) return false;
-    return true;
-  });
-  renderDep(depFiltered);
-}
+applyDepFilter
 
 function resetDepFilter() {
   document.getElementById('dep-f-start').value = '2026-06-01';
@@ -1681,21 +1749,25 @@ function importDepExcel(){
     }
     const amt = parseFloat(r[4])||0;
     depData.unshift({
-      id: depNextId++,
-      date,
-      code:    'ACC001',                  // ★ 모계좌1 고정
-      bank:    '기업',                     // ★ 고정
-      accNo:   '148-023233-04-166',       // ★ 고정
-      noteType: String(r[3]||''),
-      prevBal:  0,
-      inAmt:    amt > 0 ? amt : 0,
-      outAmt:   amt < 0 ? Math.abs(amt) : 0,
-      finalBal: 0,
-      detail:   String(r[5]||''),
-      note:     String(r[6]||''),
-      modDate:  String(r[7]||''),
-    });
-  });
+  id: depNextId++,
+  date,
+  code:      'ACC001',
+  bank:      '기업',
+  accNo:     '148-023233-04-166',
+  storeCode: String(r[0]||''),   // ★ 매장코드 저장
+  storeName: (() => {             // ★ 거래처에서 자동 매핑
+    const s = storeData.find(x => x.code === String(r[0]||'').trim());
+    return s ? s.name : String(r[1]||'');
+  })(),
+  noteType:  String(r[3]||''),
+  prevBal:   0,
+  inAmt:     amt > 0 ? amt : 0,
+  outAmt:    amt < 0 ? Math.abs(amt) : 0,
+  finalBal:  amt > 0 ? amt : 0,  // ★ 최종잔액 = 입금액으로 임시 설정
+  detail:    String(r[5]||''),
+  note:      String(r[6]||''),
+  modDate:   String(r[7]||''),
+});
   depUploadRows=[];
   closeAccModal(); applyDepFilter();
   alert(cnt+'건 업로드 완료');
@@ -2117,7 +2189,151 @@ function exportStoreExcel(){
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'거래처');
   XLSX.writeFile(wb,'거래처목록.xlsx');
 }
+// 가맹점코드로 거래처 정보 조회 (공통 유틸)
+function getStoreByCode(code) {
+  return storeData.find(s => s.code === code) || null;
+}
 
+// 매출내역 테이블에서 더블클릭시 가맹점 정보 툴팁
+function showStoreTip(code) {
+  const s = getStoreByCode(code);
+  if(!s) return;
+  alert(`[${s.code}] ${s.name}\n대표자: ${s.owner||'-'}\n사업자: ${s.bizNo||'-'}\n한도: ${s.limit?s.limit.toLocaleString():'미설정'}\n상태: ${s.status}`);
+}
+// ===== 미수금관리 =====
+function applyArFilter() {
+  const start   = document.getElementById('ar-f-start').value;
+  const end     = document.getElementById('ar-f-end').value;
+  const keyword = document.getElementById('ar-f-keyword').value.trim().toLowerCase();
+  const status  = document.getElementById('ar-f-status').value;
+  const arType  = document.getElementById('ar-f-ar').value;
+
+  // 가맹점 기준으로 집계
+  let stores = storeData.filter(s => {
+    if(status && s.status !== status) return false;
+    if(keyword && !s.code.toLowerCase().includes(keyword) &&
+       !s.name.toLowerCase().includes(keyword)) return false;
+    return true;
+  });
+
+  const result = stores.map(s => {
+    // 기간 매출 합계
+    const salesAmt = salesData
+      .filter(r => r.storeCode === s.code && r.date >= start && r.date <= end)
+      .reduce((sum, r) => sum + r.outTotal, 0);
+    const salesCnt = salesData
+      .filter(r => r.storeCode === s.code && r.date >= start && r.date <= end).length;
+
+    // 기간 입금 합계
+    const incomeAmt = depData
+      .filter(r => r.storeCode === s.code && r.date >= start && r.date <= end)
+      .reduce((sum, r) => sum + r.inAmt, 0);
+    const incomeCnt = depData
+      .filter(r => r.storeCode === s.code && r.date >= start && r.date <= end).length;
+
+    // 미수금 = 초기미수금 + 기간매출 - 기간입금
+    const ar = (s.initBalance || 0) + salesAmt - incomeAmt;
+    // 한도잔여 = 한도 - 미수금
+    const limitLeft = (s.limit || 0) - ar;
+
+    return { ...s, salesAmt, salesCnt, incomeAmt, incomeCnt, ar, limitLeft };
+  });
+
+  // 미수금 필터
+  let filtered = result;
+  if(arType === 'over')  filtered = result.filter(r => r.ar > 0);
+  if(arType === 'zero')  filtered = result.filter(r => r.ar === 0);
+  if(arType === 'minus') filtered = result.filter(r => r.ar < 0);
+
+  // 미수금 내림차순 정렬
+  filtered.sort((a,b) => b.ar - a.ar);
+
+  renderAr(filtered);
+}
+
+function renderAr(data) {
+  const tbody = document.getElementById('ar-tbody');
+  const tfoot = document.getElementById('ar-tfoot');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+
+  data.forEach(r => {
+    const arColor     = r.ar > 0 ? '#D42020' : r.ar < 0 ? '#0F6E56' : '#333';
+    const limitColor  = r.limitLeft < 0 ? '#D42020' : '#0F6E56';
+    const statusColor = r.status==='정상'?'#0F6E56': r.status==='휴업'?'#F0921E':'#D42020';
+    const statusBg    = r.status==='정상'?'#E1F5EE': r.status==='휴업'?'#FFF3E0':'#FAECE7';
+
+    tbody.innerHTML += `<tr>
+      <td style="font-weight:600;color:#2563eb;">${r.code}</td>
+      <td style="font-weight:500;">${r.name}</td>
+      <td style="font-size:11px;">${r.owner||'-'}</td>
+      <td><span style="font-size:10px;padding:2px 8px;border-radius:4px;
+          background:${statusBg};color:${statusColor};
+          border:0.5px solid ${statusColor}55;">${r.status}</span></td>
+      <td class="num">${r.limit ? r.limit.toLocaleString() : '-'}</td>
+      <td class="num">${r.initBalance ? r.initBalance.toLocaleString() : '0'}</td>
+      <td class="num">${r.salesAmt ? r.salesAmt.toLocaleString() : '-'}
+        <span style="font-size:10px;color:#aaa;">${r.salesCnt?'('+r.salesCnt+'건)':''}</span>
+      </td>
+      <td class="num" style="color:#2563eb;">${r.incomeAmt ? r.incomeAmt.toLocaleString() : '-'}
+        <span style="font-size:10px;color:#aaa;">${r.incomeCnt?'('+r.incomeCnt+'건)':''}</span>
+      </td>
+      <td class="num" style="font-weight:700;color:${arColor};">
+        ${r.ar !== 0 ? (r.ar > 0 ? '' : '-') + '₩' + Math.abs(r.ar).toLocaleString() : '₩0'}
+      </td>
+      <td class="num" style="color:${limitColor};">
+        ${r.limit ? (r.limitLeft > 0 ? '' : '-') + '₩' + Math.abs(r.limitLeft).toLocaleString() : '-'}
+      </td>
+      <td style="font-size:11px;">${r.note1||'-'}</td>
+    </tr>`;
+  });
+
+  // 합계행
+  const totSales  = data.reduce((s,r) => s + r.salesAmt, 0);
+  const totIncome = data.reduce((s,r) => s + r.incomeAmt, 0);
+  const totAr     = data.reduce((s,r) => s + r.ar, 0);
+  tfoot.innerHTML = `<tr style="background:#f9f9f9;font-weight:600;font-size:12px;">
+    <td colspan="6" style="padding:10px 12px;">합계 (${data.length}개 가맹점)</td>
+    <td class="num" style="padding:10px 12px;">₩${totSales.toLocaleString()}</td>
+    <td class="num" style="padding:10px 12px;color:#2563eb;">₩${totIncome.toLocaleString()}</td>
+    <td class="num" style="padding:10px 12px;color:${totAr>0?'#D42020':'#0F6E56'};">
+      ${totAr>0?'':'- '}₩${Math.abs(totAr).toLocaleString()}
+    </td>
+    <td colspan="2"></td>
+  </tr>`;
+
+  // 요약 카드
+  const overStores = data.filter(r => r.ar > 0);
+  document.getElementById('ar-total').textContent     = '₩' + totAr.toLocaleString();
+  document.getElementById('ar-total-cnt').textContent = data.length + '개 가맹점';
+  document.getElementById('ar-over').textContent      = '₩' + overStores.reduce((s,r)=>s+r.ar,0).toLocaleString();
+  document.getElementById('ar-over-cnt').textContent  = overStores.length + '개';
+  document.getElementById('ar-sales').textContent     = '₩' + totSales.toLocaleString();
+  document.getElementById('ar-sales-cnt').textContent = data.reduce((s,r)=>s+r.salesCnt,0) + '건';
+  document.getElementById('ar-income').textContent    = '₩' + totIncome.toLocaleString();
+  document.getElementById('ar-income-cnt').textContent= data.reduce((s,r)=>s+r.incomeCnt,0) + '건';
+  document.getElementById('ar-count').textContent     = `(${data.length}건)`;
+}
+
+function resetArFilter() {
+  document.getElementById('ar-f-start').value   = '2026-06-01';
+  document.getElementById('ar-f-end').value     = '2026-06-30';
+  document.getElementById('ar-f-keyword').value = '';
+  document.getElementById('ar-f-status').value  = '';
+  document.getElementById('ar-f-ar').value      = '';
+  applyArFilter();
+}
+
+function exportArExcel() {
+  const rows = [['가맹점코드','가맹점명','대표자','상태','한도금액','초기미수금','기간매출','기간입금','미수금','한도잔여','비고1']];
+  document.querySelectorAll('#ar-tbody tr').forEach(tr => {
+    const tds = [...tr.querySelectorAll('td')].map(td => td.textContent.trim());
+    rows.push(tds);
+  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), '미수금현황');
+  XLSX.writeFile(wb, '미수금현황_' + new Date().toLocaleDateString('ko-KR') + '.xlsx');
+}  
 </script>
 </body>
 </html>
