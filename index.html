@@ -59,8 +59,8 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif; background:
 .acc-tab { font-size: 13px; padding: 10px 20px; cursor: pointer; color: #888; border-bottom: 2px solid transparent; margin-bottom: -1.5px; }
 .acc-tab.active { color: #111; font-weight: 600; border-bottom: 2px solid #F0921E; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 1100px; }
-thead tr { background: #fafafa; }
-thead th { padding: 10px 12px; text-align: left; font-weight: 500; color: #666; font-size: 11px; border-bottom: 0.5px solid #f0f0f0; white-space: nowrap; }
+thead tr { background: #e8e8e8; }
+thead th { padding: 10px 12px; text-align: left; font-weight: 700; color: #333; font-size: 11px; border-bottom: 0.5px solid #d0d0d0; white-space: nowrap; }
 tbody tr { border-bottom: 0.5px solid #f5f5f5; cursor: pointer; }
 tbody tr:hover { background: #fffbf5; }
 tbody tr.selected { background: #fff8f0; }
@@ -144,9 +144,8 @@ input[type="checkbox"] { cursor: pointer; }
         <option value="2026-04">2026년 4월</option>
       </select>
       <button onclick="saveImage()">🖼 저장</button>
-      <button onclick="window.print()">🖨 인쇄</button>
-      <button onclick="openUploadModal()">엑셀 업로드</button>
-      <button class="primary" onclick="openAddModal()">+ 추가</button>
+<button onclick="window.print()">🖨 인쇄</button>
+<button class="primary" onclick="openAddModal()">+ 추가</button>
     </div>
   </div>
 
@@ -182,7 +181,8 @@ input[type="checkbox"] { cursor: pointer; }
         </select>
         <button class="search" onclick="applyFilter()">조회</button>
         <button onclick="resetFilter()">초기화</button>
-        <button onclick="exportExcel()">엑셀 다운로드</button>
+<button onclick="openUploadModal()">엑셀 업로드</button>
+<button onclick="exportExcel()">엑셀 다운로드</button>
       </div>
 
       <div class="table-wrap">
@@ -1611,7 +1611,6 @@ function importDepExcel(){
   if(!depUploadRows.length){alert('파일을 먼저 선택해주세요.');return;}
   const cnt=depUploadRows.length;
   depUploadRows.forEach(r=>{
-    // 새 양식: 매장코드(0) / 매장명(1) / 일자(2) / 계정(3) / 금액(4) / 비고(5) / 수정자(6) / 수정일자(7)
     const rawDate=r[2];
     let date=new Date().toISOString().slice(0,10);
     if(rawDate){
@@ -1626,17 +1625,17 @@ function importDepExcel(){
     depData.unshift({
       id: depNextId++,
       date,
-      code:    String(r[0]||''),   // 매장코드
-      bank:    String(r[1]||''),   // 매장명 → bank 필드 활용
-      accNo:   '',
-      noteType: String(r[3]||''), // 계정
+      code:    'ACC001',                  // ★ 모계좌1 고정
+      bank:    '기업',                     // ★ 고정
+      accNo:   '148-023233-04-166',       // ★ 고정
+      noteType: String(r[3]||''),
       prevBal:  0,
       inAmt:    amt > 0 ? amt : 0,
       outAmt:   amt < 0 ? Math.abs(amt) : 0,
       finalBal: 0,
-      detail:   String(r[5]||''), // 비고
-      note:     String(r[6]||''), // 수정자
-      modDate:  String(r[7]||''), // 수정일자
+      detail:   String(r[5]||''),
+      note:     String(r[6]||''),
+      modDate:  String(r[7]||''),
     });
   });
   depUploadRows=[];
