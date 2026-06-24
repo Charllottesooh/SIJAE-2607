@@ -1444,7 +1444,15 @@ function renderRpt(rows){
   const salesFr=rows.filter(r=>r.account==='가맹점 매출'), salesEtc=rows.filter(r=>r.account==='기타 매출');
   const inFr=rows.filter(r=>r.section==='예금관리'&&r.account==='가맹점 입금');
   const inEtc=rows.filter(r=>r.section==='예금관리'&&r.account!=='가맹점 입금');
-  const depFinal=(()=>{const codes=[...new Set(depData.map(r=>r.code))];return codes.reduce((s,code)=>{const items=depData.filter(x=>x.code===code).sort((a,b)=>b.date.localeCompare(a.date));return s+(items[0]?items[0].finalBal||0:0);},0);})();
+  const depFinal=(()=>{
+  const latestMap={};
+  depData.forEach(r=>{
+    if(!latestMap[r.code]||r.date>latestMap[r.code].date){
+      latestMap[r.code]=r;
+    }
+  });
+  return Object.values(latestMap).reduce((s,r)=>s+(r.finalBal||0),0);
+})();
   document.getElementById('rpt-sales-fr').textContent='₩'+salesFr.reduce((s,r)=>s+r.amt,0).toLocaleString();
   document.getElementById('rpt-sales-fr-cnt').textContent=salesFr.length+'건';
   document.getElementById('rpt-sales-etc').textContent='₩'+salesEtc.reduce((s,r)=>s+r.amt,0).toLocaleString();
