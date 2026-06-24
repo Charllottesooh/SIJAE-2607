@@ -1557,7 +1557,7 @@ function saveNoteTypes(){
 function openDepUpload(){
   const html=`<div class="modal" style="width:500px;">
     <h2>예금내역 엑셀 업로드</h2>
-    <p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>일자</strong> / 코드 / 은행명 / 계좌번호 / 비고유형 / 전잔액 / 입금 / 출금 / 최종잔액 / 상세내역 / 비고</p>
+    <p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>매장코드</strong> / 매장명 / 일자 / 계정 / 금액 / 비고 / 수정자 / 수정일자</p>
     <p style="font-size:11px;color:#2563eb;margin-bottom:10px;">📋 여러 시트 업로드 가능 — 각 시트의 데이터가 자동으로 통합됩니다.</p>
     <div class="upload-area" onclick="document.getElementById('dep-xl-input').click()">
       <div style="font-size:24px;">📂</div>
@@ -1598,8 +1598,8 @@ function importDepExcel(){
   if(!depUploadRows.length){alert('파일을 먼저 선택해주세요.');return;}
   const cnt=depUploadRows.length;
   depUploadRows.forEach(r=>{
-    // 일자 맨 앞 (index 0)
-    const rawDate=r[0];
+    // 새 양식: 매장코드(0) / 매장명(1) / 일자(2) / 계정(3) / 금액(4) / 비고(5) / 수정자(6) / 수정일자(7)
+    const rawDate=r[2];
     let date=new Date().toISOString().slice(0,10);
     if(rawDate){
       if(typeof rawDate==='number'){
@@ -1609,17 +1609,21 @@ function importDepExcel(){
         date=String(rawDate).replace(/\./g,'-').replace(/(\d{4})-(\d{1,2})-(\d{1,2})/,(_,y,m,d)=>`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
       }
     }
+    const amt = parseFloat(r[4])||0;
     depData.unshift({
-      id:depNextId++,
+      id: depNextId++,
       date,
-      code:String(r[1]||''), bank:String(r[2]||''), accNo:String(r[3]||''),
-      noteType:String(r[4]||''),
-      prevBal:parseFloat(r[5])||0,
-      inAmt:parseFloat(r[6])||0,
-      outAmt:parseFloat(r[7])||0,
-      finalBal:parseFloat(r[8])||0,
-      detail:String(r[9]||''),
-      note:String(r[10]||''),
+      code:    String(r[0]||''),   // 매장코드
+      bank:    String(r[1]||''),   // 매장명 → bank 필드 활용
+      accNo:   '',
+      noteType: String(r[3]||''), // 계정
+      prevBal:  0,
+      inAmt:    amt > 0 ? amt : 0,
+      outAmt:   amt < 0 ? Math.abs(amt) : 0,
+      finalBal: 0,
+      detail:   String(r[5]||''), // 비고
+      note:     String(r[6]||''), // 수정자
+      modDate:  String(r[7]||''), // 수정일자
     });
   });
   depUploadRows=[];
