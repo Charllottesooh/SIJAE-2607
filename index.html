@@ -113,10 +113,14 @@ input[type="checkbox"] { cursor: pointer; }
     <div class="menu-item" onclick="showPage('account',this)">계좌 및 대출</div>
   </div>
   <div class="menu-group">
-    <div class="menu-group-label">자금관리</div>
-    <div class="menu-item active" onclick="showPage('sales',this)">매출내역</div>
-    <div class="menu-item" onclick="showPage('deposit',this)">입출금내역</div>
-  </div>
+  <div class="menu-group-label">거래처</div>
+  <div class="menu-item" onclick="showPage('store',this)">거래처관리</div>
+</div>
+<div class="menu-group">
+  <div class="menu-group-label">자금관리</div>
+  <div class="menu-item active" onclick="showPage('sales',this)">매출내역</div>
+  <div class="menu-item" onclick="showPage('deposit',this)">입출금내역</div>
+</div>
   <div class="menu-group">
     <div class="menu-group-label">분석</div>
     <div class="menu-item" onclick="showPage('report',this)">리포트</div>
@@ -290,6 +294,58 @@ input[type="checkbox"] { cursor: pointer; }
       </div><!-- /sales-invoice -->
 
     </div>
+    <!-- 거래처관리 -->
+<div id="page-store" class="page">
+  <!-- 검색/필터바 -->
+  <div class="filter-bar">
+    <input type="text" id="store-f-keyword" placeholder="코드/가맹점명/대표자 검색" style="width:200px;">
+    <select id="store-f-status">
+      <option value="">전체 상태</option>
+      <option value="정상">정상</option>
+      <option value="휴업">휴업</option>
+      <option value="폐업">폐업</option>
+    </select>
+    <select id="store-f-acc">
+      <option value="">전체 모계좌</option>
+    </select>
+    <button class="search" onclick="applyStoreFilter()">조회</button>
+    <button onclick="resetStoreFilter()">초기화</button>
+    <button onclick="openStoreUpload()">엑셀 업로드</button>
+    <button onclick="exportStoreExcel()">엑셀 다운로드</button>
+  </div>
+
+  <!-- 요약 카드 -->
+  <div class="card-section" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
+    <div class="summary-card color-blue"><div class="label">전체 가맹점</div><div class="value" id="store-cnt-all">0개</div></div>
+    <div class="summary-card color-green"><div class="label">정상</div><div class="value" id="store-cnt-normal">0개</div></div>
+    <div class="summary-card color-orange"><div class="label">휴업</div><div class="value" id="store-cnt-pause">0개</div></div>
+    <div class="summary-card color-red"><div class="label">폐업</div><div class="value" id="store-cnt-close">0개</div></div>
+  </div>
+
+  <!-- 테이블 -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <span class="title">가맹점 목록 <span id="store-count" style="font-size:11px;color:#aaa;font-weight:400;"></span></span>
+      <div class="actions">
+        <button onclick="editStoreSelected()">수정</button>
+        <button class="danger" onclick="deleteStoreSelected()">삭제</button>
+        <button class="primary" onclick="openStoreModal()">+ 추가</button>
+      </div>
+    </div>
+    <div class="tbl-scroll">
+      <table id="store-table">
+        <thead><tr>
+          <th><input type="checkbox" id="store-chk-all" onchange="storeToggleAll(this)"></th>
+          <th>가맹점코드</th><th>가맹점명</th><th>대표자명</th>
+          <th>사업자번호</th><th>가상계좌번호</th><th>연결모계좌</th>
+          <th class="num">한도금액</th><th class="num">초기미수금</th>
+          <th>상태</th><th>비고1</th><th>비고2</th><th>관리</th>
+        </tr></thead>
+        <tbody id="store-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
     <!-- 매입관리 -->
 
@@ -832,10 +888,11 @@ function showPage(key, el) {
   document.getElementById('page-'+key).classList.add('active');
   document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('page-title').textContent = {sales:'매출내역',account:'계좌 및 대출',deposit:'입출금내역',report:'리포트'}[key];
-  if(key==='account') renderAcc();
-  if(key==='deposit') { initDepSelects(); depFiltered=[...depData]; renderDep(depFiltered); }
-  if(key==='report') { resetRptFilter(); }
+  document.getElementById('page-title').textContent = {sales:'매출내역',account:'계좌 및 대출',deposit:'입출금내역',report:'리포트',store:'거래처관리'}[key];
+if(key==='account') renderAcc();
+if(key==='deposit') { initDepSelects(); depFiltered=[...depData]; renderDep(depFiltered); }
+if(key==='report') { resetRptFilter(); }
+if(key==='store') { initStoreAccSelect(); storeFiltered=[...storeData]; renderStore(storeFiltered); }
 }
 
 
@@ -888,6 +945,7 @@ async function loadFromFirebase() {
     const [sSnap, dSnap, aSnap, lSnap] = await Promise.all([
       load('sales'), load('deposit'), load('accounts'), load('loans')
     ]);
+    if(stSnap.length) { storeData = stSnap; storeNextId = Math.max(...storeData.map(r=>r.id||0))+1; }
     if(sSnap.length) {
       salesData = sSnap;
       // ★ 최신날짜 정렬
@@ -954,16 +1012,16 @@ async function saveToSheets(sheetName, data) {
 async function syncAll() {
   const btn = document.querySelector('button[onclick="syncAll()"]');
   if(btn) { btn.textContent='동기화 중...'; btn.disabled=true; }
-  setStatus('fb', true, 'Firebase 저장중...');
-  setStatus('gs', true, 'Sheets 저장중...');
   await saveToFirebase('sales', salesData);
   await saveToFirebase('deposit', depData);
   await saveToFirebase('accounts', accData);
   await saveToFirebase('loans', loanData);
+  await saveToFirebase('stores', storeData); // ★ 추가
   await saveToSheets('매출내역', salesData);
   await saveToSheets('입출금내역', depData);
   await saveToSheets('계좌관리', accData);
   await saveToSheets('대출관리', loanData);
+  await saveToSheets('거래처', storeData);   // ★ 추가
   if(btn) { btn.textContent='🔄 동기화'; btn.disabled=false; }
 }
 
@@ -1828,6 +1886,237 @@ function exportLoanExcel() {
 
 // 페이지 진입시 초기 렌더
 const _origShowPage = showPage;
+  // ===== 거래처관리 =====
+let storeData = [];
+let storeNextId = 1;
+let storeFiltered = [];
+let storeUploadRows = [];
+
+function initStoreAccSelect() {
+  const el = document.getElementById('store-f-acc');
+  if(!el) return;
+  el.innerHTML = '<option value="">전체 모계좌</option>' +
+    depAccounts.map(a => `<option value="${a.code}">${a.code} ${a.accNo}</option>`).join('');
+}
+
+function applyStoreFilter() {
+  const keyword = document.getElementById('store-f-keyword').value.trim().toLowerCase();
+  const status  = document.getElementById('store-f-status').value;
+  const acc     = document.getElementById('store-f-acc').value;
+  storeFiltered = storeData.filter(r => {
+    if(status && r.status !== status) return false;
+    if(acc && r.parentAcc !== acc) return false;
+    if(keyword && !r.code.toLowerCase().includes(keyword) &&
+       !r.name.toLowerCase().includes(keyword) &&
+       !r.owner.toLowerCase().includes(keyword)) return false;
+    return true;
+  });
+  renderStore(storeFiltered);
+}
+
+function resetStoreFilter() {
+  document.getElementById('store-f-keyword').value = '';
+  document.getElementById('store-f-status').value  = '';
+  document.getElementById('store-f-acc').value     = '';
+  storeFiltered = [...storeData];
+  renderStore(storeFiltered);
+}
+
+function renderStore(data) {
+  const tbody = document.getElementById('store-tbody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  data.forEach(r => {
+    const statusColor = r.status==='정상'?'#0F6E56': r.status==='휴업'?'#F0921E':'#D42020';
+    const statusBg    = r.status==='정상'?'#E1F5EE': r.status==='휴업'?'#FFF3E0':'#FAECE7';
+    tbody.innerHTML += `<tr>
+      <td><input type="checkbox" class="store-chk" value="${r.id}"></td>
+      <td style="font-weight:600;color:#2563eb;">${r.code}</td>
+      <td style="font-weight:500;">${r.name}</td>
+      <td>${r.owner||'-'}</td>
+      <td style="font-size:11px;">${r.bizNo||'-'}</td>
+      <td style="font-size:11px;">${r.virtualAccNo||'-'}</td>
+      <td style="font-size:11px;">${r.parentAcc||'-'}</td>
+      <td class="num">${r.limit?r.limit.toLocaleString():'-'}</td>
+      <td class="num">${r.initBalance?r.initBalance.toLocaleString():'0'}</td>
+      <td><span style="font-size:10px;padding:2px 8px;border-radius:4px;background:${statusBg};color:${statusColor};border:0.5px solid ${statusColor}55;">${r.status}</span></td>
+      <td style="font-size:11px;">${r.note1||'-'}</td>
+      <td style="font-size:11px;">${r.note2||'-'}</td>
+      <td>
+        <a href="#" onclick="openStoreModal(${r.id})" style="font-size:11px;color:#888;margin-right:8px;">수정</a>
+        <a href="#" onclick="deleteStore(${r.id})" style="font-size:11px;color:#D42020;">삭제</a>
+      </td>
+    </tr>`;
+  });
+
+  // 요약 카드
+  document.getElementById('store-cnt-all').textContent    = storeData.length + '개';
+  document.getElementById('store-cnt-normal').textContent = storeData.filter(r=>r.status==='정상').length + '개';
+  document.getElementById('store-cnt-pause').textContent  = storeData.filter(r=>r.status==='휴업').length + '개';
+  document.getElementById('store-cnt-close').textContent  = storeData.filter(r=>r.status==='폐업').length + '개';
+  document.getElementById('store-count').textContent      = `(${data.length}건)`;
+}
+
+function openStoreModal(id) {
+  const r = id ? storeData.find(x=>x.id===id) : null;
+  const accOpts = depAccounts.map(a =>
+    `<option value="${a.code}" ${r&&r.parentAcc===a.code?'selected':''}>${a.code} - ${a.bank} ${a.accNo}</option>`
+  ).join('');
+  const html = `<div class="modal" style="width:620px;">
+    <h2>${r ? '가맹점 수정' : '가맹점 추가'}</h2>
+    <div class="form-grid">
+      <div class="form-group"><label>가맹점코드 *</label><input id="sm-code" value="${r?r.code:''}"></div>
+      <div class="form-group"><label>가맹점명 *</label><input id="sm-name" value="${r?r.name:''}"></div>
+      <div class="form-group"><label>대표자명</label><input id="sm-owner" value="${r?r.owner:''}"></div>
+      <div class="form-group"><label>사업자번호</label><input id="sm-bizno" value="${r?r.bizNo:''}" placeholder="000-00-00000"></div>
+      <div class="form-group"><label>가상계좌번호</label><input id="sm-vacc" value="${r?r.virtualAccNo:''}"></div>
+      <div class="form-group"><label>연결 모계좌</label>
+        <select id="sm-pacc"><option value="">선택</option>${accOpts}</select>
+      </div>
+      <div class="form-group"><label>한도금액</label><input type="number" id="sm-limit" value="${r?r.limit:0}"></div>
+      <div class="form-group"><label>초기 미수금잔액</label><input type="number" id="sm-init" value="${r?r.initBalance:0}"></div>
+      <div class="form-group"><label>상태</label>
+        <select id="sm-status">
+          <option value="정상" ${r&&r.status==='정상'?'selected':''}>정상</option>
+          <option value="휴업" ${r&&r.status==='휴업'?'selected':''}>휴업</option>
+          <option value="폐업" ${r&&r.status==='폐업'?'selected':''}>폐업</option>
+        </select>
+      </div>
+      <div class="form-group"></div>
+      <div class="form-group"><label>비고1</label><input id="sm-note1" value="${r?r.note1:''}"></div>
+      <div class="form-group"><label>비고2</label><input id="sm-note2" value="${r?r.note2:''}"></div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeAccModal()">취소</button>
+      <button class="primary" onclick="saveStore(${id||'null'})">저장</button>
+    </div>
+  </div>`;
+  showDynModal(html);
+}
+
+function saveStore(id) {
+  const code = document.getElementById('sm-code').value.trim();
+  const name = document.getElementById('sm-name').value.trim();
+  if(!code||!name){alert('가맹점코드와 가맹점명은 필수입니다.');return;}
+  const row = {
+    id: id||storeNextId++,
+    code, name,
+    owner:      document.getElementById('sm-owner').value.trim(),
+    bizNo:      document.getElementById('sm-bizno').value.trim(),
+    virtualAccNo: document.getElementById('sm-vacc').value.trim(),
+    parentAcc:  document.getElementById('sm-pacc').value,
+    limit:      parseFloat(document.getElementById('sm-limit').value)||0,
+    initBalance:parseFloat(document.getElementById('sm-init').value)||0,
+    status:     document.getElementById('sm-status').value,
+    note1:      document.getElementById('sm-note1').value,
+    note2:      document.getElementById('sm-note2').value,
+  };
+  if(id){const i=storeData.findIndex(x=>x.id===id);storeData[i]=row;}
+  else storeData.push(row);
+  closeAccModal();
+  applyStoreFilter();
+}
+
+function deleteStore(id){
+  if(confirm('삭제하시겠습니까?')){storeData=storeData.filter(x=>x.id!==id);applyStoreFilter();}
+}
+
+function storeToggleAll(chk){document.querySelectorAll('.store-chk').forEach(c=>c.checked=chk.checked);}
+function getStoreChecked(){return [...document.querySelectorAll('.store-chk:checked')].map(c=>parseInt(c.value));}
+
+function editStoreSelected(){
+  const ids=getStoreChecked();
+  if(ids.length!==1){alert('수정할 항목 1건을 선택해주세요.');return;}
+  openStoreModal(ids[0]);
+}
+
+function deleteStoreSelected(){
+  const ids=getStoreChecked();
+  if(!ids.length){alert('삭제할 항목을 선택해주세요.');return;}
+  if(confirm(ids.length+'건을 삭제하시겠습니까?')){
+    storeData=storeData.filter(r=>!ids.includes(r.id));
+    applyStoreFilter();
+  }
+}
+
+// 거래처 엑셀 업로드
+function openStoreUpload(){
+  const html=`<div class="modal" style="width:500px;">
+    <h2>거래처 엑셀 업로드</h2>
+    <p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>가맹점코드</strong> / 가맹점명 / 대표자명 / 사업자번호 / 가상계좌번호 / 연결모계좌 / 한도금액 / 초기미수금 / 상태 / 비고1 / 비고2</p>
+    <div class="upload-area" onclick="document.getElementById('store-xl-input').click()">
+      <div style="font-size:24px;">📂</div>
+      <p>클릭하여 엑셀 파일 선택 (.xlsx / .xls / .csv)</p>
+      <input type="file" id="store-xl-input" accept=".xlsx,.xls,.csv" style="display:none;" onchange="previewStoreExcel(this)">
+    </div>
+    <div class="upload-preview" id="store-xl-preview"></div>
+    <div class="modal-footer">
+      <button onclick="closeAccModal()">취소</button>
+      <button class="primary" onclick="importStoreExcel()">업로드 적용</button>
+    </div>
+  </div>`;
+  showDynModal(html);
+}
+
+function previewStoreExcel(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const wb=XLSX.read(e.target.result,{type:'binary'});
+    storeUploadRows=[];
+    let sheetInfo=[];
+    wb.SheetNames.forEach(name=>{
+      const ws=wb.Sheets[name];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1});
+      const dataRows=rows.slice(1).filter(r=>r.length>0);
+      storeUploadRows=storeUploadRows.concat(dataRows);
+      sheetInfo.push(`${name}(${dataRows.length}건)`);
+    });
+    const prev=document.getElementById('store-xl-preview');
+    prev.style.display='block';
+    prev.innerHTML=`✅ 총 <strong>${storeUploadRows.length}건</strong> 감지됨 — 시트: ${sheetInfo.join(', ')}`;
+  };
+  reader.readAsBinaryString(file);
+}
+
+function importStoreExcel(){
+  if(!storeUploadRows.length){alert('파일을 먼저 선택해주세요.');return;}
+  const cnt=storeUploadRows.length;
+  storeUploadRows.forEach(r=>{
+    // 중복코드 체크 — 있으면 업데이트, 없으면 추가
+    const code=String(r[0]||'').trim();
+    if(!code) return;
+    const existing=storeData.find(x=>x.code===code);
+    const row={
+      id: existing?existing.id:storeNextId++,
+      code,
+      name:         String(r[1]||''),
+      owner:        String(r[2]||''),
+      bizNo:        String(r[3]||''),
+      virtualAccNo: String(r[4]||''),
+      parentAcc:    String(r[5]||''),
+      limit:        parseFloat(r[6])||0,
+      initBalance:  parseFloat(r[7])||0,
+      status:       String(r[8]||'정상'),
+      note1:        String(r[9]||''),
+      note2:        String(r[10]||''),
+    };
+    if(existing){const i=storeData.findIndex(x=>x.code===code);storeData[i]=row;}
+    else storeData.push(row);
+  });
+  storeUploadRows=[];
+  closeAccModal();
+  applyStoreFilter();
+  alert(cnt+'건 업로드 완료');
+}
+
+function exportStoreExcel(){
+  const rows=[['가맹점코드','가맹점명','대표자명','사업자번호','가상계좌번호','연결모계좌','한도금액','초기미수금','상태','비고1','비고2']];
+  storeFiltered.forEach(r=>rows.push([r.code,r.name,r.owner,r.bizNo,r.virtualAccNo,r.parentAcc,r.limit,r.initBalance,r.status,r.note1,r.note2]));
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'거래처');
+  XLSX.writeFile(wb,'거래처목록.xlsx');
+}
 
 </script>
 </body>
