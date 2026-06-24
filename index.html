@@ -9,7 +9,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif; background: #f4f4f4; display: flex; height: 100vh; overflow: hidden; }
 
-#sidebar { width: 200px; background: #111; display: flex; flex-direction: column; flex-shrink: 0; height: 100vh; }
+#sidebar { width: 200px; background: #111; display: flex; flex-direction: column; flex-shrink: 0; height: 100vh; overflow-y: auto; }
 #sidebar-top { padding: 20px 16px 16px; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
 #sidebar-top .logo { font-size: 14px; font-weight: 600; color: #fff; }
 #sidebar-top .logo span { color: #D42020; }
@@ -39,15 +39,13 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif; background:
 .summary-card .label { font-size: 11px; color: #888; margin-bottom: 8px; }
 .summary-card .value { font-size: 20px; font-weight: 600; color: #111; }
 .summary-card .sub { font-size: 11px; color: #aaa; margin-top: 4px; }
-.summary-card .badge-up { font-size: 10px; color: #0F6E56; background: #E1F5EE; border-radius: 4px; padding: 2px 6px; margin-top: 5px; display: inline-block; }
-.summary-card .badge-down { font-size: 10px; color: #993C1D; background: #FAECE7; border-radius: 4px; padding: 2px 6px; margin-top: 5px; display: inline-block; }
 
 .filter-bar { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
 .filter-bar input, .filter-bar select { font-size: 12px; border: 0.5px solid #ddd; border-radius: 6px; padding: 6px 10px; background: #fff; color: #333; }
 .filter-bar button { font-size: 12px; padding: 6px 14px; border-radius: 6px; border: 0.5px solid #ddd; background: #fff; cursor: pointer; color: #333; }
 .filter-bar button.search { background: #090909; color: #fff; border-color: #090909; }
 
-.table-wrap { background: #fff; border: 0.5px solid #e8e8e8; border-radius: 10px; overflow: hidden; }
+.table-wrap { background: #fff; border: 0.5px solid #e8e8e8; border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
 .table-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 0.5px solid #f0f0f0; }
 .table-header .title { font-size: 13px; font-weight: 600; color: #111; }
 .table-header .actions { display: flex; gap: 8px; }
@@ -56,14 +54,13 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif; background:
 .table-header .actions button.danger { background: #fff; color: #D42020; border-color: #D42020; }
 
 .tbl-scroll { overflow-x: auto; }
-.acc-tab { font-size: 13px; padding: 10px 20px; cursor: pointer; color: #888; border-bottom: 2px solid transparent; margin-bottom: -1.5px; }
+.acc-tab { font-size: 13px; padding: 10px 20px; cursor: pointer; color: #888; border-bottom: 2px solid transparent; margin-bottom: -1.5px; display: inline-block; }
 .acc-tab.active { color: #111; font-weight: 600; border-bottom: 2px solid #F0921E; }
-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 1100px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 900px; }
 thead tr { background: #e8e8e8; }
 thead th { padding: 10px 12px; text-align: left; font-weight: 700; color: #333; font-size: 11px; border-bottom: 0.5px solid #d0d0d0; white-space: nowrap; }
-tbody tr { border-bottom: 0.5px solid #f5f5f5; cursor: pointer; }
+tbody tr { border-bottom: 0.5px solid #f5f5f5; }
 tbody tr:hover { background: #fffbf5; }
-tbody tr.selected { background: #fff8f0; }
 tbody td { padding: 10px 12px; color: #333; white-space: nowrap; }
 .tax-badge { font-size: 10px; padding: 2px 7px; border-radius: 4px; }
 .tax-y { background: #E6F1FB; color: #185FA5; }
@@ -71,7 +68,6 @@ tbody td { padding: 10px 12px; color: #333; white-space: nowrap; }
 .num { text-align: right; }
 input[type="checkbox"] { cursor: pointer; }
 
-/* 모달 */
 .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: center; justify-content: center; }
 .modal-bg.open { display: flex; }
 .modal { background: #fff; border-radius: 12px; padding: 28px; width: 620px; max-height: 85vh; overflow-y: auto; }
@@ -87,19 +83,13 @@ input[type="checkbox"] { cursor: pointer; }
 .modal-footer button.primary { background: #090909; color: #fff; border-color: #090909; }
 .modal-footer button.danger { background: #D42020; color: #fff; border-color: #D42020; }
 
-/* 엑셀 업로드 모달 */
 .upload-area { border: 1.5px dashed #ddd; border-radius: 8px; padding: 32px; text-align: center; cursor: pointer; margin-bottom: 14px; }
 .upload-area:hover { border-color: #F0921E; background: #fffbf5; }
 .upload-area p { font-size: 13px; color: #aaa; margin-top: 8px; }
 .upload-preview { font-size: 12px; color: #333; background: #f9f9f9; border-radius: 6px; padding: 10px 14px; margin-top: 8px; display: none; }
 
-/* 페이지 숨김 */
 .page { display: none; }
 .page.active { display: block; }
-
-/* 빈 화면 */
-.empty-page { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; color: #bbb; }
-.empty-page p { font-size: 13px; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -109,19 +99,19 @@ input[type="checkbox"] { cursor: pointer; }
     <div class="logo"><span>매출및시재보고</span>2607</div>
   </div>
   <div class="menu-group">
-    <div class="menu-group-label">관리 (계좌 및 대출)</div>
+    <div class="menu-group-label">관리</div>
     <div class="menu-item" onclick="showPage('account',this)">계좌 및 대출</div>
   </div>
   <div class="menu-group">
-  <div class="menu-group-label">거래처</div>
-  <div class="menu-item" onclick="showPage('store',this)">거래처관리</div>
-  <div class="menu-item" onclick="showPage('arpage',this)">미수금관리</div>
-</div>
-<div class="menu-group">
-  <div class="menu-group-label">자금관리</div>
-  <div class="menu-item active" onclick="showPage('sales',this)">매출내역</div>
-  <div class="menu-item" onclick="showPage('deposit',this)">입출금내역</div>
-</div>
+    <div class="menu-group-label">거래처</div>
+    <div class="menu-item" onclick="showPage('store',this)">거래처관리</div>
+    <div class="menu-item" onclick="showPage('arpage',this)">미수금관리</div>
+  </div>
+  <div class="menu-group">
+    <div class="menu-group-label">자금관리</div>
+    <div class="menu-item active" onclick="showPage('sales',this)">매출내역</div>
+    <div class="menu-item" onclick="showPage('deposit',this)">입출금내역</div>
+  </div>
   <div class="menu-group">
     <div class="menu-group-label">분석</div>
     <div class="menu-item" onclick="showPage('report',this)">리포트</div>
@@ -149,87 +139,68 @@ input[type="checkbox"] { cursor: pointer; }
         <option value="2026-04">2026년 4월</option>
       </select>
       <button onclick="saveImage()">🖼 저장</button>
-<button onclick="window.print()">🖨 인쇄</button>
-<button class="primary" onclick="openAddModal()">+ 추가</button>
+      <button onclick="window.print()">🖨 인쇄</button>
+      <button class="primary" onclick="openAddModal()">+ 추가</button>
     </div>
   </div>
 
   <div id="content">
 
-    <!-- 매출관리 -->
+    <!-- ===== 매출내역 ===== -->
     <div id="page-sales" class="page active">
-      <!-- 매출 탭 -->
       <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:1.5px solid #e0e0e0;">
         <div class="acc-tab active" onclick="switchSalesTab('sales-daily',this)">일별거래내역</div>
         <div class="acc-tab" onclick="switchSalesTab('sales-invoice',this)">매출계산서발행</div>
       </div>
 
-      <!-- 일별거래내역 -->
       <div id="sales-daily">
-      <div class="card-section">
-        <div class="summary-card color-red"><div class="label">과세 매출 합계</div><div class="value" id="card-taxable">₩0</div><div class="sub">부가세 포함</div></div>
-        <div class="summary-card color-green"><div class="label">면세 매출 합계</div><div class="value" id="card-exempt">₩0</div><div class="sub">부가세 없음</div></div>
-        <div class="summary-card color-orange"><div class="label">부가세 합계</div><div class="value" id="card-vat">₩0</div><div class="sub">자동 산출</div></div>
-        <div class="summary-card color-blue"><div class="label">총 출고 합계금액</div><div class="value" id="card-total">₩0</div><div class="sub" id="card-count">0건</div></div>
-      </div>
-
-      <div class="filter-bar">
-        <input type="date" id="f-start" value="2026-06-01">
-        <span style="font-size:12px;color:#aaa;">~</span>
-        <input type="date" id="f-end" value="2026-06-30">
-        <input type="text" id="f-store" placeholder="매장코드/매장명 검색" style="width:180px;" oninput="applyFilter()">
-        <input type="text" id="f-product" placeholder="상품코드/상품명" style="width:140px;">
-        <select id="f-tax">
-          <option value="">과세/면세 전체</option>
-          <option value="과세">과세</option>
-          <option value="면세">면세</option>
-        </select>
-        <button class="search" onclick="applyFilter()">조회</button>
-        <button onclick="resetFilter()">초기화</button>
-<button onclick="openUploadModal()">엑셀 업로드</button>
-<button onclick="exportExcel()">엑셀 다운로드</button>
-      </div>
-
-      <div class="table-wrap">
-        <div class="table-header">
-          <span class="title">매출 내역 <span id="filtered-count" style="font-size:11px;color:#aaa;font-weight:400;"></span></span>
-          <div class="actions">
-            <button onclick="editSelected()">수정</button>
-            <button class="danger" onclick="deleteSelected()">삭제</button>
-            <button class="primary" onclick="openAddModal()">+ 추가</button>
+        <div class="card-section">
+          <div class="summary-card color-red"><div class="label">과세 매출 합계</div><div class="value" id="card-taxable">₩0</div><div class="sub">부가세 포함</div></div>
+          <div class="summary-card color-green"><div class="label">면세 매출 합계</div><div class="value" id="card-exempt">₩0</div><div class="sub">부가세 없음</div></div>
+          <div class="summary-card color-orange"><div class="label">부가세 합계</div><div class="value" id="card-vat">₩0</div><div class="sub">자동 산출</div></div>
+          <div class="summary-card color-blue"><div class="label">총 출고 합계금액</div><div class="value" id="card-total">₩0</div><div class="sub" id="card-count">0건</div></div>
+        </div>
+        <div class="filter-bar">
+          <input type="date" id="f-start" value="2026-06-01">
+          <span style="font-size:12px;color:#aaa;">~</span>
+          <input type="date" id="f-end" value="2026-06-30">
+          <input type="text" id="f-store" placeholder="매장코드/매장명 검색" style="width:180px;">
+          <input type="text" id="f-product" placeholder="상품코드/상품명" style="width:140px;">
+          <select id="f-tax">
+            <option value="">과세/면세 전체</option>
+            <option value="과세">과세</option>
+            <option value="면세">면세</option>
+          </select>
+          <button class="search" onclick="applyFilter()">조회</button>
+          <button onclick="resetFilter()">초기화</button>
+          <button onclick="openUploadModal()">엑셀 업로드</button>
+          <button onclick="exportExcel()">엑셀 다운로드</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <span class="title">매출 내역 <span id="filtered-count" style="font-size:11px;color:#aaa;font-weight:400;"></span></span>
+            <div class="actions">
+              <button onclick="editSelected()">수정</button>
+              <button class="danger" onclick="deleteSelected()">삭제</button>
+              <button class="primary" onclick="openAddModal()">+ 추가</button>
+            </div>
+          </div>
+          <div class="tbl-scroll">
+            <table id="sales-table">
+              <thead><tr>
+                <th><input type="checkbox" id="chk-all" onchange="toggleAll(this)"></th>
+                <th>날짜</th><th>매장코드</th><th>매장명</th><th>상품코드</th><th>상품명</th>
+                <th>단위</th><th>입수</th><th>출고횟수</th>
+                <th class="num">공급가</th><th class="num">출고수량</th><th class="num">출고단가</th>
+                <th class="num">출고부가세</th><th class="num">출고합계금액</th><th>과세구분</th><th>비고</th>
+              </tr></thead>
+              <tbody id="sales-tbody"></tbody>
+            </table>
           </div>
         </div>
-        <div class="tbl-scroll">
-          <table id="sales-table">
-            <thead>
-              <tr>
-                <th><input type="checkbox" id="chk-all" onchange="toggleAll(this)"></th>
-                <th>날짜</th>
-                <th>매장코드</th>
-                <th>매장명</th>
-                <th>상품코드</th>
-                <th>상품명</th>
-                <th>단위</th>
-                <th>입수</th>
-                <th>출고횟수</th>
-                <th class="num">공급가</th>
-                <th class="num">출고수량</th>
-                <th class="num">출고단가</th>
-                <th class="num">출고부가세</th>
-                <th class="num">출고합계금액</th>
-                <th>과세구분</th>
-                <th>비고</th>
-              </tr>
-            </thead>
-            <tbody id="sales-tbody"></tbody>
-          </table>
-        </div>
       </div>
-      </div><!-- /sales-daily -->
 
-      <!-- 매출계산서발행 -->
       <div id="sales-invoice" style="display:none;">
-        <!-- 필터바 -->
         <div class="filter-bar">
           <input type="date" id="inv-f-start" value="2026-06-01">
           <span style="font-size:12px;color:#aaa;">~</span>
@@ -248,33 +219,22 @@ input[type="checkbox"] { cursor: pointer; }
           <button onclick="resetInvoiceFilter()">초기화</button>
           <button onclick="exportInvoiceExcel()">엑셀 다운로드</button>
         </div>
-
-        <!-- 요약 카드 -->
-        <div class="card-section" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
+        <div class="card-section" style="grid-template-columns:repeat(4,1fr);">
           <div class="summary-card color-red"><div class="label">과세 합계</div><div class="value" id="inv-taxable">₩0</div><div class="sub" id="inv-taxable-cnt">0건</div></div>
           <div class="summary-card color-green"><div class="label">면세 합계</div><div class="value" id="inv-exempt">₩0</div><div class="sub" id="inv-exempt-cnt">0건</div></div>
           <div class="summary-card color-orange"><div class="label">부가세 합계</div><div class="value" id="inv-vat">₩0</div></div>
           <div class="summary-card color-blue"><div class="label">총 합계금액</div><div class="value" id="inv-total">₩0</div><div class="sub" id="inv-total-cnt">0건</div></div>
         </div>
-
-        <!-- 결과 테이블 -->
         <div class="table-wrap">
           <div class="table-header">
             <span class="title" id="inv-table-title">매장별 과세/면세 요약</span>
             <div class="actions"><button class="primary" onclick="exportInvoiceExcel()">엑셀 저장</button></div>
           </div>
           <div class="tbl-scroll">
-            <table>
-              <thead>
-                <tr id="inv-thead-row"></tr>
-              </thead>
-              <tbody id="inv-tbody"></tbody>
-            </table>
+            <table><thead><tr id="inv-thead-row"></tr></thead><tbody id="inv-tbody"></tbody></table>
           </div>
         </div>
-
-        <!-- 상세 패널 -->
-        <div id="inv-detail-panel" style="display:none;margin-top:16px;">
+        <div id="inv-detail-panel" style="display:none;">
           <div class="table-wrap">
             <div class="table-header">
               <span class="title" id="inv-detail-title">세부내역</span>
@@ -292,154 +252,110 @@ input[type="checkbox"] { cursor: pointer; }
             </div>
           </div>
         </div>
-      </div><!-- /sales-invoice -->
+      </div>
+    </div>
 
+    <!-- ===== 거래처관리 ===== -->
+    <div id="page-store" class="page">
+      <div class="filter-bar">
+        <input type="text" id="store-f-keyword" placeholder="코드/가맹점명/대표자 검색" style="width:200px;">
+        <select id="store-f-status">
+          <option value="">전체 상태</option>
+          <option value="정상">정상</option>
+          <option value="휴업">휴업</option>
+          <option value="폐업">폐업</option>
+        </select>
+        <select id="store-f-acc"><option value="">전체 모계좌</option></select>
+        <button class="search" onclick="applyStoreFilter()">조회</button>
+        <button onclick="resetStoreFilter()">초기화</button>
+        <button onclick="openStoreUpload()">엑셀 업로드</button>
+        <button onclick="exportStoreExcel()">엑셀 다운로드</button>
+      </div>
+      <div class="card-section" style="grid-template-columns:repeat(4,1fr);">
+        <div class="summary-card color-blue"><div class="label">전체 가맹점</div><div class="value" id="store-cnt-all">0개</div></div>
+        <div class="summary-card color-green"><div class="label">정상</div><div class="value" id="store-cnt-normal">0개</div></div>
+        <div class="summary-card color-orange"><div class="label">휴업</div><div class="value" id="store-cnt-pause">0개</div></div>
+        <div class="summary-card color-red"><div class="label">폐업</div><div class="value" id="store-cnt-close">0개</div></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <span class="title">가맹점 목록 <span id="store-count" style="font-size:11px;color:#aaa;font-weight:400;"></span></span>
+          <div class="actions">
+            <button onclick="editStoreSelected()">수정</button>
+            <button class="danger" onclick="deleteStoreSelected()">삭제</button>
+            <button class="primary" onclick="openStoreModal(null)">+ 추가</button>
+          </div>
+        </div>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr>
+              <th><input type="checkbox" id="store-chk-all" onchange="storeToggleAll(this)"></th>
+              <th>가맹점코드</th><th>가맹점명</th><th>대표자명</th>
+              <th>사업자번호</th><th>가상계좌번호</th><th>연결모계좌</th>
+              <th class="num">한도금액</th><th class="num">초기미수금</th>
+              <th>상태</th><th>비고1</th><th>비고2</th><th>관리</th>
+            </tr></thead>
+            <tbody id="store-tbody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    <!-- 거래처관리 -->
-<div id="page-store" class="page">
-  <!-- 검색/필터바 -->
-  <div class="filter-bar">
-    <input type="text" id="store-f-keyword" placeholder="코드/가맹점명/대표자 검색" style="width:200px;">
-    <select id="store-f-status">
-      <option value="">전체 상태</option>
-      <option value="정상">정상</option>
-      <option value="휴업">휴업</option>
-      <option value="폐업">폐업</option>
-    </select>
-    <select id="store-f-acc">
-      <option value="">전체 모계좌</option>
-    </select>
-    <button class="search" onclick="applyStoreFilter()">조회</button>
-    <button onclick="resetStoreFilter()">초기화</button>
-    <button onclick="openStoreUpload()">엑셀 업로드</button>
-    <button onclick="exportStoreExcel()">엑셀 다운로드</button>
-  </div>
-<!-- 미수금관리 -->
-<div id="page-arpage" class="page">
 
-  <!-- 필터바 -->
-  <div class="filter-bar">
-    <input type="date" id="ar-f-start" value="2026-06-01">
-    <span style="font-size:12px;color:#aaa;">~</span>
-    <input type="date" id="ar-f-end" value="2026-06-30">
-    <input type="text" id="ar-f-keyword" placeholder="가맹점코드/명 검색" style="width:180px;">
-    <select id="ar-f-status">
-      <option value="">전체 상태</option>
-      <option value="정상">정상</option>
-      <option value="휴업">휴업</option>
-      <option value="폐업">폐업</option>
-    </select>
-    <select id="ar-f-ar">
-      <option value="">전체</option>
-      <option value="over">미수금 있음</option>
-      <option value="zero">미수금 없음</option>
-      <option value="minus">초과입금</option>
-    </select>
-    <button class="search" onclick="applyArFilter()">조회</button>
-    <button onclick="resetArFilter()">초기화</button>
-    <button onclick="exportArExcel()">엑셀 다운로드</button>
-  </div>
-
-  <!-- 요약 카드 -->
-  <div class="card-section" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
-    <div class="summary-card color-red">
-      <div class="label">총 미수금</div>
-      <div class="value" id="ar-total">₩0</div>
-      <div class="sub" id="ar-total-cnt">0개 가맹점</div>
-    </div>
-    <div class="summary-card color-orange">
-      <div class="label">미수금 발생</div>
-      <div class="value" id="ar-over">₩0</div>
-      <div class="sub" id="ar-over-cnt">0개</div>
-    </div>
-    <div class="summary-card color-blue">
-      <div class="label">총 매출합계</div>
-      <div class="value" id="ar-sales">₩0</div>
-      <div class="sub" id="ar-sales-cnt">0건</div>
-    </div>
-    <div class="summary-card color-green">
-      <div class="label">총 입금합계</div>
-      <div class="value" id="ar-income">₩0</div>
-      <div class="sub" id="ar-income-cnt">0건</div>
-    </div>
-  </div>
-
-  <!-- 테이블 -->
-  <div class="table-wrap">
-    <div class="table-header">
-      <span class="title">가맹점별 미수금 현황 
-        <span id="ar-count" style="font-size:11px;color:#aaa;font-weight:400;"></span>
-      </span>
-      <div class="actions">
+    <!-- ===== 미수금관리 ===== -->
+    <div id="page-arpage" class="page">
+      <div class="filter-bar">
+        <input type="date" id="ar-f-start" value="2026-06-01">
+        <span style="font-size:12px;color:#aaa;">~</span>
+        <input type="date" id="ar-f-end" value="2026-06-30">
+        <input type="text" id="ar-f-keyword" placeholder="가맹점코드/명 검색" style="width:180px;">
+        <select id="ar-f-status">
+          <option value="">전체 상태</option>
+          <option value="정상">정상</option>
+          <option value="휴업">휴업</option>
+          <option value="폐업">폐업</option>
+        </select>
+        <select id="ar-f-ar">
+          <option value="">전체</option>
+          <option value="over">미수금 있음</option>
+          <option value="zero">미수금 없음</option>
+          <option value="minus">초과입금</option>
+        </select>
+        <button class="search" onclick="applyArFilter()">조회</button>
+        <button onclick="resetArFilter()">초기화</button>
         <button onclick="exportArExcel()">엑셀 다운로드</button>
       </div>
-    </div>
-    <div class="tbl-scroll">
-      <table id="ar-table">
-        <thead><tr>
-          <th>가맹점코드</th>
-          <th>가맹점명</th>
-          <th>대표자</th>
-          <th>상태</th>
-          <th class="num">한도금액</th>
-          <th class="num">초기미수금</th>
-          <th class="num">기간매출</th>
-          <th class="num">기간입금</th>
-          <th class="num" style="color:#D42020;">미수금</th>
-          <th class="num">한도잔여</th>
-          <th>비고1</th>
-        </tr></thead>
-        <tbody id="ar-tbody"></tbody>
-        <tfoot id="ar-tfoot"></tfoot>
-      </table>
-    </div>
-  </div>
-</div>
-  <!-- 요약 카드 -->
-  <div class="card-section" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
-    <div class="summary-card color-blue"><div class="label">전체 가맹점</div><div class="value" id="store-cnt-all">0개</div></div>
-    <div class="summary-card color-green"><div class="label">정상</div><div class="value" id="store-cnt-normal">0개</div></div>
-    <div class="summary-card color-orange"><div class="label">휴업</div><div class="value" id="store-cnt-pause">0개</div></div>
-    <div class="summary-card color-red"><div class="label">폐업</div><div class="value" id="store-cnt-close">0개</div></div>
-  </div>
-
-  <!-- 테이블 -->
-  <div class="table-wrap">
-    <div class="table-header">
-      <span class="title">가맹점 목록 <span id="store-count" style="font-size:11px;color:#aaa;font-weight:400;"></span></span>
-      <div class="actions">
-        <button onclick="editStoreSelected()">수정</button>
-        <button class="danger" onclick="deleteStoreSelected()">삭제</button>
-        <button class="primary" onclick="openStoreModal()">+ 추가</button>
+      <div class="card-section" style="grid-template-columns:repeat(4,1fr);">
+        <div class="summary-card color-red"><div class="label">총 미수금</div><div class="value" id="ar-total">₩0</div><div class="sub" id="ar-total-cnt">0개 가맹점</div></div>
+        <div class="summary-card color-orange"><div class="label">미수금 발생</div><div class="value" id="ar-over">₩0</div><div class="sub" id="ar-over-cnt">0개</div></div>
+        <div class="summary-card color-blue"><div class="label">총 매출합계</div><div class="value" id="ar-sales">₩0</div><div class="sub" id="ar-sales-cnt">0건</div></div>
+        <div class="summary-card color-green"><div class="label">총 입금합계</div><div class="value" id="ar-income">₩0</div><div class="sub" id="ar-income-cnt">0건</div></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <span class="title">가맹점별 미수금 현황 <span id="ar-count" style="font-size:11px;color:#aaa;font-weight:400;"></span></span>
+          <div class="actions"><button onclick="exportArExcel()">엑셀 다운로드</button></div>
+        </div>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr>
+              <th>가맹점코드</th><th>가맹점명</th><th>대표자</th><th>상태</th>
+              <th class="num">한도금액</th><th class="num">초기미수금</th>
+              <th class="num">기간매출</th><th class="num">기간입금</th>
+              <th class="num" style="color:#D42020;">미수금</th><th class="num">한도잔여</th><th>비고1</th>
+            </tr></thead>
+            <tbody id="ar-tbody"></tbody>
+            <tfoot id="ar-tfoot"></tfoot>
+          </table>
+        </div>
       </div>
     </div>
-    <div class="tbl-scroll">
-      <table id="store-table">
-        <thead><tr>
-          <th><input type="checkbox" id="store-chk-all" onchange="storeToggleAll(this)"></th>
-          <th>가맹점코드</th><th>가맹점명</th><th>대표자명</th>
-          <th>사업자번호</th><th>가상계좌번호</th><th>연결모계좌</th>
-          <th class="num">한도금액</th><th class="num">초기미수금</th>
-          <th>상태</th><th>비고1</th><th>비고2</th><th>관리</th>
-        </tr></thead>
-        <tbody id="store-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
 
-    <!-- 매입관리 -->
-
-
-    <!-- 계좌/대출 -->
+    <!-- ===== 계좌/대출 ===== -->
     <div id="page-account" class="page">
-      <!-- 탭 -->
       <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:1.5px solid #e0e0e0;">
         <div class="acc-tab active" onclick="switchAccTab('account-tab',this)">계좌내역</div>
         <div class="acc-tab" onclick="switchAccTab('loan-tab',this)">대출내역</div>
       </div>
-
-      <!-- 계좌내역 -->
       <div id="account-tab">
         <div class="card-section">
           <div class="summary-card color-blue"><div class="label">계좌 수</div><div class="value" id="acc-count">0개</div></div>
@@ -451,12 +367,12 @@ input[type="checkbox"] { cursor: pointer; }
           <div class="table-header">
             <span class="title">계좌 목록</span>
             <div class="actions">
-              <button onclick="openAccModal()">+ 추가</button>
+              <button onclick="openAccModal(null)">+ 추가</button>
               <button onclick="exportAccExcel()">엑셀 다운로드</button>
             </div>
           </div>
           <div class="tbl-scroll">
-            <table id="acc-table">
+            <table>
               <thead><tr>
                 <th>코드</th><th>은행명</th><th>계좌번호</th><th>계좌별명</th>
                 <th class="num">기초잔액</th><th class="num">현재잔액</th><th>관리</th>
@@ -466,8 +382,6 @@ input[type="checkbox"] { cursor: pointer; }
           </div>
         </div>
       </div>
-
-      <!-- 대출내역 -->
       <div id="loan-tab" style="display:none;">
         <div class="card-section">
           <div class="summary-card color-red"><div class="label">대출 건수</div><div class="value" id="loan-count">0건</div></div>
@@ -479,12 +393,12 @@ input[type="checkbox"] { cursor: pointer; }
           <div class="table-header">
             <span class="title">대출 목록</span>
             <div class="actions">
-              <button onclick="openLoanModal()">+ 추가</button>
+              <button onclick="openLoanModal(null)">+ 추가</button>
               <button onclick="exportLoanExcel()">엑셀 다운로드</button>
             </div>
           </div>
           <div class="tbl-scroll">
-            <table id="loan-table">
+            <table>
               <thead><tr>
                 <th>코드</th><th>은행명</th><th>계좌번호</th><th>최초실행일</th><th>재실행일</th><th>만기일</th>
                 <th class="num">대출원금</th><th>금리</th><th>금리비고</th>
@@ -497,51 +411,43 @@ input[type="checkbox"] { cursor: pointer; }
       </div>
     </div>
 
-    <!-- 예금관리 -->
+    <!-- ===== 입출금내역 ===== -->
     <div id="page-deposit" class="page">
-      <!-- 상단 카드 -->
       <div class="card-section" style="grid-template-columns:repeat(3,1fr);">
-        <div class="summary-card color-red"><div class="label">월 누계 매출 (2026-06)</div><div class="value" id="dep-sales">₩0</div><div class="sub" id="dep-sales-sub">당일 0원</div></div>
-        <div class="summary-card color-blue"><div class="label">월 누계 입금 (2026-06)</div><div class="value" id="dep-in">₩0</div><div class="sub" id="dep-in-sub">당일 0원</div></div>
+        <div class="summary-card color-red"><div class="label">월 누계 매출</div><div class="value" id="dep-sales">₩0</div><div class="sub" id="dep-sales-sub">당일 0원</div></div>
+        <div class="summary-card color-blue"><div class="label">월 누계 입금</div><div class="value" id="dep-in">₩0</div><div class="sub" id="dep-in-sub">당일 0원</div></div>
         <div class="summary-card color-green"><div class="label">총 예금잔액</div><div class="value" id="dep-bal">₩0</div><div class="sub" id="dep-bal-sub">0개 계좌</div></div>
       </div>
-
-      <!-- 필터바 -->
       <div class="filter-bar">
         <input type="date" id="dep-f-start" value="2026-06-01">
         <span style="font-size:12px;color:#aaa;">~</span>
-        <input type="date" id="dep-f-end" value="2026-06-21">
+        <input type="date" id="dep-f-end" value="2026-06-30">
         <input type="text" id="dep-f-store" placeholder="가맹점코드/명 검색" style="width:160px;">
-<select id="dep-f-code" style="width:130px;">
-  <option value="">전체 계좌</option>
-</select>
-        <select id="dep-f-type" style="width:110px;">
-          <option value="">비고유형 전체</option>
-        </select>
+        <select id="dep-f-code" style="width:180px;"><option value="">전체 계좌</option></select>
+        <select id="dep-f-type" style="width:120px;"><option value="">비고유형 전체</option></select>
         <button class="search" onclick="applyDepFilter()">조회</button>
         <button onclick="resetDepFilter()">초기화</button>
         <button onclick="openDepAccMgr()">계정관리</button>
         <button onclick="openDepUpload()">엑셀 업로드</button>
         <button onclick="exportDepExcel()">엑셀 다운로드</button>
       </div>
-
-      <!-- 테이블 -->
       <div class="table-wrap">
         <div class="table-header">
           <span class="title">예금 내역 <span id="dep-count" style="font-size:11px;color:#aaa;font-weight:400;"></span></span>
           <div class="actions">
             <button onclick="editDepSelected()">수정</button>
             <button class="danger" onclick="deleteDepSelected()">삭제</button>
-            <button class="primary" onclick="openDepModal()">+ 추가</button>
+            <button class="primary" onclick="openDepModal(null)">+ 추가</button>
           </div>
         </div>
         <div class="tbl-scroll">
           <table>
             <thead><tr>
               <th><input type="checkbox" id="dep-chk-all" onchange="depToggleAll(this)"></th>
-<th>코드</th><th>은행명</th><th>계좌번호</th>
-<th>가맹점코드</th><th>가맹점명</th><th>비고유형</th>
-              <th class="num">전잔액</th><th class="num" style="color:#2563eb;">입금</th>
+              <th>코드</th><th>은행명</th><th>계좌번호</th>
+              <th>가맹점코드</th><th>가맹점명</th><th>비고유형</th>
+              <th class="num">전잔액</th>
+              <th class="num" style="color:#2563eb;">입금</th>
               <th class="num" style="color:#D42020;">출금</th>
               <th class="num" style="color:#0F6E56;">최종잔액</th>
               <th>상세내역</th><th>비고</th><th>일자</th>
@@ -553,18 +459,15 @@ input[type="checkbox"] { cursor: pointer; }
       </div>
     </div>
 
-    <!-- 리포트 -->
+    <!-- ===== 리포트 ===== -->
     <div id="page-report" class="page">
-      <!-- 카드섹션 -->
       <div class="card-section" style="grid-template-columns:repeat(5,1fr);">
         <div class="summary-card color-red"><div class="label">가맹점 매출</div><div class="value" id="rpt-sales-fr">₩0</div><div class="sub" id="rpt-sales-fr-cnt">0건</div></div>
         <div class="summary-card color-orange"><div class="label">기타 매출</div><div class="value" id="rpt-sales-etc">₩0</div><div class="sub" id="rpt-sales-etc-cnt">0건</div></div>
         <div class="summary-card color-blue"><div class="label">가맹점 입금</div><div class="value" id="rpt-in-fr">₩0</div><div class="sub" id="rpt-in-fr-cnt">0건</div></div>
         <div class="summary-card color-purple"><div class="label">기타 입금</div><div class="value" id="rpt-in-etc">₩0</div><div class="sub" id="rpt-in-etc-cnt">0건</div></div>
-        <div class="summary-card color-green"><div class="label">최종 잔액</div><div class="value" id="rpt-final">₩0</div><div class="sub" id="rpt-final-sub">예금 기준</div></div>
+        <div class="summary-card color-green"><div class="label">최종 잔액</div><div class="value" id="rpt-final">₩0</div><div class="sub">예금 기준</div></div>
       </div>
-
-      <!-- 필터바 -->
       <div class="filter-bar">
         <input type="date" id="rpt-f-start" value="2026-06-01">
         <span style="font-size:12px;color:#aaa;">~</span>
@@ -579,14 +482,10 @@ input[type="checkbox"] { cursor: pointer; }
         <button onclick="resetRptFilter()">초기화</button>
         <button onclick="exportRptExcel()">엑셀 다운로드</button>
       </div>
-
-      <!-- 계정별 합계 테이블 -->
-      <div class="table-wrap" style="margin-bottom:16px;">
-        <div class="table-header">
-          <span class="title">계정별 합계</span>
-        </div>
+      <div class="table-wrap">
+        <div class="table-header"><span class="title">계정별 합계</span></div>
         <div class="tbl-scroll">
-          <table id="rpt-acc-table">
+          <table>
             <thead><tr>
               <th>구분</th><th>계정과목</th><th class="num">건수</th>
               <th class="num">입금합계</th><th class="num">출금합계</th><th class="num">합계금액</th>
@@ -595,14 +494,12 @@ input[type="checkbox"] { cursor: pointer; }
           </table>
         </div>
       </div>
-
-      <!-- 전체 거래내역 -->
       <div class="table-wrap">
         <div class="table-header">
           <span class="title">전체 거래내역 <span id="rpt-count" style="font-size:11px;color:#aaa;font-weight:400;"></span></span>
         </div>
         <div class="tbl-scroll">
-          <table id="rpt-detail-table">
+          <table>
             <thead><tr>
               <th>일자</th><th>구분</th><th>계정과목</th><th>거래처/매장</th>
               <th class="num">입금</th><th class="num">출금</th><th class="num">금액</th><th>비고</th>
@@ -613,34 +510,31 @@ input[type="checkbox"] { cursor: pointer; }
       </div>
     </div>
 
-  </div>
-</div>
+  </div><!-- /content -->
+</div><!-- /main -->
 
-<!-- 추가/수정 모달 -->
+<!-- 매출 추가/수정 모달 -->
 <div class="modal-bg" id="modal-form">
   <div class="modal">
     <h2 id="modal-title">매출 추가</h2>
     <div class="form-grid">
       <div class="form-group"><label>날짜 *</label><input type="date" id="f-date"></div>
       <div class="form-group"><label>과세구분 *</label>
-        <select id="f-taxtype" onchange="calcVat()">
-          <option value="과세">과세</option>
-          <option value="면세">면세</option>
-        </select>
+        <select id="f-taxtype" onchange="calcVat()"><option value="과세">과세</option><option value="면세">면세</option></select>
       </div>
       <div class="form-group"><label>매장코드 *</label><input type="text" id="f-storecode" placeholder="예) GN001"></div>
       <div class="form-group"><label>매장명 *</label><input type="text" id="f-storename" placeholder="예) 강남점"></div>
       <div class="form-group"><label>상품코드 *</label><input type="text" id="f-productcode" placeholder="예) P001"></div>
       <div class="form-group"><label>상품명 *</label><input type="text" id="f-productname" placeholder="예) 후라이드치킨"></div>
-      <div class="form-group"><label>단위</label><input type="text" id="f-unit" placeholder="예) 박스"></div>
+      <div class="form-group"><label>단위</label><input type="text" id="f-unit"></div>
       <div class="form-group"><label>입수</label><input type="number" id="f-inqty" placeholder="0" oninput="calcVat()"></div>
-      <div class="form-group"><label>출고횟수</label><input type="number" id="f-outcount" placeholder="0" oninput="calcVat()"></div>
+      <div class="form-group"><label>출고횟수</label><input type="number" id="f-outcount" placeholder="0"></div>
       <div class="form-group"><label>공급가</label><input type="number" id="f-supply" placeholder="0" oninput="calcVat()"></div>
       <div class="form-group"><label>출고수량</label><input type="number" id="f-outqty" placeholder="0" oninput="calcVat()"></div>
       <div class="form-group"><label>출고단가</label><input type="number" id="f-outprice" placeholder="0" oninput="calcVat()"></div>
-      <div class="form-group"><label>출고부가세 (자동계산)</label><input type="number" id="f-outvat" placeholder="0" readonly style="background:#f9f9f9;"></div>
-      <div class="form-group"><label>출고합계금액 (자동계산)</label><input type="number" id="f-outtotal" placeholder="0" readonly style="background:#f9f9f9;"></div>
-      <div class="form-group full"><label>비고</label><input type="text" id="f-note" placeholder="메모"></div>
+      <div class="form-group"><label>출고부가세 (자동)</label><input type="number" id="f-outvat" readonly style="background:#f9f9f9;"></div>
+      <div class="form-group"><label>출고합계금액 (자동)</label><input type="number" id="f-outtotal" readonly style="background:#f9f9f9;"></div>
+      <div class="form-group full"><label>비고</label><input type="text" id="f-note"></div>
     </div>
     <div class="modal-footer">
       <button onclick="closeModal('modal-form')">취소</button>
@@ -649,12 +543,12 @@ input[type="checkbox"] { cursor: pointer; }
   </div>
 </div>
 
-<!-- 엑셀 업로드 모달 -->
+<!-- 매출 엑셀 업로드 모달 -->
 <div class="modal-bg" id="modal-upload">
   <div class="modal" style="width:500px;">
-    <h2>엑셀 업로드</h2>
+    <h2>엑셀 업로드 (매출)</h2>
     <p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>날짜</strong> / 매장코드 / 매장명 / 상품코드 / 상품명 / 단위 / 입수 / 출고횟수 / 공급가 / 출고수량 / 출고단가 / 출고부가세 / 출고합계금액 / 비고</p>
-    <p style="font-size:11px;color:#2563eb;margin-bottom:10px;">📋 여러 시트 업로드 가능 — 각 시트의 데이터가 자동으로 통합됩니다.</p>
+    <p style="font-size:11px;color:#2563eb;margin-bottom:10px;">📋 여러 시트 업로드 가능</p>
     <div class="upload-area" onclick="document.getElementById('excel-input').click()">
       <div style="font-size:24px;">📂</div>
       <p>클릭하여 엑셀 파일 선택 (.xlsx / .xls / .csv)</p>
@@ -683,46 +577,227 @@ input[type="checkbox"] { cursor: pointer; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-// 데이터 저장소
-let salesData = [
-  { id:1, date:'2026-06-22', storeCode:'GN001', storeName:'강남점', productCode:'P001', productName:'후라이드치킨', unit:'박스', inQty:10, outCount:3, supply:3800000, outQty:30, outPrice:127000, outVat:381000, outTotal:4181000, taxType:'과세', note:'' },
-  { id:2, date:'2026-06-22', storeCode:'HD002', storeName:'홍대점', productCode:'P002', productName:'양념치킨', unit:'박스', inQty:8, outCount:2, supply:3400000, outQty:20, outPrice:170000, outVat:0, outTotal:3400000, taxType:'면세', note:'' },
-  { id:3, date:'2026-06-22', storeCode:'BS003', storeName:'부산점', productCode:'P001', productName:'후라이드치킨', unit:'박스', inQty:12, outCount:4, supply:4600000, outQty:40, outPrice:115000, outVat:460000, outTotal:5060000, taxType:'과세', note:'신규가맹' },
-  { id:4, date:'2026-06-21', storeCode:'DJ004', storeName:'대전점', productCode:'P003', productName:'간장치킨', unit:'박스', inQty:6, outCount:2, supply:2600000, outQty:15, outPrice:173000, outVat:260000, outTotal:2860000, taxType:'과세', note:'' },
+// ===== 데이터 =====
+let salesData = [], nextId = 1, filteredData = [], editingId = null, uploadedRows = [];
+
+let depAccounts = [
+  {code:'ACC001', bank:'기업', accNo:'148-023233-04-166', alias:'모계좌1'},
+  {code:'ACC002', bank:'기업', accNo:'148-023233-04-106', alias:''},
+  {code:'ACC003', bank:'기업', accNo:'148-023233-04-021', alias:''},
+  {code:'ACC004', bank:'기업', accNo:'058-0457347-01-011', alias:''},
+  {code:'ACC005', bank:'기업', accNo:'148-023233-04-045', alias:''},
+  {code:'ACC006', bank:'기업', accNo:'148-023233-01-063', alias:''},
+  {code:'ACC007', bank:'기업', accNo:'148-023233-04-077', alias:''},
+  {code:'ACC008', bank:'기업', accNo:'148-023233-04-110', alias:''},
+  {code:'ACC009', bank:'기업', accNo:'148-023233-04-134', alias:''},
+  {code:'ACC010', bank:'기업', accNo:'148-023233-04-141', alias:''},
+  {code:'ACC011', bank:'기업', accNo:'148-023233-04-159', alias:''},
+  {code:'ACC012', bank:'기업', accNo:'148-023233-04-127', alias:''},
+  {code:'ACC013', bank:'기업', accNo:'148-023233-04-095', alias:''},
+  {code:'ACC014', bank:'기업', accNo:'148-023233-04-181', alias:''},
+  {code:'ACC015', bank:'기업', accNo:'148-023233-04-173', alias:''},
+  {code:'ACC016', bank:'하나', accNo:'581-910058-20904', alias:''},
 ];
-let nextId = 5;
-let filteredData = [...salesData];
-let editingId = null;
-let uploadedRows = [];
 
-function fmt(n) { return '₩' + Math.round(n).toLocaleString(); }
+let depNoteTypes = [
+  {name:'가맹점 입금', color:'#2563eb'},
+  {name:'결산이자',    color:'#0F6E56'},
+  {name:'이체',        color:'#F0921E'},
+  {name:'기타',        color:'#888'},
+];
 
+let depData = [], depNextId = 1, editDepId = null, depFiltered = [], depUploadRows = [];
+
+let accData = [], loanData = [], accNextId = 1, loanNextId = 1, editAccId = null, editLoanId = null;
+
+let storeData = [], storeNextId = 1, storeFiltered = [], storeUploadRows = [];
+
+// ===== 유틸 =====
+function fmt(n) { return '₩' + Math.round(n||0).toLocaleString(); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function showDynModal(html) {
+  let bg = document.getElementById('dyn-modal-bg');
+  if(!bg){ bg=document.createElement('div'); bg.id='dyn-modal-bg'; bg.className='modal-bg'; document.body.appendChild(bg); }
+  bg.innerHTML = html;
+  bg.classList.add('open');
+}
+function closeAccModal() {
+  const bg = document.getElementById('dyn-modal-bg');
+  if(bg) bg.classList.remove('open');
+}
+function getStoreByCode(code) { return storeData.find(s=>s.code===code)||null; }
+
+// ===== Firebase =====
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCwczMPx-W07iuv3YCLtbymAjoPOb-xpP4",
+  authDomain: "sijae-202607.firebaseapp.com",
+  projectId: "sijae-202607",
+  storageBucket: "sijae-202607.firebasestorage.app",
+  appId: "1:587529949522:web:408deca43deffdcc482a8b"
+};
+const GS_URL = "https://script.google.com/macros/s/AKfycbwvfGkc2gvLUFeR60-uMkD8GDcZ5xo11Bop_rEEugaFHWkFDvuYJNdlLmiX2ZnwpLsu/exec";
+let fbApp=null, fbDb=null, fbReady=false;
+
+function setStatus(type, ok, msg) {
+  const dot=document.getElementById(type+'-dot'), txt=document.getElementById(type+'-txt');
+  if(!dot||!txt) return;
+  dot.style.background = ok?'#0F6E56':'#D42020';
+  txt.style.color = ok?'#0F6E56':'#D42020';
+  txt.textContent = msg;
+}
+
+async function initFirebase() {
+  try {
+    const {initializeApp} = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const {getFirestore, collection, getDocs, doc, writeBatch} = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    fbApp = initializeApp(FIREBASE_CONFIG);
+    fbDb  = getFirestore(fbApp);
+    window._fbFs = {collection, getDocs, doc, writeBatch};
+    fbReady = true;
+    setStatus('fb', true, 'Firebase 연결됨');
+    await loadFromFirebase();
+  } catch(e) {
+    setStatus('fb', false, 'Firebase 오류');
+    console.error(e);
+  }
+}
+
+async function loadFromFirebase() {
+  if(!fbReady) return;
+  const {collection, getDocs} = window._fbFs;
+  try {
+    const load = async name => {
+      const snap = await getDocs(collection(fbDb, name));
+      return snap.docs.map(d=>({...d.data(), _docId:d.id}));
+    };
+    const [sSnap, dSnap, aSnap, lSnap, stSnap] = await Promise.all([
+      load('sales'), load('deposit'), load('accounts'), load('loans'), load('stores')
+    ]);
+    if(sSnap.length) {
+      salesData = sSnap;
+      nextId = Math.max(...salesData.map(r=>r.id||0)) + 1;
+      salesData.sort((a,b)=>b.date.localeCompare(a.date));
+      filteredData = [...salesData];
+      renderTable(filteredData);
+    }
+    if(dSnap.length) {
+      depData = dSnap;
+      depNextId = Math.max(...depData.map(r=>r.id||0)) + 1;
+      depFiltered = [...depData];
+    }
+    if(aSnap.length) {
+      accData = aSnap;
+      accNextId = Math.max(...accData.map(r=>r.id||0)) + 1;
+    }
+    if(lSnap.length) {
+      loanData = lSnap;
+      loanNextId = Math.max(...loanData.map(r=>r.id||0)) + 1;
+    }
+    if(stSnap.length) {
+      storeData = stSnap;
+      storeNextId = Math.max(...storeData.map(r=>r.id||0)) + 1;
+    }
+    setStatus('fb', true, 'Firebase 로드완료');
+  } catch(e) {
+    setStatus('fb', false, 'Firebase 로드오류');
+    console.error(e);
+  }
+}
+
+async function saveToFirebase(collectionName, data) {
+  if(!fbReady) return;
+  const {collection, getDocs, doc, writeBatch} = window._fbFs;
+  try {
+    const existing = await getDocs(collection(fbDb, collectionName));
+    if(!existing.empty) {
+      const b = writeBatch(fbDb);
+      existing.docs.forEach(d=>b.delete(doc(fbDb,collectionName,d.id)));
+      await b.commit();
+    }
+    if(data.length>0) {
+      const b = writeBatch(fbDb);
+      data.forEach((row,i)=>{
+        const clean = JSON.parse(JSON.stringify(row));
+        delete clean._docId;
+        b.set(doc(fbDb,collectionName,String(row.id||i+1)), clean);
+      });
+      await b.commit();
+    }
+    setStatus('fb', true, 'Firebase 저장완료');
+  } catch(e) {
+    setStatus('fb', false, 'Firebase 저장오류');
+    console.error(e);
+  }
+}
+
+async function saveToSheets(sheetName, data) {
+  try {
+    const headers = data.length>0 ? Object.keys(data[0]).filter(k=>k!=='_docId') : [];
+    const rows = data.map(r=>headers.map(h=>r[h]??''));
+    await fetch(GS_URL, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({sheet:sheetName, action:'replace', headers, rows})
+    });
+    setStatus('gs', true, 'Sheets 저장완료');
+  } catch(e) {
+    setStatus('gs', false, 'Sheets 오류');
+  }
+}
+
+async function syncAll() {
+  const btn = document.querySelector('button[onclick="syncAll()"]');
+  if(btn){btn.textContent='동기화 중...';btn.disabled=true;}
+  setStatus('fb',true,'저장중...');
+  await saveToFirebase('sales', salesData);
+  await saveToFirebase('deposit', depData);
+  await saveToFirebase('accounts', accData);
+  await saveToFirebase('loans', loanData);
+  await saveToFirebase('stores', storeData);
+  await saveToSheets('매출내역', salesData);
+  await saveToSheets('입출금내역', depData);
+  await saveToSheets('계좌관리', accData);
+  await saveToSheets('대출관리', loanData);
+  await saveToSheets('거래처', storeData);
+  if(btn){btn.textContent='🔄 동기화';btn.disabled=false;}
+}
+
+// ===== 페이지 전환 =====
+function showPage(key, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+key).classList.add('active');
+  document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active'));
+  el.classList.add('active');
+  const titles = {sales:'매출내역',account:'계좌 및 대출',deposit:'입출금내역',report:'리포트',store:'거래처관리',arpage:'미수금관리'};
+  document.getElementById('page-title').textContent = titles[key]||key;
+  if(key==='account') renderAcc();
+  if(key==='deposit') { initDepSelects(); depFiltered=[...depData]; renderDep(depFiltered); }
+  if(key==='report')  { resetRptFilter(); }
+  if(key==='store')   { initStoreAccSelect(); storeFiltered=[...storeData]; renderStore(storeFiltered); }
+  if(key==='arpage')  { applyArFilter(); }
+}
+
+// ===== 매출내역 =====
 function renderTable(data) {
   const tbody = document.getElementById('sales-tbody');
   tbody.innerHTML = '';
   data.forEach(r => {
     const tr = document.createElement('tr');
-    tr.dataset.id = r.id;
-    tr.onclick = (e) => { if(e.target.type !== 'checkbox') tr.querySelector('input[type=checkbox]').click(); };
     tr.innerHTML = `
-      <td><input type="checkbox" class="row-chk" value="${r.id}" onclick="e=>e.stopPropagation()"></td>
+      <td><input type="checkbox" class="row-chk" value="${r.id}"></td>
       <td>${r.date}</td>
       <td style="cursor:pointer;color:#2563eb;" onclick="showStoreTip('${r.storeCode}')">${r.storeCode}</td>
       <td>${r.storeName}</td>
-      <td>${r.productCode}</td>
-      <td>${r.productName}</td>
-      <td>${r.unit}</td>
-      <td class="num">${r.inQty}</td>
-      <td class="num">${r.outCount}</td>
-      <td class="num">${r.supply.toLocaleString()}</td>
-      <td class="num">${r.outQty}</td>
-      <td class="num">${r.outPrice.toLocaleString()}</td>
-      <td class="num">${r.outVat.toLocaleString()}</td>
-      <td class="num">${r.outTotal.toLocaleString()}</td>
+      <td>${r.productCode}</td><td>${r.productName}</td><td>${r.unit||''}</td>
+      <td class="num">${(r.inQty||0)}</td><td class="num">${(r.outCount||0)}</td>
+      <td class="num">${(r.supply||0).toLocaleString()}</td>
+      <td class="num">${(r.outQty||0).toLocaleString()}</td>
+      <td class="num">${(r.outPrice||0).toLocaleString()}</td>
+      <td class="num">${(r.outVat||0).toLocaleString()}</td>
+      <td class="num">${(r.outTotal||0).toLocaleString()}</td>
       <td><span class="tax-badge ${r.taxType==='과세'?'tax-y':'tax-n'}">${r.taxType}</span></td>
-      <td>${r.note}</td>
-    `;
-    tr.ondblclick = () => openEditModal(r.id);
+      <td>${r.note||''}</td>`;
+    tr.ondblclick = ()=>openEditModal(r.id);
     tbody.appendChild(tr);
   });
   document.getElementById('filtered-count').textContent = `(${data.length}건)`;
@@ -730,15 +805,15 @@ function renderTable(data) {
 }
 
 function updateCards(data) {
-  const taxable = data.filter(r=>r.taxType==='과세').reduce((s,r)=>s+r.outTotal,0);
-  const exempt  = data.filter(r=>r.taxType==='면세').reduce((s,r)=>s+r.outTotal,0);
-  const vat     = data.reduce((s,r)=>s+r.outVat,0);
-  const total   = data.reduce((s,r)=>s+r.outTotal,0);
+  const taxable = data.filter(r=>r.taxType==='과세').reduce((s,r)=>s+(r.outTotal||0),0);
+  const exempt  = data.filter(r=>r.taxType==='면세').reduce((s,r)=>s+(r.outTotal||0),0);
+  const vat     = data.reduce((s,r)=>s+(r.outVat||0),0);
+  const total   = data.reduce((s,r)=>s+(r.outTotal||0),0);
   document.getElementById('card-taxable').textContent = fmt(taxable);
   document.getElementById('card-exempt').textContent  = fmt(exempt);
   document.getElementById('card-vat').textContent     = fmt(vat);
   document.getElementById('card-total').textContent   = fmt(total);
-  document.getElementById('card-count').textContent   = data.length + '건';
+  document.getElementById('card-count').textContent   = data.length+'건';
 }
 
 function applyFilter() {
@@ -755,34 +830,35 @@ function applyFilter() {
     if(tax && r.taxType !== tax) return false;
     return true;
   });
-  // ★ 최신날짜 정렬 추가
-  filteredData.sort((a,b) => b.date.localeCompare(a.date));
+  filteredData.sort((a,b)=>b.date.localeCompare(a.date));
   renderTable(filteredData);
 }
 
 function resetFilter() {
-  document.getElementById('f-start').value = '2026-06-01';
-  document.getElementById('f-end').value   = '2026-06-30';
+  document.getElementById('f-start').value   = '2026-06-01';
+  document.getElementById('f-end').value     = '2026-06-30';
   document.getElementById('f-store').value   = '';
   document.getElementById('f-product').value = '';
   document.getElementById('f-tax').value     = '';
   filteredData = [...salesData];
+  filteredData.sort((a,b)=>b.date.localeCompare(a.date));
   renderTable(filteredData);
 }
 
 function filterByMonth() {
   const val = document.getElementById('month-select').value;
-  document.getElementById('f-start').value = val + '-01';
+  document.getElementById('f-start').value = val+'-01';
   const last = new Date(val.split('-')[0], val.split('-')[1], 0).getDate();
-  document.getElementById('f-end').value = val + '-' + String(last).padStart(2,'0');
+  document.getElementById('f-end').value = val+'-'+String(last).padStart(2,'0');
   applyFilter();
 }
 
-// 추가 모달
 function openAddModal() {
   editingId = null;
   document.getElementById('modal-title').textContent = '매출 추가';
-  ['date','storecode','storename','productcode','productname','unit','inqty','outcount','supply','outqty','outprice','outvat','outtotal','note'].forEach(k => document.getElementById('f-'+k).value = '');
+  ['storecode','storename','productcode','productname','unit','inqty','outcount','supply','outqty','outprice','outvat','outtotal','note'].forEach(k=>{
+    const el=document.getElementById('f-'+k); if(el) el.value='';
+  });
   document.getElementById('f-taxtype').value = '과세';
   document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
   document.getElementById('modal-form').classList.add('open');
@@ -790,8 +866,7 @@ function openAddModal() {
 
 function openEditModal(id) {
   editingId = id;
-  const r = salesData.find(x=>x.id===id);
-  if(!r) return;
+  const r = salesData.find(x=>x.id===id); if(!r) return;
   document.getElementById('modal-title').textContent = '매출 수정';
   document.getElementById('f-date').value        = r.date;
   document.getElementById('f-taxtype').value     = r.taxType;
@@ -799,15 +874,15 @@ function openEditModal(id) {
   document.getElementById('f-storename').value   = r.storeName;
   document.getElementById('f-productcode').value = r.productCode;
   document.getElementById('f-productname').value = r.productName;
-  document.getElementById('f-unit').value        = r.unit;
-  document.getElementById('f-inqty').value       = r.inQty;
-  document.getElementById('f-outcount').value    = r.outCount;
-  document.getElementById('f-supply').value      = r.supply;
-  document.getElementById('f-outqty').value      = r.outQty;
-  document.getElementById('f-outprice').value    = r.outPrice;
-  document.getElementById('f-outvat').value      = r.outVat;
-  document.getElementById('f-outtotal').value    = r.outTotal;
-  document.getElementById('f-note').value        = r.note;
+  document.getElementById('f-unit').value        = r.unit||'';
+  document.getElementById('f-inqty').value       = r.inQty||0;
+  document.getElementById('f-outcount').value    = r.outCount||0;
+  document.getElementById('f-supply').value      = r.supply||0;
+  document.getElementById('f-outqty').value      = r.outQty||0;
+  document.getElementById('f-outprice').value    = r.outPrice||0;
+  document.getElementById('f-outvat').value      = r.outVat||0;
+  document.getElementById('f-outtotal').value    = r.outTotal||0;
+  document.getElementById('f-note').value        = r.note||'';
   document.getElementById('modal-form').classList.add('open');
 }
 
@@ -815,789 +890,266 @@ function calcVat() {
   const tax   = document.getElementById('f-taxtype').value;
   const qty   = parseFloat(document.getElementById('f-outqty').value)||0;
   const price = parseFloat(document.getElementById('f-outprice').value)||0;
-  const supply = parseFloat(document.getElementById('f-supply').value)||0;
-  const base  = qty * price || supply;
-  const vat   = tax==='과세' ? Math.round(base * 0.1) : 0;
-  const total = base + vat;
+  const supply= parseFloat(document.getElementById('f-supply').value)||0;
+  const base  = qty*price || supply;
+  const vat   = tax==='과세' ? Math.round(base*0.1) : 0;
   document.getElementById('f-outvat').value   = vat;
-  document.getElementById('f-outtotal').value = total;
+  document.getElementById('f-outtotal').value = base+vat;
 }
 
 function saveRow() {
-  const d = document.getElementById('f-date').value;
-  const sc = document.getElementById('f-storecode').value.trim();
-  const sn = document.getElementById('f-storename').value.trim();
-  const pc = document.getElementById('f-productcode').value.trim();
-  const pn = document.getElementById('f-productname').value.trim();
-  if(!d||!sc||!sn||!pc||!pn) { alert('필수 항목을 입력해주세요.'); return; }
+  const d=document.getElementById('f-date').value;
+  const sc=document.getElementById('f-storecode').value.trim();
+  const sn=document.getElementById('f-storename').value.trim();
+  const pc=document.getElementById('f-productcode').value.trim();
+  const pn=document.getElementById('f-productname').value.trim();
+  if(!d||!sc||!sn||!pc||!pn){alert('필수 항목을 입력해주세요.');return;}
   const row = {
-    id: editingId || nextId++,
-    date: d,
+    id: editingId||nextId++, date:d,
     taxType: document.getElementById('f-taxtype').value,
-    storeCode: sc, storeName: sn,
-    productCode: pc, productName: pn,
-    unit: document.getElementById('f-unit').value,
-    inQty: parseFloat(document.getElementById('f-inqty').value)||0,
-    outCount: parseFloat(document.getElementById('f-outcount').value)||0,
-    supply: parseFloat(document.getElementById('f-supply').value)||0,
-    outQty: parseFloat(document.getElementById('f-outqty').value)||0,
-    outPrice: parseFloat(document.getElementById('f-outprice').value)||0,
-    outVat: parseFloat(document.getElementById('f-outvat').value)||0,
-    outTotal: parseFloat(document.getElementById('f-outtotal').value)||0,
-    note: document.getElementById('f-note').value,
+    storeCode:sc, storeName:sn, productCode:pc, productName:pn,
+    unit:    document.getElementById('f-unit').value,
+    inQty:   parseFloat(document.getElementById('f-inqty').value)||0,
+    outCount:parseFloat(document.getElementById('f-outcount').value)||0,
+    supply:  parseFloat(document.getElementById('f-supply').value)||0,
+    outQty:  parseFloat(document.getElementById('f-outqty').value)||0,
+    outPrice:parseFloat(document.getElementById('f-outprice').value)||0,
+    outVat:  parseFloat(document.getElementById('f-outvat').value)||0,
+    outTotal:parseFloat(document.getElementById('f-outtotal').value)||0,
+    note:    document.getElementById('f-note').value,
   };
-  if(editingId) { const i = salesData.findIndex(x=>x.id===editingId); salesData[i] = row; }
+  if(editingId){const i=salesData.findIndex(x=>x.id===editingId);salesData[i]=row;}
   else salesData.unshift(row);
-  closeModal('modal-form');
-  applyFilter();
+  closeModal('modal-form'); applyFilter();
 }
 
-// 선택 삭제
-function getChecked() { return [...document.querySelectorAll('.row-chk:checked')].map(c=>parseInt(c.value)); }
-function toggleAll(chk) { document.querySelectorAll('.row-chk').forEach(c=>c.checked=chk.checked); }
+function getChecked(){return [...document.querySelectorAll('.row-chk:checked')].map(c=>parseInt(c.value));}
+function toggleAll(chk){document.querySelectorAll('.row-chk').forEach(c=>c.checked=chk.checked);}
+function editSelected(){const ids=getChecked();if(ids.length!==1){alert('1건 선택해주세요.');return;}openEditModal(ids[0]);}
+function deleteSelected(){const ids=getChecked();if(!ids.length){alert('삭제할 항목을 선택해주세요.');return;}document.getElementById('del-count').textContent=ids.length;document.getElementById('modal-delete').classList.add('open');}
+function confirmDelete(){const ids=getChecked();salesData=salesData.filter(r=>!ids.includes(r.id));closeModal('modal-delete');applyFilter();}
 
-function editSelected() {
-  const ids = getChecked();
-  if(ids.length !== 1) { alert('수정할 항목 1건을 선택해주세요.'); return; }
-  openEditModal(ids[0]);
-}
-
-function deleteSelected() {
-  const ids = getChecked();
-  if(!ids.length) { alert('삭제할 항목을 선택해주세요.'); return; }
-  document.getElementById('del-count').textContent = ids.length;
-  document.getElementById('modal-delete').classList.add('open');
-}
-
-function confirmDelete() {
-  const ids = getChecked();
-  salesData = salesData.filter(r=>!ids.includes(r.id));
-  closeModal('modal-delete');
-  applyFilter();
-}
-
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-// 엑셀 업로드
-function openUploadModal() { document.getElementById('modal-upload').classList.add('open'); }
-
-function previewExcel(input) {
-  const file = input.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const wb = XLSX.read(e.target.result, {type:'binary'});
-    uploadedRows = [];
-    let sheetInfo = [];
-    wb.SheetNames.forEach(name => {
-      const ws = wb.Sheets[name];
-      const rows = XLSX.utils.sheet_to_json(ws, {header:1});
-      const dataRows = rows.slice(1).filter(r=>r.length>0);
-      uploadedRows = uploadedRows.concat(dataRows);
-      sheetInfo.push(`${name}(${dataRows.length}건)`);
+function openUploadModal(){document.getElementById('modal-upload').classList.add('open');}
+function previewExcel(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const wb=XLSX.read(e.target.result,{type:'binary'});
+    uploadedRows=[];let info=[];
+    wb.SheetNames.forEach(name=>{
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1});
+      const dr=rows.slice(1).filter(r=>r.length>0);
+      uploadedRows=uploadedRows.concat(dr);info.push(`${name}(${dr.length}건)`);
     });
-    const prev = document.getElementById('upload-preview');
-    prev.style.display = 'block';
-    prev.innerHTML = `✅ 총 <strong>${uploadedRows.length}건</strong> 감지됨 — 시트: ${sheetInfo.join(', ')}<br>
-    미리보기: ${uploadedRows.slice(0,2).map(r=>r[1]||'').join(', ')} ...`;
+    const p=document.getElementById('upload-preview');
+    p.style.display='block';
+    p.innerHTML=`✅ 총 <strong>${uploadedRows.length}건</strong> — 시트: ${info.join(', ')}`;
   };
   reader.readAsBinaryString(file);
 }
-
-function importExcel() {
-  if(!uploadedRows.length) { alert('파일을 먼저 선택해주세요.'); return; }
-  const cnt = uploadedRows.length;
-  uploadedRows.forEach(r => {
-    // 날짜가 맨 앞 컬럼 (index 0)
-    const rawDate = r[0];
-    let date = new Date().toISOString().slice(0,10);
-    if(rawDate) {
-      if(typeof rawDate === 'number') {
-        // 엑셀 날짜 시리얼 변환
-        const d = new Date(Math.round((rawDate - 25569) * 86400 * 1000));
-        date = d.toISOString().slice(0,10);
-      } else {
-        date = String(rawDate).replace(/\./g,'-').replace(/(\d{4})-(\d{1,2})-(\d{1,2})/,(_,y,m,d)=>`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
-      }
+function importExcel(){
+  if(!uploadedRows.length){alert('파일을 먼저 선택해주세요.');return;}
+  const cnt=uploadedRows.length;
+  uploadedRows.forEach(r=>{
+    const rawDate=r[0];let date=new Date().toISOString().slice(0,10);
+    if(rawDate){
+      if(typeof rawDate==='number'){const d=new Date(Math.round((rawDate-25569)*86400*1000));date=d.toISOString().slice(0,10);}
+      else date=String(rawDate).replace(/\./g,'-').replace(/(\d{4})-(\d{1,2})-(\d{1,2})/,(_,y,m,d)=>`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
     }
-    const outVat   = parseFloat(r[11])||0;
-    const outTotal = parseFloat(r[12])||0;
-    salesData.unshift({
-      id: nextId++,
-      date,
-      storeCode:   String(r[1]||''), storeName:   String(r[2]||''),
-      productCode: String(r[3]||''), productName: String(r[4]||''),
-      unit:     String(r[5]||''),
-      inQty:    parseFloat(r[6])||0,
-      outCount: parseFloat(r[7])||0,
-      supply:   parseFloat(r[8])||0,
-      outQty:   parseFloat(r[9])||0,
-      outPrice: parseFloat(r[10])||0,
-      outVat, outTotal,
-      taxType: outVat > 0 ? '과세' : '면세',
-      note: String(r[13]||''),
-    });
+    const outVat=parseFloat(r[11])||0, outTotal=parseFloat(r[12])||0;
+    salesData.unshift({id:nextId++,date,storeCode:String(r[1]||''),storeName:String(r[2]||''),productCode:String(r[3]||''),productName:String(r[4]||''),unit:String(r[5]||''),inQty:parseFloat(r[6])||0,outCount:parseFloat(r[7])||0,supply:parseFloat(r[8])||0,outQty:parseFloat(r[9])||0,outPrice:parseFloat(r[10])||0,outVat,outTotal,taxType:outVat>0?'과세':'면세',note:String(r[13]||'')});
   });
-  uploadedRows = [];
-  document.getElementById('upload-preview').style.display = 'none';
-  document.getElementById('excel-input').value = '';
-  closeModal('modal-upload');
-  applyFilter();
-  alert(`${cnt}건 업로드 완료`);
+  uploadedRows=[];
+  document.getElementById('upload-preview').style.display='none';
+  document.getElementById('excel-input').value='';
+  closeModal('modal-upload'); applyFilter();
+  alert(cnt+'건 업로드 완료');
 }
-
-// 엑셀 다운로드
-function exportExcel() {
-  const rows = [['날짜','매장코드','매장명','상품코드','상품명','단위','입수','출고횟수','공급가','출고수량','출고단가','출고부가세','출고합계금액','과세구분','비고']]; // 날짜 맨앞
-  filteredData.forEach(r => rows.push([r.date,r.storeCode,r.storeName,r.productCode,r.productName,r.unit,r.inQty,r.outCount,r.supply,r.outQty,r.outPrice,r.outVat,r.outTotal,r.taxType,r.note]));
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), '매출내역');
-  XLSX.writeFile(wb, '매출내역_' + new Date().toLocaleDateString('ko-KR') + '.xlsx');
+function exportExcel(){
+  const rows=[['날짜','매장코드','매장명','상품코드','상품명','단위','입수','출고횟수','공급가','출고수량','출고단가','출고부가세','출고합계금액','과세구분','비고']];
+  filteredData.forEach(r=>rows.push([r.date,r.storeCode,r.storeName,r.productCode,r.productName,r.unit,r.inQty,r.outCount,r.supply,r.outQty,r.outPrice,r.outVat,r.outTotal,r.taxType,r.note]));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'매출내역');
+  XLSX.writeFile(wb,'매출내역_'+new Date().toLocaleDateString('ko-KR')+'.xlsx');
 }
+function saveImage(){html2canvas(document.getElementById('content')).then(canvas=>{const a=document.createElement('a');a.download='시재보고2607_'+new Date().toLocaleDateString('ko-KR')+'.png';a.href=canvas.toDataURL();a.click();});}
+function showStoreTip(code){const s=getStoreByCode(code);if(!s)return;alert(`[${s.code}] ${s.name}\n대표자: ${s.owner||'-'}\n사업자: ${s.bizNo||'-'}\n한도: ${s.limit?s.limit.toLocaleString():'미설정'}\n상태: ${s.status}`);}
 
-// 이미지 저장
-function saveImage() {
-  html2canvas(document.getElementById('content')).then(canvas => {
-    const a = document.createElement('a');
-    a.download = '시재보고2607_' + new Date().toLocaleDateString('ko-KR') + '.png';
-    a.href = canvas.toDataURL();
-    a.click();
-  });
-}
-
-// 메뉴 전환
-function showPage(key, el) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+key).classList.add('active');
-  document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('page-title').textContent = {sales:'매출내역',account:'계좌 및 대출',deposit:'입출금내역',report:'리포트',store:'거래처관리',arpage:'미수금관리'}[key];
-if(key==='store')  { initStoreAccSelect(); storeFiltered=[...storeData]; renderStore(storeFiltered); }
-if(key==='arpage') { applyArFilter(); }
-}
-
-
-
-// ===== Firebase + Google Sheets 연동 =====
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyCwczMPx-W07iuv3YCLtbymAjoPOb-xpP4",
-  authDomain: "sijae-202607.firebaseapp.com",
-  projectId: "sijae-202607",
-  storageBucket: "sijae-202607.firebasestorage.app",
-  appId: "1:587529949522:web:408deca43deffdcc482a8b"
-};
-const GS_URL = "https://script.google.com/macros/s/AKfycbwvfGkc2gvLUFeR60-uMkD8GDcZ5xo11Bop_rEEugaFHWkFDvuYJNdlLmiX2ZnwpLsu/exec";
-
-let fbApp=null, fbDb=null, fbReady=false, gsReady=false;
-
-function setStatus(type, ok, msg) {
-  const dot = document.getElementById(type+'-dot');
-  const txt = document.getElementById(type+'-txt');
-  if(!dot||!txt) return;
-  dot.style.background = ok ? '#0F6E56' : '#D42020';
-  txt.style.color = ok ? '#0F6E56' : '#D42020';
-  txt.textContent = msg;
-}
-
-async function initFirebase() {
-  try {
-    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
-    const { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, writeBatch } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    fbApp = initializeApp(FIREBASE_CONFIG);
-    fbDb = getFirestore(fbApp);
-    window._fbFs = { collection, getDocs, setDoc, doc, deleteDoc, writeBatch };
-    fbReady = true;
-    setStatus('fb', true, 'Firebase 연결됨');
-    await loadFromFirebase();
-  } catch(e) {
-    setStatus('fb', false, 'Firebase 오류');
-    console.error(e);
-  }
-}
-
-async function loadFromFirebase() {
-  if(!fbReady) return;
-  const { collection, getDocs } = window._fbFs;
-  try {
-    const load = async (name) => {
-      const snap = await getDocs(collection(fbDb, name));
-      return snap.docs.map(d => ({...d.data(), _docId: d.id}));
-    };
-    const [sSnap, dSnap, aSnap, lSnap] = await Promise.all([
-      load('sales'), load('deposit'), load('accounts'), load('loans')
-    ]);
-    if(stSnap.length) { storeData = stSnap; storeNextId = Math.max(...storeData.map(r=>r.id||0))+1; }
-    if(sSnap.length) {
-      salesData = sSnap;
-      // ★ 최신날짜 정렬
-      salesData.sort((a,b) => b.date.localeCompare(a.date));
-      filteredData = [...salesData];
-      renderTable(filteredData);
-    }
-    if(dSnap.length) {
-      depData = dSnap;
-      // ★ depNoteTypes는 Firebase에서 덮어쓰지 않음 — 코드 기본값 유지
-    }
-    if(aSnap.length) accData = aSnap;
-    if(lSnap.length) loanData = lSnap;
-    setStatus('fb', true, `Firebase 로드완료`);
-  } catch(e) {
-    setStatus('fb', false, 'Firebase 로드오류');
-    console.error(e);
-  }
-}
-
-async function saveToFirebase(collectionName, data) {
-  if(!fbReady) return;
-  const { collection, getDocs, doc, writeBatch } = window._fbFs;
-  try {
-    // 1. 기존 컬렉션 전체 삭제
-    const existing = await getDocs(collection(fbDb, collectionName));
-    if(!existing.empty) {
-      const delBatch = writeBatch(fbDb);
-      existing.docs.forEach(d => delBatch.delete(doc(fbDb, collectionName, d.id)));
-      await delBatch.commit();
-    }
-    // 2. 현재 데이터 전체 재저장
-    if(data.length > 0) {
-      const setBatch = writeBatch(fbDb);
-      data.forEach((row, i) => {
-        const clean = JSON.parse(JSON.stringify(row));
-        setBatch.set(doc(fbDb, collectionName, String(row.id || i+1)), clean);
-      });
-      await setBatch.commit();
-    }
-    setStatus('fb', true, 'Firebase 저장완료');
-  } catch(e) {
-    setStatus('fb', false, 'Firebase 저장오류');
-    console.error(e);
-  }
-}
-
-async function saveToSheets(sheetName, data) {
-  try {
-    const headers = data.length>0 ? Object.keys(data[0]) : [];
-    const rows = data.map(r=>headers.map(h=>r[h]??''));
-    await fetch(GS_URL, {
-      method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({sheet:sheetName, action:'replace', headers, rows})
-    });
-    gsReady=true;
-    setStatus('gs', true, 'Sheets 저장완료');
-  } catch(e) {
-    setStatus('gs', false, 'Sheets 오류');
-  }
-}
-
-async function syncAll() {
-  const btn = document.querySelector('button[onclick="syncAll()"]');
-  if(btn) { btn.textContent='동기화 중...'; btn.disabled=true; }
-  await saveToFirebase('sales', salesData);
-  await saveToFirebase('deposit', depData);
-  await saveToFirebase('accounts', accData);
-  await saveToFirebase('loans', loanData);
-  await saveToFirebase('stores', storeData); // ★ 추가
-  await saveToSheets('매출내역', salesData);
-  await saveToSheets('입출금내역', depData);
-  await saveToSheets('계좌관리', accData);
-  await saveToSheets('대출관리', loanData);
-  await saveToSheets('거래처', storeData);   // ★ 추가
-  if(btn) { btn.textContent='🔄 동기화'; btn.disabled=false; }
-}
-
-// 앱 시작시 Firebase 초기화
-initFirebase();
-
-
-// ===== 매출계산서발행 =====
-function switchSalesTab(tab, el) {
-  ['sales-daily','sales-invoice'].forEach(t=>{
-    const el2=document.getElementById(t);
-    if(el2) el2.style.display = t===tab?'block':'none';
-  });
+// ===== 매출계산서 =====
+function switchSalesTab(tab,el){
+  ['sales-daily','sales-invoice'].forEach(t=>{document.getElementById(t).style.display=t===tab?'block':'none';});
   document.querySelectorAll('#page-sales .acc-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   if(tab==='sales-invoice') applyInvoiceFilter();
 }
-
-function applyInvoiceFilter() {
-  const start   = document.getElementById('inv-f-start').value;
-  const end     = document.getElementById('inv-f-end').value;
-  const type    = document.getElementById('inv-f-type').value;
-  const tax     = document.getElementById('inv-f-tax').value;
-  const keyword = document.getElementById('inv-f-keyword').value.trim().toLowerCase();
-
-  let data = salesData.filter(r => {
-    if(start && r.date < start) return false;
-    if(end   && r.date > end)   return false;
-    if(tax   && r.taxType !== tax) return false;
-    if(keyword) {
-      const match = r.storeName.toLowerCase().includes(keyword) ||
-                    r.storeCode.toLowerCase().includes(keyword) ||
-                    r.productName.toLowerCase().includes(keyword) ||
-                    r.productCode.toLowerCase().includes(keyword);
-      if(!match) return false;
-    }
+function applyInvoiceFilter(){
+  const start=document.getElementById('inv-f-start').value, end=document.getElementById('inv-f-end').value;
+  const type=document.getElementById('inv-f-type').value, tax=document.getElementById('inv-f-tax').value;
+  const keyword=document.getElementById('inv-f-keyword').value.trim().toLowerCase();
+  let data=salesData.filter(r=>{
+    if(start&&r.date<start)return false; if(end&&r.date>end)return false;
+    if(tax&&r.taxType!==tax)return false;
+    if(keyword&&!r.storeName.toLowerCase().includes(keyword)&&!r.storeCode.toLowerCase().includes(keyword)&&!r.productName.toLowerCase().includes(keyword)&&!r.productCode.toLowerCase().includes(keyword))return false;
     return true;
   });
-
-  // 카드 업데이트
-  const taxable = data.filter(r=>r.taxType==='과세');
-  const exempt  = data.filter(r=>r.taxType==='면세');
-  document.getElementById('inv-taxable').textContent     = '₩'+taxable.reduce((s,r)=>s+r.outTotal,0).toLocaleString();
-  document.getElementById('inv-taxable-cnt').textContent = taxable.length+'건';
-  document.getElementById('inv-exempt').textContent      = '₩'+exempt.reduce((s,r)=>s+r.outTotal,0).toLocaleString();
-  document.getElementById('inv-exempt-cnt').textContent  = exempt.length+'건';
-  document.getElementById('inv-vat').textContent         = '₩'+data.reduce((s,r)=>s+r.outVat,0).toLocaleString();
-  document.getElementById('inv-total').textContent       = '₩'+data.reduce((s,r)=>s+r.outTotal,0).toLocaleString();
-  document.getElementById('inv-total-cnt').textContent   = data.length+'건';
-
-  if(type==='store') renderInvoiceByStore(data);
-  else renderInvoiceByProduct(data);
+  const taxable=data.filter(r=>r.taxType==='과세'), exempt=data.filter(r=>r.taxType==='면세');
+  document.getElementById('inv-taxable').textContent='₩'+taxable.reduce((s,r)=>s+(r.outTotal||0),0).toLocaleString();
+  document.getElementById('inv-taxable-cnt').textContent=taxable.length+'건';
+  document.getElementById('inv-exempt').textContent='₩'+exempt.reduce((s,r)=>s+(r.outTotal||0),0).toLocaleString();
+  document.getElementById('inv-exempt-cnt').textContent=exempt.length+'건';
+  document.getElementById('inv-vat').textContent='₩'+data.reduce((s,r)=>s+(r.outVat||0),0).toLocaleString();
+  document.getElementById('inv-total').textContent='₩'+data.reduce((s,r)=>s+(r.outTotal||0),0).toLocaleString();
+  document.getElementById('inv-total-cnt').textContent=data.length+'건';
+  if(type==='store') renderInvoiceByStore(data); else renderInvoiceByProduct(data);
   closeInvDetail();
 }
-
-function renderInvoiceByStore(data) {
-  document.getElementById('inv-table-title').textContent = '매장별 과세/면세 요약';
-  document.getElementById('inv-thead-row').innerHTML = `
-    <th>매장코드</th><th>매장명</th><th>과세구분</th>
-    <th class="num">품목수</th><th class="num">공급가 합계</th>
-    <th class="num">부가세 합계</th><th class="num">합계금액</th><th>상세</th>`;
-
-  // 매장별 × 과세구분 그룹핑
-  const map = {};
-  data.forEach(r => {
-    const key = r.storeCode + '||' + r.taxType;
-    if(!map[key]) map[key] = {storeCode:r.storeCode, storeName:r.storeName, taxType:r.taxType, items:[]};
-    map[key].items.push(r);
+function renderInvoiceByStore(data){
+  document.getElementById('inv-table-title').textContent='매장별 과세/면세 요약';
+  document.getElementById('inv-thead-row').innerHTML='<th>매장코드</th><th>매장명</th><th>과세구분</th><th class="num">품목수</th><th class="num">공급가 합계</th><th class="num">부가세 합계</th><th class="num">합계금액</th><th>상세</th>';
+  const map={};
+  data.forEach(r=>{const key=r.storeCode+'||'+r.taxType;if(!map[key])map[key]={storeCode:r.storeCode,storeName:r.storeName,taxType:r.taxType,items:[]};map[key].items.push(r);});
+  const tbody=document.getElementById('inv-tbody');tbody.innerHTML='';
+  Object.values(map).sort((a,b)=>a.storeCode.localeCompare(b.storeCode)).forEach(g=>{
+    const supply=g.items.reduce((s,r)=>s+(r.supply||0),0),vat=g.items.reduce((s,r)=>s+(r.outVat||0),0),total=g.items.reduce((s,r)=>s+(r.outTotal||0),0);
+    const badge=g.taxType==='과세'?'<span class="tax-badge tax-y">과세</span>':'<span class="tax-badge tax-n">면세</span>';
+    const key=g.storeCode+'||'+g.taxType;
+    tbody.innerHTML+=`<tr style="cursor:pointer;" onclick="showInvDetail('store','${key}','${g.storeName} - ${g.taxType}')"><td>${g.storeCode}</td><td>${g.storeName}</td><td>${badge}</td><td class="num">${g.items.length}가지</td><td class="num">${supply.toLocaleString()}</td><td class="num">${vat.toLocaleString()}</td><td class="num" style="font-weight:600;">₩${total.toLocaleString()}</td><td><span style="font-size:11px;color:#2563eb;">상세보기 ▼</span></td></tr>`;
   });
-
-  const tbody = document.getElementById('inv-tbody');
-  tbody.innerHTML = '';
-  Object.values(map).sort((a,b)=>a.storeCode.localeCompare(b.storeCode)).forEach(g => {
-    const supply = g.items.reduce((s,r)=>s+r.supply,0);
-    const vat    = g.items.reduce((s,r)=>s+r.outVat,0);
-    const total  = g.items.reduce((s,r)=>s+r.outTotal,0);
-    const taxBadge = g.taxType==='과세'
-      ? `<span class="tax-badge tax-y">과세</span>`
-      : `<span class="tax-badge tax-n">면세</span>`;
-    const key = g.storeCode+'||'+g.taxType;
-    tbody.innerHTML += `<tr style="cursor:pointer;" onclick="showInvDetail('store','${key}','${g.storeName} - ${g.taxType}')">
-      <td>${g.storeCode}</td><td>${g.storeName}</td><td>${taxBadge}</td>
-      <td class="num">${g.items.length}가지</td>
-      <td class="num">${supply.toLocaleString()}</td>
-      <td class="num">${vat.toLocaleString()}</td>
-      <td class="num" style="font-weight:600;">₩${total.toLocaleString()}</td>
-      <td><span style="font-size:11px;color:#2563eb;cursor:pointer;">상세보기 ▼</span></td>
-    </tr>`;
-  });
-
-  // 저장용
-  window._invMap = map;
-  window._invType = 'store';
+  window._invMap=map;
 }
-
-function renderInvoiceByProduct(data) {
-  document.getElementById('inv-table-title').textContent = '품목별 과세/면세 요약';
-  document.getElementById('inv-thead-row').innerHTML = `
-    <th>상품코드</th><th>상품명</th><th>과세구분</th>
-    <th class="num">거래수</th><th class="num">총출고수량</th>
-    <th class="num">공급가 합계</th><th class="num">부가세 합계</th><th class="num">합계금액</th><th>상세</th>`;
-
-  const map = {};
-  data.forEach(r => {
-    const key = r.productCode + '||' + r.taxType;
-    if(!map[key]) map[key] = {productCode:r.productCode, productName:r.productName, taxType:r.taxType, items:[]};
-    map[key].items.push(r);
+function renderInvoiceByProduct(data){
+  document.getElementById('inv-table-title').textContent='품목별 과세/면세 요약';
+  document.getElementById('inv-thead-row').innerHTML='<th>상품코드</th><th>상품명</th><th>과세구분</th><th class="num">거래수</th><th class="num">총출고수량</th><th class="num">공급가 합계</th><th class="num">부가세 합계</th><th class="num">합계금액</th><th>상세</th>';
+  const map={};
+  data.forEach(r=>{const key=r.productCode+'||'+r.taxType;if(!map[key])map[key]={productCode:r.productCode,productName:r.productName,taxType:r.taxType,items:[]};map[key].items.push(r);});
+  const tbody=document.getElementById('inv-tbody');tbody.innerHTML='';
+  Object.values(map).sort((a,b)=>a.productCode.localeCompare(b.productCode)).forEach(g=>{
+    const qty=g.items.reduce((s,r)=>s+(r.outQty||0),0),supply=g.items.reduce((s,r)=>s+(r.supply||0),0),vat=g.items.reduce((s,r)=>s+(r.outVat||0),0),total=g.items.reduce((s,r)=>s+(r.outTotal||0),0);
+    const badge=g.taxType==='과세'?'<span class="tax-badge tax-y">과세</span>':'<span class="tax-badge tax-n">면세</span>';
+    const key=g.productCode+'||'+g.taxType;
+    tbody.innerHTML+=`<tr style="cursor:pointer;" onclick="showInvDetail('product','${key}','${g.productName} - ${g.taxType}')"><td>${g.productCode}</td><td>${g.productName}</td><td>${badge}</td><td class="num">${g.items.length}건</td><td class="num">${qty.toLocaleString()}</td><td class="num">${supply.toLocaleString()}</td><td class="num">${vat.toLocaleString()}</td><td class="num" style="font-weight:600;">₩${total.toLocaleString()}</td><td><span style="font-size:11px;color:#2563eb;">상세보기 ▼</span></td></tr>`;
   });
-
-  const tbody = document.getElementById('inv-tbody');
-  tbody.innerHTML = '';
-  Object.values(map).sort((a,b)=>a.productCode.localeCompare(b.productCode)).forEach(g => {
-    const qty    = g.items.reduce((s,r)=>s+r.outQty,0);
-    const supply = g.items.reduce((s,r)=>s+r.supply,0);
-    const vat    = g.items.reduce((s,r)=>s+r.outVat,0);
-    const total  = g.items.reduce((s,r)=>s+r.outTotal,0);
-    const taxBadge = g.taxType==='과세'
-      ? `<span class="tax-badge tax-y">과세</span>`
-      : `<span class="tax-badge tax-n">면세</span>`;
-    const key = g.productCode+'||'+g.taxType;
-    tbody.innerHTML += `<tr style="cursor:pointer;" onclick="showInvDetail('product','${key}','${g.productName} - ${g.taxType}')">
-      <td>${g.productCode}</td><td>${g.productName}</td><td>${taxBadge}</td>
-      <td class="num">${g.items.length}건</td>
-      <td class="num">${qty.toLocaleString()}</td>
-      <td class="num">${supply.toLocaleString()}</td>
-      <td class="num">${vat.toLocaleString()}</td>
-      <td class="num" style="font-weight:600;">₩${total.toLocaleString()}</td>
-      <td><span style="font-size:11px;color:#2563eb;cursor:pointer;">상세보기 ▼</span></td>
-    </tr>`;
-  });
-
-  window._invMap = map;
-  window._invType = 'product';
+  window._invMap=map;
 }
-
-function showInvDetail(type, key, title) {
-  const map = window._invMap;
-  const g = map[key];
-  if(!g) return;
-  document.getElementById('inv-detail-title').textContent = '📋 ' + title + ' 세부내역';
-  const tbody = document.getElementById('inv-detail-tbody');
-  tbody.innerHTML = '';
-  g.items.forEach(r => {
-    tbody.innerHTML += `<tr>
-      <td>${r.date}</td><td>${r.storeCode}</td><td>${r.storeName}</td>
-      <td>${r.productCode}</td><td>${r.productName}</td>
-      <td class="num">${r.outQty.toLocaleString()}</td>
-      <td class="num">${r.outPrice.toLocaleString()}</td>
-      <td class="num">${r.supply.toLocaleString()}</td>
-      <td class="num">${r.outVat.toLocaleString()}</td>
-      <td class="num" style="font-weight:600;">₩${r.outTotal.toLocaleString()}</td>
-      <td><span class="tax-badge ${r.taxType==='과세'?'tax-y':'tax-n'}">${r.taxType}</span></td>
-    </tr>`;
-  });
-  // 합계행
-  const totSupply = g.items.reduce((s,r)=>s+r.supply,0);
-  const totVat    = g.items.reduce((s,r)=>s+r.outVat,0);
-  const totTotal  = g.items.reduce((s,r)=>s+r.outTotal,0);
-  tbody.innerHTML += `<tr style="background:#f9f9f9;font-weight:600;">
-    <td colspan="7" style="padding:10px 12px;">합계</td>
-    <td class="num" style="padding:10px 12px;">${totSupply.toLocaleString()}</td>
-    <td class="num" style="padding:10px 12px;">${totVat.toLocaleString()}</td>
-    <td class="num" style="padding:10px 12px;">₩${totTotal.toLocaleString()}</td>
-    <td></td>
-  </tr>`;
-  document.getElementById('inv-detail-panel').style.display = 'block';
+function showInvDetail(type,key,title){
+  const g=window._invMap[key];if(!g)return;
+  document.getElementById('inv-detail-title').textContent='📋 '+title+' 세부내역';
+  const tbody=document.getElementById('inv-detail-tbody');tbody.innerHTML='';
+  g.items.forEach(r=>{tbody.innerHTML+=`<tr><td>${r.date}</td><td>${r.storeCode}</td><td>${r.storeName}</td><td>${r.productCode}</td><td>${r.productName}</td><td class="num">${(r.outQty||0).toLocaleString()}</td><td class="num">${(r.outPrice||0).toLocaleString()}</td><td class="num">${(r.supply||0).toLocaleString()}</td><td class="num">${(r.outVat||0).toLocaleString()}</td><td class="num" style="font-weight:600;">₩${(r.outTotal||0).toLocaleString()}</td><td><span class="tax-badge ${r.taxType==='과세'?'tax-y':'tax-n'}">${r.taxType}</span></td></tr>`;});
+  const tS=g.items.reduce((s,r)=>s+(r.supply||0),0),tV=g.items.reduce((s,r)=>s+(r.outVat||0),0),tT=g.items.reduce((s,r)=>s+(r.outTotal||0),0);
+  tbody.innerHTML+=`<tr style="background:#f9f9f9;font-weight:600;"><td colspan="7" style="padding:10px 12px;">합계</td><td class="num" style="padding:10px 12px;">${tS.toLocaleString()}</td><td class="num" style="padding:10px 12px;">${tV.toLocaleString()}</td><td class="num" style="padding:10px 12px;">₩${tT.toLocaleString()}</td><td></td></tr>`;
+  document.getElementById('inv-detail-panel').style.display='block';
   document.getElementById('inv-detail-panel').scrollIntoView({behavior:'smooth'});
 }
-
-function closeInvDetail() {
-  document.getElementById('inv-detail-panel').style.display = 'none';
-}
-
-function resetInvoiceFilter() {
-  document.getElementById('inv-f-start').value   = '2026-06-01';
-  document.getElementById('inv-f-end').value     = '2026-06-30';
-  document.getElementById('inv-f-type').value    = 'store';
-  document.getElementById('inv-f-tax').value     = '';
-  document.getElementById('inv-f-keyword').value = '';
-  applyInvoiceFilter();
-}
-
-function exportInvoiceExcel() {
-  const rows = [['매장코드','매장명','상품코드','상품명','날짜','출고수량','출고단가','공급가','부가세','합계금액','과세구분']];
-  const start = document.getElementById('inv-f-start').value;
-  const end   = document.getElementById('inv-f-end').value;
-  salesData.filter(r=>r.date>=start&&r.date<=end).forEach(r=>{
-    rows.push([r.storeCode,r.storeName,r.productCode,r.productName,r.date,r.outQty,r.outPrice,r.supply,r.outVat,r.outTotal,r.taxType]);
-  });
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'매출계산서');
+function closeInvDetail(){document.getElementById('inv-detail-panel').style.display='none';}
+function resetInvoiceFilter(){document.getElementById('inv-f-start').value='2026-06-01';document.getElementById('inv-f-end').value='2026-06-30';document.getElementById('inv-f-type').value='store';document.getElementById('inv-f-tax').value='';document.getElementById('inv-f-keyword').value='';applyInvoiceFilter();}
+function exportInvoiceExcel(){
+  const rows=[['매장코드','매장명','상품코드','상품명','날짜','출고수량','출고단가','공급가','부가세','합계금액','과세구분']];
+  const start=document.getElementById('inv-f-start').value, end=document.getElementById('inv-f-end').value;
+  salesData.filter(r=>r.date>=start&&r.date<=end).forEach(r=>rows.push([r.storeCode,r.storeName,r.productCode,r.productName,r.date,r.outQty,r.outPrice,r.supply,r.outVat,r.outTotal,r.taxType]));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'매출계산서');
   XLSX.writeFile(wb,'매출계산서_'+new Date().toLocaleDateString('ko-KR')+'.xlsx');
 }
 
-// ===== 리포트 =====
-function applyRptFilter() {
-  const start  = document.getElementById('rpt-f-start').value;
-  const end    = document.getElementById('rpt-f-end').value;
-  const menu   = document.getElementById('rpt-f-menu').value;
-
-  let rows = [];
-
-  // 매출관리 데이터
-  if(menu==='all'||menu==='sales') {
-    salesData.forEach(r => {
-      if(r.date>=start && r.date<=end) {
-        rows.push({
-          date:r.date, section:'매출관리',
-          account: r.storeCode ? '가맹점 매출' : '기타 매출',
-          target: r.storeName||'-',
-          inAmt: r.outTotal, outAmt: 0, amt: r.outTotal, note: r.productName
-        });
-      }
-    });
-  }
-
-  // 예금관리 데이터
-  if(menu==='all'||menu==='deposit') {
-    depData.forEach(r => {
-      if(r.date>=start && r.date<=end) {
-        const isFr = r.noteType==='가맹점 입금';
-        rows.push({
-          date:r.date, section:'예금관리',
-          account: r.noteType||'기타 입금',
-          target: r.accNo||'-',
-          inAmt: r.inAmt, outAmt: r.outAmt,
-          amt: r.inAmt - r.outAmt, note: r.detail
-        });
-      }
-    });
-  }
-
-  // 계좌/대출 데이터
-  if(menu==='all'||menu==='account') {
-    accData.forEach(r => {
-      rows.push({
-        date:'-', section:'계좌관리',
-        account:'계좌잔액',
-        target: r.alias||r.bank,
-        inAmt:r.curAmt, outAmt:0, amt:r.curAmt, note:r.accNo
-      });
-    });
-    loanData.forEach(r => {
-      rows.push({
-        date:'-', section:'대출관리',
-        account:'대출잔액',
-        target: r.bank,
-        inAmt:0, outAmt:r.balance, amt:-r.balance, note:r.collateral
-      });
-    });
-  }
-
-  rows.sort((a,b)=>a.date.localeCompare(b.date));
-  renderRpt(rows, start, end);
+// ===== 입출금내역 =====
+function initDepSelects(){
+  const codeEl=document.getElementById('dep-f-code'), typeEl=document.getElementById('dep-f-type');
+  if(!codeEl||!typeEl)return;
+  codeEl.innerHTML='<option value="">전체 계좌</option>'+depAccounts.map(a=>`<option value="${a.code}">${a.code} ${a.accNo}${a.alias?' ('+a.alias+')':''}</option>`).join('');
+  typeEl.innerHTML='<option value="">비고유형 전체</option>'+depNoteTypes.map(t=>`<option value="${t.name}">${t.name}</option>`).join('');
 }
 
-function renderRpt(rows, start, end) {
-  // 카드 집계
-  const salesFr  = rows.filter(r=>r.account==='가맹점 매출');
-  const salesEtc = rows.filter(r=>r.account==='기타 매출');
-  const inFr     = rows.filter(r=>r.account==='가맹점 입금');
-  const inEtc    = rows.filter(r=>r.noteType!=='가맹점 입금'&&r.section==='예금관리'&&r.account!=='가맹점 입금');
-  const finalBal = depData.reduce((s,r)=>{ const last=depData.filter(x=>x.code===r.code).sort((a,b)=>b.date.localeCompare(a.date))[0]; return last&&last.code===r.code?s:s; },0);
-  const depFinal = (()=>{const codes=[...new Set(depData.map(r=>r.code))];return codes.reduce((s,code)=>{const items=depData.filter(x=>x.code===code).sort((a,b)=>b.date.localeCompare(a.date));return s+(items[0]?items[0].finalBal:0);},0);})();
-
-  document.getElementById('rpt-sales-fr').textContent     = '₩'+salesFr.reduce((s,r)=>s+r.amt,0).toLocaleString();
-  document.getElementById('rpt-sales-fr-cnt').textContent = salesFr.length+'건';
-  document.getElementById('rpt-sales-etc').textContent    = '₩'+salesEtc.reduce((s,r)=>s+r.amt,0).toLocaleString();
-  document.getElementById('rpt-sales-etc-cnt').textContent= salesEtc.length+'건';
-  document.getElementById('rpt-in-fr').textContent        = '₩'+inFr.reduce((s,r)=>s+r.inAmt,0).toLocaleString();
-  document.getElementById('rpt-in-fr-cnt').textContent    = inFr.length+'건';
-  document.getElementById('rpt-in-etc').textContent       = '₩'+rows.filter(r=>r.section==='예금관리'&&r.account!=='가맹점 입금').reduce((s,r)=>s+r.inAmt,0).toLocaleString();
-  document.getElementById('rpt-in-etc-cnt').textContent   = rows.filter(r=>r.section==='예금관리'&&r.account!=='가맹점 입금').length+'건';
-  document.getElementById('rpt-final').textContent        = '₩'+depFinal.toLocaleString();
-
-  // 계정별 합계
-  const accMap = {};
-  rows.forEach(r => {
-    const key = r.section+'||'+r.account;
-    if(!accMap[key]) accMap[key]={section:r.section,account:r.account,cnt:0,inAmt:0,outAmt:0,amt:0};
-    accMap[key].cnt++;
-    accMap[key].inAmt+=r.inAmt;
-    accMap[key].outAmt+=r.outAmt;
-    accMap[key].amt+=r.amt;
-  });
-  const accTbody = document.getElementById('rpt-acc-tbody');
-  accTbody.innerHTML='';
-  Object.values(accMap).forEach(g=>{
-    accTbody.innerHTML+=`<tr>
-      <td><span class="status-badge status-confirm" style="font-size:10px;">${g.section}</span></td>
-      <td style="font-weight:500;">${g.account}</td>
-      <td class="num">${g.cnt}건</td>
-      <td class="num" style="color:#2563eb;">${g.inAmt>0?'₩'+g.inAmt.toLocaleString():'-'}</td>
-      <td class="num" style="color:#D42020;">${g.outAmt>0?'₩'+g.outAmt.toLocaleString():'-'}</td>
-      <td class="num" style="font-weight:600;">₩${g.amt.toLocaleString()}</td>
-    </tr>`;
-  });
-  // 합계행
-  const totIn=Object.values(accMap).reduce((s,g)=>s+g.inAmt,0);
-  const totOut=Object.values(accMap).reduce((s,g)=>s+g.outAmt,0);
-  const totAmt=Object.values(accMap).reduce((s,g)=>s+g.amt,0);
-  accTbody.innerHTML+=`<tr style="background:#f9f9f9;font-weight:600;">
-    <td colspan="2" style="padding:10px 12px;">합계</td>
-    <td class="num" style="padding:10px 12px;">${rows.length}건</td>
-    <td class="num" style="padding:10px 12px;color:#2563eb;">₩${totIn.toLocaleString()}</td>
-    <td class="num" style="padding:10px 12px;color:#D42020;">₩${totOut.toLocaleString()}</td>
-    <td class="num" style="padding:10px 12px;">₩${totAmt.toLocaleString()}</td>
-  </tr>`;
-
-  // 전체 거래내역
-  const detailTbody = document.getElementById('rpt-detail-tbody');
-  detailTbody.innerHTML='';
-  rows.forEach(r=>{
-    detailTbody.innerHTML+=`<tr>
-      <td>${r.date}</td>
-      <td><span class="status-badge status-confirm" style="font-size:10px;">${r.section}</span></td>
-      <td>${r.account}</td>
-      <td>${r.target}</td>
-      <td class="num" style="color:#2563eb;">${r.inAmt>0?'₩'+r.inAmt.toLocaleString():'-'}</td>
-      <td class="num" style="color:#D42020;">${r.outAmt>0?'₩'+r.outAmt.toLocaleString():'-'}</td>
-      <td class="num" style="font-weight:500;">₩${r.amt.toLocaleString()}</td>
-      <td style="font-size:11px;">${r.note}</td>
-    </tr>`;
-  });
-  document.getElementById('rpt-count').textContent=`(${rows.length}건)`;
+function getNoteTypeBadge(noteType){
+  if(!noteType)return '-';
+  const nt=depNoteTypes.find(x=>x.name===noteType);
+  const color=nt?nt.color:'#888', bg=nt?nt.color+'22':'#eee', border=nt?nt.color+'55':'#ddd';
+  return `<span class="tax-badge" style="background:${bg};color:${color};border:0.5px solid ${border};">${noteType}</span>`;
 }
 
-function resetRptFilter(){
-  document.getElementById('rpt-f-start').value='2026-06-01';
-  document.getElementById('rpt-f-end').value='2026-06-30';
-  document.getElementById('rpt-f-menu').value='all';
-  document.getElementById('rpt-acc-tbody').innerHTML='';
-  document.getElementById('rpt-detail-tbody').innerHTML='';
-  ['rpt-sales-fr','rpt-sales-etc','rpt-in-fr','rpt-in-etc','rpt-final'].forEach(id=>document.getElementById(id).textContent='₩0');
-}
-
-function exportRptExcel(){
-  const rows=[['일자','구분','계정과목','거래처/매장','입금','출금','금액','비고']];
-  document.querySelectorAll('#rpt-detail-tbody tr').forEach(tr=>{
-    const tds=[...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
-    rows.push(tds);
-  });
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'리포트');
-  XLSX.writeFile(wb,'리포트_'+new Date().toLocaleDateString('ko-KR')+'.xlsx');
-}
-
-// 초기 렌더
-salesData.sort((a,b) => b.date.localeCompare(a.date));
-filteredData = [...salesData];
-renderTable(filteredData);
-
-
-// ===== 예금관리 =====
-let depAccounts = [
-  {code:'ACC001', bank:'기업', accNo:'148-023233-04-166'},
-  {code:'ACC002', bank:'기업', accNo:'148-023233-04-106'},
-  {code:'ACC003', bank:'기업', accNo:'148-023233-04-021'},
-  {code:'ACC004', bank:'기업', accNo:'058-0457347-01-011'},
-  {code:'ACC005', bank:'기업', accNo:'148-023233-04-045'},
-  {code:'ACC006', bank:'기업', accNo:'148-023233-01-063'},
-  {code:'ACC007', bank:'기업', accNo:'148-023233-04-077'},
-  {code:'ACC008', bank:'기업', accNo:'148-023233-04-110'},
-  {code:'ACC009', bank:'기업', accNo:'148-023233-04-134'},
-  {code:'ACC010', bank:'기업', accNo:'148-023233-04-141'},
-  {code:'ACC011', bank:'기업', accNo:'148-023233-04-159'},
-  {code:'ACC012', bank:'기업', accNo:'148-023233-04-127'},
-  {code:'ACC013', bank:'기업', accNo:'148-023233-04-095'},
-  {code:'ACC014', bank:'기업', accNo:'148-023233-04-181'},
-  {code:'ACC015', bank:'기업', accNo:'148-023233-04-173'},
-  {code:'ACC016', bank:'하나', accNo:'581-910058-20904'},
-];
-
-let depNoteTypes = [
-  {name:'가맹점 입금', color:'#2563eb'},
-  {name:'결산이자',    color:'#0F6E56'},
-  {name:'기타',        color:'#888'}
-];
-
-let depData = [
-  {id:1, code:'ACC001', bank:'기업', accNo:'148-023233-04-166', noteType:'가맹점 입금', prevBal:1790183, inAmt:8572158, outAmt:0, finalBal:10362341, detail:'가맹점 입금', note:'-', date:'2026-06-21'},
-  {id:2, code:'ACC001', bank:'기업', accNo:'148-023233-04-166', noteType:'결산이자', prevBal:10362341, inAmt:2581, outAmt:0, finalBal:10364922, detail:'결산이자', note:'-', date:'2026-06-21'},
-  {id:3, code:'ACC002', bank:'기업', accNo:'148-023233-04-106', noteType:'', prevBal:20465335, inAmt:0, outAmt:0, finalBal:20465335, detail:'-', note:'-', date:'2026-06-21'},
-  {id:4, code:'ACC003', bank:'기업', accNo:'148-023233-04-021', noteType:'결산이자', prevBal:3374, inAmt:3, outAmt:0, finalBal:3377, detail:'결산이자', note:'-', date:'2026-06-21'},
-  {id:5, code:'ACC004', bank:'기업', accNo:'058-0457347-01-011', noteType:'', prevBal:32, inAmt:0, outAmt:0, finalBal:32, detail:'-', note:'-', date:'2026-06-21'},
-  {id:6, code:'ACC005', bank:'기업', accNo:'148-023233-04-045', noteType:'결산이자', prevBal:168, inAmt:24, outAmt:0, finalBal:192, detail:'결산이자', note:'-', date:'2026-06-21'},
-  {id:7, code:'ACC006', bank:'기업', accNo:'148-023233-01-063', noteType:'', prevBal:15, inAmt:0, outAmt:0, finalBal:15, detail:'-', note:'-', date:'2026-06-21'},
-  {id:8, code:'ACC007', bank:'기업', accNo:'148-023233-04-077', noteType:'결산이자', prevBal:7726, inAmt:46, outAmt:0, finalBal:7772, detail:'결산이자', note:'-', date:'2026-06-21'},
-  {id:9, code:'ACC008', bank:'기업', accNo:'148-023233-04-110', noteType:'결산이자', prevBal:3503165, inAmt:39, outAmt:0, finalBal:3503204, detail:'결산이자', note:'-', date:'2026-06-21'},
-  {id:10, code:'ACC009', bank:'기업', accNo:'148-023233-04-134', noteType:'결산이자', prevBal:0, inAmt:17, outAmt:0, finalBal:17, detail:'결산이자', note:'-', date:'2026-06-21'},
-  {id:11, code:'ACC010', bank:'기업', accNo:'148-023233-04-141', noteType:'결산이자', prevBal:34, inAmt:78, outAmt:0, finalBal:112, detail:'결산이자', note:'-', date:'2026-06-21'},
-  {id:12, code:'ACC011', bank:'기업', accNo:'148-023233-04-159', noteType:'결산이자', prevBal:31303, inAmt:9, outAmt:0, finalBal:31312, detail:'결산이자', note:'-', date:'2026-06-21'},
-  {id:13, code:'ACC012', bank:'기업', accNo:'148-023233-04-127', noteType:'결산이자', prevBal:29537482, inAmt:4689, outAmt:0, finalBal:29542171, detail:'결산이자', note:'-', date:'2026-06-21'},
-  {id:14, code:'ACC013', bank:'기업', accNo:'148-023233-04-095', noteType:'', prevBal:111298, inAmt:0, outAmt:0, finalBal:111298, detail:'-', note:'-', date:'2026-06-21'},
-  {id:15, code:'ACC014', bank:'기업', accNo:'148-023233-04-181', noteType:'결산이자', prevBal:8000000, inAmt:1016, outAmt:0, finalBal:8001016, detail:'결산이자', note:'-', date:'2026-06-21'},
-  {id:16, code:'ACC015', bank:'기업', accNo:'148-023233-04-173', noteType:'결산이자', prevBal:40848, inAmt:24, outAmt:0, finalBal:40872, detail:'결산이자', note:'-', date:'2026-06-21'},
-  {id:17, code:'ACC016', bank:'하나', accNo:'581-910058-20904', noteType:'', prevBal:4174660, inAmt:0, outAmt:0, finalBal:4174660, detail:'-', note:'-', date:'2026-06-21'},
-];
-let depNextId=18, editDepId=null, depFiltered=[...depData], depUploadRows=[];
-
-function initDepSelects() {
-  const codeEl = document.getElementById('dep-f-code');
-  const typeEl = document.getElementById('dep-f-type');
-  if(!codeEl||!typeEl) return;
-  // ★ 계좌번호 옆 계좌별명 추가
-  codeEl.innerHTML = '<option value="">전체 계좌</option>' + depAccounts.map(a=>
-    `<option value="${a.code}">${a.code} ${a.accNo}${a.alias ? ' ('+a.alias+')' : ''}</option>`
-  ).join('');
-  typeEl.innerHTML = '<option value="">비고유형 전체</option>' + depNoteTypes.map(t=>
-    `<option value="${t.name}">${t.name}</option>`
-  ).join('');
-}
-
-function renderDep(data) {
-  const tbody = document.getElementById('dep-tbody');
-  const tfoot = document.getElementById('dep-tfoot');
-  if(!tbody) return;
-  tbody.innerHTML = '';
-  data.forEach(r => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
+function renderDep(data){
+  const tbody=document.getElementById('dep-tbody'), tfoot=document.getElementById('dep-tfoot');
+  if(!tbody)return;
+  tbody.innerHTML='';
+  data.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
       <td><input type="checkbox" class="dep-chk" value="${r.id}"></td>
-      <td style="font-size:11px;">${r.accNo}</td>
-<td style="font-size:11px;color:#2563eb;font-weight:500;">${r.storeCode||'-'}</td>
-<td style="font-size:11px;">${r.storeName||'-'}</td>
-<td>${(()=>{...비고유형...})()}</td>
+      <td style="font-size:11px;color:#888;">${r.code||''}</td>
+      <td>${r.bank||''}</td>
+      <td style="font-size:11px;">${r.accNo||''}</td>
+      <td style="font-size:11px;color:#2563eb;font-weight:500;">${r.storeCode||'-'}</td>
+      <td style="font-size:11px;">${r.storeName||'-'}</td>
+      <td>${getNoteTypeBadge(r.noteType)}</td>
+      <td class="num">${(r.prevBal||0).toLocaleString()}</td>
       <td class="num" style="color:#2563eb;font-weight:500;">${r.inAmt>0?r.inAmt.toLocaleString():'-'}</td>
       <td class="num" style="color:#D42020;font-weight:500;">${r.outAmt>0?r.outAmt.toLocaleString():'-'}</td>
-      <td class="num" style="color:#0F6E56;font-weight:500;">${r.finalBal.toLocaleString()}</td>
-      <td style="font-size:11px;">${r.detail}</td>
-      <td style="font-size:11px;">${r.note}</td>
-      <td style="font-size:11px;">${r.date}</td>
-    `;
-    tr.ondblclick = () => openDepModal(r.id);
+      <td class="num" style="color:#0F6E56;font-weight:500;">${(r.finalBal||0).toLocaleString()}</td>
+      <td style="font-size:11px;">${r.detail||''}</td>
+      <td style="font-size:11px;">${r.note||''}</td>
+      <td style="font-size:11px;">${r.date||''}</td>`;
+    tr.ondblclick=()=>openDepModal(r.id);
     tbody.appendChild(tr);
   });
-
-  // 합계행
-  const totPrev  = data.reduce((s,r)=>s+r.prevBal,0);
-  const totIn    = data.reduce((s,r)=>s+r.inAmt,0);
-  const totOut   = data.reduce((s,r)=>s+r.outAmt,0);
-  const totFinal = data.reduce((s,r)=>s+r.finalBal,0);
-  tfoot.innerHTML = `<tr style="background:#f9f9f9;font-weight:600;font-size:12px;">
-    <td colspan="5" style="padding:10px 12px;">합계</td>
-    <td class="num" style="padding:10px 12px;">${totPrev.toLocaleString()}</td>
-    <td class="num" style="padding:10px 12px;color:#2563eb;">${totIn.toLocaleString()}</td>
-    <td class="num" style="padding:10px 12px;color:#D42020;">${totOut.toLocaleString()}</td>
-    <td class="num" style="padding:10px 12px;color:#0F6E56;">${totFinal.toLocaleString()}</td>
-    <td colspan="3"></td>
-  </tr>`;
-
-  document.getElementById('dep-count').textContent = `(${data.length}건)`;
+  const totIn=data.reduce((s,r)=>s+(r.inAmt||0),0), totOut=data.reduce((s,r)=>s+(r.outAmt||0),0), totFinal=data.reduce((s,r)=>s+(r.finalBal||0),0), totPrev=data.reduce((s,r)=>s+(r.prevBal||0),0);
+  tfoot.innerHTML=`<tr style="background:#f9f9f9;font-weight:600;font-size:12px;"><td colspan="7" style="padding:10px 12px;">합계</td><td class="num" style="padding:10px 12px;">${totPrev.toLocaleString()}</td><td class="num" style="padding:10px 12px;color:#2563eb;">${totIn.toLocaleString()}</td><td class="num" style="padding:10px 12px;color:#D42020;">${totOut.toLocaleString()}</td><td class="num" style="padding:10px 12px;color:#0F6E56;">${totFinal.toLocaleString()}</td><td colspan="3"></td></tr>`;
+  document.getElementById('dep-count').textContent=`(${data.length}건)`;
   updateDepCards(data);
 }
 
-function updateDepCards(data) {
-  const totIn    = data.reduce((s,r)=>s+r.inAmt,0);
-  const totFinal = data.reduce((s,r)=>s+r.finalBal,0);
-  const salesAmt = typeof filteredData !== 'undefined' ? filteredData.reduce((s,r)=>s+r.outTotal,0) : 0;
-  document.getElementById('dep-sales').textContent    = '₩'+salesAmt.toLocaleString();
-  document.getElementById('dep-in').textContent       = '₩'+totIn.toLocaleString();
-  document.getElementById('dep-bal').textContent      = '₩'+totFinal.toLocaleString();
-  document.getElementById('dep-in-sub').textContent   = '당일 '+data.filter(r=>r.date===new Date().toISOString().slice(0,10)).reduce((s,r)=>s+r.inAmt,0).toLocaleString()+'원';
-  document.getElementById('dep-bal-sub').textContent  = depAccounts.length+'개 계좌';
+function updateDepCards(data){
+  const totIn=data.reduce((s,r)=>s+(r.inAmt||0),0), totFinal=data.reduce((s,r)=>s+(r.finalBal||0),0);
+  const salesAmt=filteredData.reduce((s,r)=>s+(r.outTotal||0),0);
+  document.getElementById('dep-sales').textContent='₩'+salesAmt.toLocaleString();
+  document.getElementById('dep-in').textContent='₩'+totIn.toLocaleString();
+  document.getElementById('dep-bal').textContent='₩'+totFinal.toLocaleString();
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('dep-in-sub').textContent='당일 '+data.filter(r=>r.date===today).reduce((s,r)=>s+(r.inAmt||0),0).toLocaleString()+'원';
+  document.getElementById('dep-bal-sub').textContent=depAccounts.length+'개 계좌';
 }
 
-applyDepFilter
-
-function resetDepFilter() {
-  document.getElementById('dep-f-start').value = '2026-06-01';
-  document.getElementById('dep-f-end').value   = '2026-06-21';
-  document.getElementById('dep-f-code').value  = '';
-  document.getElementById('dep-f-type').value  = '';
-  depFiltered = [...depData];
+function applyDepFilter(){
+  const start=document.getElementById('dep-f-start').value, end=document.getElementById('dep-f-end').value;
+  const code=document.getElementById('dep-f-code').value, type=document.getElementById('dep-f-type').value;
+  const storeKw=(document.getElementById('dep-f-store')||{value:''}).value.trim().toLowerCase();
+  depFiltered=depData.filter(r=>{
+    if(start&&r.date<start)return false;
+    if(end&&r.date>end)return false;
+    if(code&&r.code!==code)return false;
+    if(type&&r.noteType!==type)return false;
+    if(storeKw&&!(r.storeCode||'').toLowerCase().includes(storeKw)&&!(r.storeName||'').toLowerCase().includes(storeKw))return false;
+    return true;
+  });
   renderDep(depFiltered);
 }
 
-function openDepModal(id) {
-  editDepId = id||null;
-  const r = id ? depData.find(x=>x.id===id) : null;
-  const today = new Date().toISOString().slice(0,10);
-  const accOpts = depAccounts.map(a=>`<option value="${a.code}" ${r&&r.code===a.code?'selected':''}>${a.code} - ${a.bank} ${a.accNo}</option>`).join('');
- const typeOpts = depNoteTypes.map(t=>`<option value="${t.name}" ${r&&r.noteType===t.name?'selected':''}>${t.name}</option>`).join('');
-  const html = `<div class="modal" style="width:560px;">
+function resetDepFilter(){
+  document.getElementById('dep-f-start').value='2026-06-01';
+  document.getElementById('dep-f-end').value='2026-06-30';
+  document.getElementById('dep-f-code').value='';
+  document.getElementById('dep-f-type').value='';
+  const s=document.getElementById('dep-f-store');if(s)s.value='';
+  depFiltered=[...depData]; renderDep(depFiltered);
+}
+
+function openDepModal(id){
+  editDepId=id||null;
+  const r=id?depData.find(x=>x.id===id):null;
+  const today=new Date().toISOString().slice(0,10);
+  const accOpts=depAccounts.map(a=>`<option value="${a.code}" ${r&&r.code===a.code?'selected':''}>${a.code} - ${a.bank} ${a.accNo}</option>`).join('');
+  const typeOpts=depNoteTypes.map(t=>`<option value="${t.name}" ${r&&r.noteType===t.name?'selected':''}>${t.name}</option>`).join('');
+  const html=`<div class="modal" style="width:560px;">
     <h2>${r?'내역 수정':'내역 추가'}</h2>
     <div class="form-grid">
       <div class="form-group full"><label>계좌 *</label><select id="dp-code"><option value="">선택</option>${accOpts}</select></div>
       <div class="form-group"><label>일자 *</label><input type="date" id="dp-date" value="${r?r.date:today}"></div>
       <div class="form-group"><label>비고유형</label><select id="dp-type"><option value="">없음</option>${typeOpts}</select></div>
+      <div class="form-group"><label>가맹점코드</label><input id="dp-stcode" value="${r?r.storeCode||'':''}"></div>
+      <div class="form-group"><label>가맹점명</label><input id="dp-stname" value="${r?r.storeName||'':''}"></div>
       <div class="form-group"><label>전잔액</label><input type="number" id="dp-prev" value="${r?r.prevBal:0}"></div>
       <div class="form-group"><label>입금</label><input type="number" id="dp-in" value="${r?r.inAmt:0}"></div>
       <div class="form-group"><label>출금</label><input type="number" id="dp-out" value="${r?r.outAmt:0}"></div>
       <div class="form-group"><label>최종잔액 (자동)</label><input type="number" id="dp-final" value="${r?r.finalBal:0}" readonly style="background:#f9f9f9;"></div>
-      <div class="form-group"><label>상세내역</label><input id="dp-detail" value="${r?r.detail:''}"></div>
-      <div class="form-group"><label>비고</label><input id="dp-note" value="${r?r.note:'-'}"></div>
+      <div class="form-group"><label>상세내역</label><input id="dp-detail" value="${r?r.detail||'':''}"></div>
+      <div class="form-group"><label>비고</label><input id="dp-note" value="${r?r.note||'':''}"></div>
     </div>
     <div class="modal-footer">
       <button onclick="closeAccModal()">취소</button>
@@ -1607,30 +1159,30 @@ function openDepModal(id) {
   showDynModal(html);
   ['dp-prev','dp-in','dp-out'].forEach(id=>{
     const el=document.getElementById(id);
-    if(el) el.addEventListener('input',()=>{
-      const prev=parseFloat(document.getElementById('dp-prev').value)||0;
-      const inA=parseFloat(document.getElementById('dp-in').value)||0;
-      const outA=parseFloat(document.getElementById('dp-out').value)||0;
-      document.getElementById('dp-final').value=prev+inA-outA;
+    if(el)el.addEventListener('input',()=>{
+      const p=parseFloat(document.getElementById('dp-prev').value)||0;
+      const i=parseFloat(document.getElementById('dp-in').value)||0;
+      const o=parseFloat(document.getElementById('dp-out').value)||0;
+      document.getElementById('dp-final').value=p+i-o;
     });
   });
 }
 
-function saveDepRow() {
-  const code = document.getElementById('dp-code').value;
-  const date = document.getElementById('dp-date').value;
+function saveDepRow(){
+  const code=document.getElementById('dp-code').value, date=document.getElementById('dp-date').value;
   if(!code||!date){alert('계좌와 일자를 입력해주세요.');return;}
-  const acc = depAccounts.find(a=>a.code===code)||{};
-  const row = {
-    id: editDepId||depNextId++,
-    code, bank:acc.bank||'', accNo:acc.accNo||'', date,
-    noteType: document.getElementById('dp-type').value,
-    prevBal:  parseFloat(document.getElementById('dp-prev').value)||0,
-    inAmt:    parseFloat(document.getElementById('dp-in').value)||0,
-    outAmt:   parseFloat(document.getElementById('dp-out').value)||0,
-    finalBal: parseFloat(document.getElementById('dp-final').value)||0,
-    detail:   document.getElementById('dp-detail').value,
-    note:     document.getElementById('dp-note').value,
+  const acc=depAccounts.find(a=>a.code===code)||{};
+  const row={
+    id:editDepId||depNextId++, code, bank:acc.bank||'', accNo:acc.accNo||'', date,
+    storeCode:document.getElementById('dp-stcode').value,
+    storeName:document.getElementById('dp-stname').value,
+    noteType:document.getElementById('dp-type').value,
+    prevBal:parseFloat(document.getElementById('dp-prev').value)||0,
+    inAmt:parseFloat(document.getElementById('dp-in').value)||0,
+    outAmt:parseFloat(document.getElementById('dp-out').value)||0,
+    finalBal:parseFloat(document.getElementById('dp-final').value)||0,
+    detail:document.getElementById('dp-detail').value,
+    note:document.getElementById('dp-note').value,
   };
   if(editDepId){const i=depData.findIndex(x=>x.id===editDepId);depData[i]=row;}
   else depData.unshift(row);
@@ -1639,701 +1191,285 @@ function saveDepRow() {
 
 function depToggleAll(chk){document.querySelectorAll('.dep-chk').forEach(c=>c.checked=chk.checked);}
 function getDepChecked(){return [...document.querySelectorAll('.dep-chk:checked')].map(c=>parseInt(c.value));}
-function editDepSelected(){
-  const ids=getDepChecked();
-  if(ids.length!==1){alert('수정할 항목 1건을 선택해주세요.');return;}
-  openDepModal(ids[0]);
-}
-function deleteDepSelected(){
-  const ids=getDepChecked();
-  if(!ids.length){alert('삭제할 항목을 선택해주세요.');return;}
-  if(confirm(ids.length+'건을 삭제하시겠습니까?')){
-    depData=depData.filter(r=>!ids.includes(r.id));
-    applyDepFilter();
-  }
-}
+function editDepSelected(){const ids=getDepChecked();if(ids.length!==1){alert('수정할 항목 1건을 선택해주세요.');return;}openDepModal(ids[0]);}
+function deleteDepSelected(){const ids=getDepChecked();if(!ids.length){alert('삭제할 항목을 선택해주세요.');return;}if(confirm(ids.length+'건을 삭제하시겠습니까?')){depData=depData.filter(r=>!ids.includes(r.id));applyDepFilter();}}
 
-// 계정(비고유형) 관리
-function openDepAccMgr() {
-  const items = depNoteTypes.map((t,i)=>`
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-      <input id="nt-${i}" value="${t.name}" style="flex:1;font-size:12px;border:0.5px solid #ddd;border-radius:6px;padding:6px 10px;">
-      <input type="color" id="ntc-${i}" value="${t.color}" style="width:36px;height:32px;border:0.5px solid #ddd;border-radius:6px;cursor:pointer;padding:2px;">
-      <span style="font-size:11px;padding:3px 10px;border-radius:4px;background:${t.color}22;color:${t.color};border:0.5px solid ${t.color}55;">${t.name}</span>
-      <button onclick="deleteNoteType(${i})" style="font-size:11px;padding:5px 10px;border:0.5px solid #D42020;color:#D42020;background:#fff;border-radius:6px;cursor:pointer;">삭제</button>
-    </div>`).join('');
-  const html = `<div class="modal" style="width:460px;">
-    <h2>계정(비고유형) 관리</h2>
-    <div id="note-type-list" style="margin-bottom:14px;">${items}</div>
-    <div style="display:flex;gap:8px;margin-bottom:14px;">
-      <input id="new-note-type" placeholder="새 계정 입력" style="flex:1;font-size:12px;border:0.5px solid #ddd;border-radius:6px;padding:6px 10px;">
-      <input type="color" id="new-note-color" value="#7c3aed" style="width:36px;height:32px;border:0.5px solid #ddd;border-radius:6px;cursor:pointer;padding:2px;">
-      <button onclick="addNoteType()" style="font-size:12px;padding:6px 14px;border:0.5px solid #090909;background:#090909;color:#fff;border-radius:6px;cursor:pointer;">추가</button>
-    </div>
-    <div class="modal-footer">
-      <button onclick="saveNoteTypes()">저장</button>
-      <button class="primary" onclick="closeAccModal()">닫기</button>
-    </div>
-  </div>`;
+function openDepAccMgr(){
+  const items=depNoteTypes.map((t,i)=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><input id="nt-${i}" value="${t.name}" style="flex:1;font-size:12px;border:0.5px solid #ddd;border-radius:6px;padding:6px 10px;"><input type="color" id="ntc-${i}" value="${t.color}" style="width:36px;height:32px;border:0.5px solid #ddd;border-radius:6px;cursor:pointer;padding:2px;"><span style="font-size:11px;padding:3px 10px;border-radius:4px;background:${t.color}22;color:${t.color};border:0.5px solid ${t.color}55;">${t.name}</span><button onclick="deleteNoteType(${i})" style="font-size:11px;padding:5px 10px;border:0.5px solid #D42020;color:#D42020;background:#fff;border-radius:6px;cursor:pointer;">삭제</button></div>`).join('');
+  const html=`<div class="modal" style="width:460px;"><h2>계정(비고유형) 관리</h2><div id="note-type-list" style="margin-bottom:14px;">${items}</div><div style="display:flex;gap:8px;margin-bottom:14px;"><input id="new-note-type" placeholder="새 계정 입력" style="flex:1;font-size:12px;border:0.5px solid #ddd;border-radius:6px;padding:6px 10px;"><input type="color" id="new-note-color" value="#7c3aed" style="width:36px;height:32px;border:0.5px solid #ddd;border-radius:6px;cursor:pointer;padding:2px;"><button onclick="addNoteType()" style="font-size:12px;padding:6px 14px;border:0.5px solid #090909;background:#090909;color:#fff;border-radius:6px;cursor:pointer;">추가</button></div><div class="modal-footer"><button onclick="saveNoteTypes()">저장</button><button class="primary" onclick="closeAccModal()">닫기</button></div></div>`;
   showDynModal(html);
 }
-
-function addNoteType(){
-  const val=document.getElementById('new-note-type').value.trim();
-  const col=document.getElementById('new-note-color').value;
-  if(!val) return;
-  depNoteTypes.push({name:val,color:col});
-  openDepAccMgr();
-}
+function addNoteType(){const val=document.getElementById('new-note-type').value.trim(),col=document.getElementById('new-note-color').value;if(!val)return;depNoteTypes.push({name:val,color:col});openDepAccMgr();}
 function deleteNoteType(i){depNoteTypes.splice(i,1);openDepAccMgr();}
-function saveNoteTypes(){
-  depNoteTypes=depNoteTypes.map((_,i)=>({name:document.getElementById('nt-'+i).value.trim(),color:document.getElementById('ntc-'+i).value})).filter(x=>x.name);
-  closeAccModal();
-  initDepSelects();
-}
+function saveNoteTypes(){depNoteTypes=depNoteTypes.map((_,i)=>({name:document.getElementById('nt-'+i).value.trim(),color:document.getElementById('ntc-'+i).value})).filter(x=>x.name);closeAccModal();initDepSelects();}
 
-// 엑셀 업로드
 function openDepUpload(){
-  const html=`<div class="modal" style="width:500px;">
-    <h2>예금내역 엑셀 업로드</h2>
-    <p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>매장코드</strong> / 매장명 / 일자 / 계정 / 금액 / 비고 / 수정자 / 수정일자</p>
-    <p style="font-size:11px;color:#2563eb;margin-bottom:10px;">📋 여러 시트 업로드 가능 — 각 시트의 데이터가 자동으로 통합됩니다.</p>
-    <div class="upload-area" onclick="document.getElementById('dep-xl-input').click()">
-      <div style="font-size:24px;">📂</div>
-      <p>클릭하여 엑셀 파일 선택 (.xlsx / .xls / .csv)</p>
-      <input type="file" id="dep-xl-input" accept=".xlsx,.xls,.csv" style="display:none;" onchange="previewDepExcel(this)">
-    </div>
-    <div class="upload-preview" id="dep-xl-preview"></div>
-    <div class="modal-footer">
-      <button onclick="closeAccModal()">취소</button>
-      <button class="primary" onclick="importDepExcel()">업로드 적용</button>
-    </div>
-  </div>`;
+  const html=`<div class="modal" style="width:500px;"><h2>예금내역 엑셀 업로드</h2><p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>매장코드</strong> / 매장명 / 일자 / 계정(비고유형) / 금액 / 비고 / 수정자 / 수정일자</p><p style="font-size:11px;color:#2563eb;margin-bottom:10px;">📋 여러 시트 업로드 가능 — ACC001(모계좌1) 자동 연결</p><div class="upload-area" onclick="document.getElementById('dep-xl-input').click()"><div style="font-size:24px;">📂</div><p>클릭하여 엑셀 파일 선택 (.xlsx / .xls / .csv)</p><input type="file" id="dep-xl-input" accept=".xlsx,.xls,.csv" style="display:none;" onchange="previewDepExcel(this)"></div><div class="upload-preview" id="dep-xl-preview"></div><div class="modal-footer"><button onclick="closeAccModal()">취소</button><button class="primary" onclick="importDepExcel()">업로드 적용</button></div></div>`;
   showDynModal(html);
 }
-
 function previewDepExcel(input){
-  const file=input.files[0]; if(!file) return;
+  const file=input.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=e=>{
     const wb=XLSX.read(e.target.result,{type:'binary'});
-    depUploadRows=[];
-    let sheetInfo=[];
-    wb.SheetNames.forEach(name=>{
-      const ws=wb.Sheets[name];
-      const rows=XLSX.utils.sheet_to_json(ws,{header:1});
-      const dataRows=rows.slice(1).filter(r=>r.length>0);
-      depUploadRows=depUploadRows.concat(dataRows);
-      sheetInfo.push(`${name}(${dataRows.length}건)`);
-    });
-    const prev=document.getElementById('dep-xl-preview');
-    prev.style.display='block';
-    prev.innerHTML=`✅ 총 <strong>${depUploadRows.length}건</strong> 감지됨 — 시트: ${sheetInfo.join(', ')}<br>미리보기: ${depUploadRows.slice(0,2).map(r=>r[1]||'').join(', ')}...`;
+    depUploadRows=[];let info=[];
+    wb.SheetNames.forEach(name=>{const rows=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1});const dr=rows.slice(1).filter(r=>r.length>0);depUploadRows=depUploadRows.concat(dr);info.push(`${name}(${dr.length}건)`);});
+    const p=document.getElementById('dep-xl-preview');p.style.display='block';p.innerHTML=`✅ 총 <strong>${depUploadRows.length}건</strong> — 시트: ${info.join(', ')}`;
   };
   reader.readAsBinaryString(file);
 }
-
 function importDepExcel(){
   if(!depUploadRows.length){alert('파일을 먼저 선택해주세요.');return;}
   const cnt=depUploadRows.length;
   depUploadRows.forEach(r=>{
-    const rawDate=r[2];
-    let date=new Date().toISOString().slice(0,10);
+    const rawDate=r[2];let date=new Date().toISOString().slice(0,10);
     if(rawDate){
-      if(typeof rawDate==='number'){
-        const d=new Date(Math.round((rawDate-25569)*86400*1000));
-        date=d.toISOString().slice(0,10);
-      } else {
-        date=String(rawDate).replace(/\./g,'-').replace(/(\d{4})-(\d{1,2})-(\d{1,2})/,(_,y,m,d)=>`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
-      }
+      if(typeof rawDate==='number'){const d=new Date(Math.round((rawDate-25569)*86400*1000));date=d.toISOString().slice(0,10);}
+      else date=String(rawDate).replace(/\./g,'-').replace(/(\d{4})-(\d{1,2})-(\d{1,2})/,(_,y,m,d)=>`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
     }
-    const amt = parseFloat(r[4])||0;
+    const amt=parseFloat(r[4])||0;
+    const stCode=String(r[0]||'').trim();
+    const stObj=storeData.find(x=>x.code===stCode);
     depData.unshift({
-  id: depNextId++,
-  date,
-  code:      'ACC001',
-  bank:      '기업',
-  accNo:     '148-023233-04-166',
-  storeCode: String(r[0]||''),   // ★ 매장코드 저장
-  storeName: (() => {             // ★ 거래처에서 자동 매핑
-    const s = storeData.find(x => x.code === String(r[0]||'').trim());
-    return s ? s.name : String(r[1]||'');
-  })(),
-  noteType:  String(r[3]||''),
-  prevBal:   0,
-  inAmt:     amt > 0 ? amt : 0,
-  outAmt:    amt < 0 ? Math.abs(amt) : 0,
-  finalBal:  amt > 0 ? amt : 0,  // ★ 최종잔액 = 입금액으로 임시 설정
-  detail:    String(r[5]||''),
-  note:      String(r[6]||''),
-  modDate:   String(r[7]||''),
-});
+      id:depNextId++, date,
+      code:'ACC001', bank:'기업', accNo:'148-023233-04-166',
+      storeCode:stCode,
+      storeName:stObj?stObj.name:String(r[1]||''),
+      noteType:String(r[3]||''),
+      prevBal:0,
+      inAmt:amt>0?amt:0,
+      outAmt:amt<0?Math.abs(amt):0,
+      finalBal:amt>0?amt:0,
+      detail:String(r[5]||''),
+      note:String(r[6]||''),
+      modDate:String(r[7]||''),
+    });
+  });
   depUploadRows=[];
   closeAccModal(); applyDepFilter();
   alert(cnt+'건 업로드 완료');
 }
-
 function exportDepExcel(){
-  const rows=[['일자','코드','은행명','계좌번호','비고유형','전잔액','입금','출금','최종잔액','상세내역','비고']];
-  depFiltered.forEach(r=>rows.push([r.date,r.code,r.bank,r.accNo,r.noteType,r.prevBal,r.inAmt,r.outAmt,r.finalBal,r.detail,r.note]));
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'예금내역');
+  const rows=[['일자','코드','은행명','계좌번호','가맹점코드','가맹점명','비고유형','전잔액','입금','출금','최종잔액','상세내역','비고']];
+  depFiltered.forEach(r=>rows.push([r.date,r.code,r.bank,r.accNo,r.storeCode||'',r.storeName||'',r.noteType,r.prevBal,r.inAmt,r.outAmt,r.finalBal,r.detail,r.note]));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'예금내역');
   XLSX.writeFile(wb,'예금내역.xlsx');
 }
 
-
 // ===== 계좌/대출 =====
-let accData = [
-  {id:1, code:'ACC001', bank:'기업은행', accNo:'123-456-789012', alias:'법인통장', baseAmt:100000000, curAmt:150000000},
-  {id:2, code:'ACC002', bank:'국민은행', accNo:'987-654-321098', alias:'운영자금', baseAmt:80000000, curAmt:84500000},
-];
-let loanData = [
-  {id:1, code:'LN001', bank:'기업은행', accNo:'111-222-333444', startDate:'2024-01-10', reDate:'', expDate:'2027-01-10', principal:100000000, rate:4.5, rateNote:'고정금리', interest:375000, balance:100000000, collateral:'공장건물', note:''},
-  {id:2, code:'LN002', bank:'신한은행', accNo:'555-666-777888', startDate:'2025-03-15', reDate:'', expDate:'2026-09-15', principal:20000000, rate:5.2, rateNote:'변동금리', interest:86667, balance:18000000, collateral:'', note:'운영자금'},
-];
-let accNextId=3, loanNextId=3, editAccId=null, editLoanId=null;
-
-function switchAccTab(tab, el) {
+function switchAccTab(tab,el){
   ['account-tab','loan-tab'].forEach(t=>document.getElementById(t).style.display='none');
   document.getElementById(tab).style.display='block';
-  document.querySelectorAll('.acc-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('#page-account .acc-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  if(tab==='account-tab') renderAcc();
-  else renderLoan();
+  if(tab==='account-tab')renderAcc(); else renderLoan();
 }
-
-function renderAcc() {
-  const tbody = document.getElementById('acc-tbody');
-  tbody.innerHTML = '';
-  accData.forEach(r => {
-    const diff = r.curAmt - r.baseAmt;
-    tbody.innerHTML += `<tr>
-      <td>${r.code}</td><td>${r.bank}</td><td>${r.accNo}</td><td>${r.alias}</td>
-      <td class="num">${r.baseAmt.toLocaleString()}</td>
-      <td class="num">${r.curAmt.toLocaleString()}</td>
-      <td><a href="#" onclick="openAccModal(${r.id})" style="font-size:11px;color:#888;margin-right:8px;">수정</a><a href="#" onclick="deleteAcc(${r.id})" style="font-size:11px;color:#D42020;">삭제</a></td>
-    </tr>`;
-  });
-  document.getElementById('acc-count').textContent = accData.length + '개';
-  document.getElementById('acc-base').textContent = '₩' + accData.reduce((s,r)=>s+r.baseAmt,0).toLocaleString();
-  document.getElementById('acc-current').textContent = '₩' + accData.reduce((s,r)=>s+r.curAmt,0).toLocaleString();
-  const diff = accData.reduce((s,r)=>s+(r.curAmt-r.baseAmt),0);
-  document.getElementById('acc-diff').textContent = (diff>=0?'+':'') + '₩' + diff.toLocaleString();
+function renderAcc(){
+  const tbody=document.getElementById('acc-tbody');tbody.innerHTML='';
+  accData.forEach(r=>{tbody.innerHTML+=`<tr><td>${r.code}</td><td>${r.bank}</td><td>${r.accNo}</td><td>${r.alias||'-'}</td><td class="num">${(r.baseAmt||0).toLocaleString()}</td><td class="num">${(r.curAmt||0).toLocaleString()}</td><td><a href="#" onclick="openAccModal(${r.id})" style="font-size:11px;color:#888;margin-right:8px;">수정</a><a href="#" onclick="deleteAcc(${r.id})" style="font-size:11px;color:#D42020;">삭제</a></td></tr>`;});
+  document.getElementById('acc-count').textContent=accData.length+'개';
+  document.getElementById('acc-base').textContent='₩'+accData.reduce((s,r)=>s+(r.baseAmt||0),0).toLocaleString();
+  document.getElementById('acc-current').textContent='₩'+accData.reduce((s,r)=>s+(r.curAmt||0),0).toLocaleString();
+  const diff=accData.reduce((s,r)=>s+((r.curAmt||0)-(r.baseAmt||0)),0);
+  document.getElementById('acc-diff').textContent=(diff>=0?'+':'')+'₩'+diff.toLocaleString();
 }
-
-function renderLoan() {
-  const tbody = document.getElementById('loan-tbody');
-  tbody.innerHTML = '';
-  loanData.forEach(r => {
-    tbody.innerHTML += `<tr>
-      <td>${r.code}</td><td>${r.bank}</td><td>${r.accNo}</td>
-      <td>${r.startDate}</td><td>${r.reDate||'-'}</td><td>${r.expDate}</td>
-      <td class="num">${r.principal.toLocaleString()}</td>
-      <td>${r.rate}%</td><td>${r.rateNote}</td>
-      <td class="num">${r.interest.toLocaleString()}</td>
-      <td class="num">${r.balance.toLocaleString()}</td>
-      <td>${r.collateral||'-'}</td><td>${r.note||'-'}</td>
-      <td><a href="#" onclick="openLoanModal(${r.id})" style="font-size:11px;color:#888;margin-right:8px;">수정</a><a href="#" onclick="deleteLoan(${r.id})" style="font-size:11px;color:#D42020;">삭제</a></td>
-    </tr>`;
-  });
-  document.getElementById('loan-count').textContent = loanData.length + '건';
-  document.getElementById('loan-principal').textContent = '₩' + loanData.reduce((s,r)=>s+r.principal,0).toLocaleString();
-  document.getElementById('loan-interest').textContent = '₩' + loanData.reduce((s,r)=>s+r.interest,0).toLocaleString();
-  document.getElementById('loan-balance').textContent = '₩' + loanData.reduce((s,r)=>s+r.balance,0).toLocaleString();
+function renderLoan(){
+  const tbody=document.getElementById('loan-tbody');tbody.innerHTML='';
+  loanData.forEach(r=>{tbody.innerHTML+=`<tr><td>${r.code}</td><td>${r.bank}</td><td>${r.accNo||'-'}</td><td>${r.startDate||'-'}</td><td>${r.reDate||'-'}</td><td>${r.expDate||'-'}</td><td class="num">${(r.principal||0).toLocaleString()}</td><td>${r.rate||0}%</td><td>${r.rateNote||'-'}</td><td class="num">${(r.interest||0).toLocaleString()}</td><td class="num">${(r.balance||0).toLocaleString()}</td><td>${r.collateral||'-'}</td><td>${r.note||'-'}</td><td><a href="#" onclick="openLoanModal(${r.id})" style="font-size:11px;color:#888;margin-right:8px;">수정</a><a href="#" onclick="deleteLoan(${r.id})" style="font-size:11px;color:#D42020;">삭제</a></td></tr>`;});
+  document.getElementById('loan-count').textContent=loanData.length+'건';
+  document.getElementById('loan-principal').textContent='₩'+loanData.reduce((s,r)=>s+(r.principal||0),0).toLocaleString();
+  document.getElementById('loan-interest').textContent='₩'+loanData.reduce((s,r)=>s+(r.interest||0),0).toLocaleString();
+  document.getElementById('loan-balance').textContent='₩'+loanData.reduce((s,r)=>s+(r.balance||0),0).toLocaleString();
 }
-
-function openAccModal(id) {
-  editAccId = id||null;
-  const r = id ? accData.find(x=>x.id===id) : null;
-  const html = `<div class="modal" style="width:480px;">
-    <h2>${r?'계좌 수정':'계좌 추가'}</h2>
-    <div class="form-grid">
-      <div class="form-group"><label>코드 *</label><input id="ma-code" value="${r?r.code:''}"></div>
-      <div class="form-group"><label>은행명 *</label><input id="ma-bank" value="${r?r.bank:''}"></div>
-      <div class="form-group"><label>계좌번호 *</label><input id="ma-no" value="${r?r.accNo:''}"></div>
-      <div class="form-group"><label>계좌별명</label><input id="ma-alias" value="${r?r.alias:''}"></div>
-      <div class="form-group"><label>기초잔액</label><input type="number" id="ma-base" value="${r?r.baseAmt:0}"></div>
-      <div class="form-group"><label>현재잔액</label><input type="number" id="ma-cur" value="${r?r.curAmt:0}"></div>
-    </div>
-    <div class="modal-footer">
-      <button onclick="closeAccModal()">취소</button>
-      <button class="primary" onclick="saveAcc()">저장</button>
-    </div>
-  </div>`;
+function openAccModal(id){
+  editAccId=id||null;const r=id?accData.find(x=>x.id===id):null;
+  const html=`<div class="modal" style="width:480px;"><h2>${r?'계좌 수정':'계좌 추가'}</h2><div class="form-grid"><div class="form-group"><label>코드 *</label><input id="ma-code" value="${r?r.code:''}"></div><div class="form-group"><label>은행명 *</label><input id="ma-bank" value="${r?r.bank:''}"></div><div class="form-group"><label>계좌번호 *</label><input id="ma-no" value="${r?r.accNo:''}"></div><div class="form-group"><label>계좌별명</label><input id="ma-alias" value="${r?r.alias||'':''}"></div><div class="form-group"><label>기초잔액</label><input type="number" id="ma-base" value="${r?r.baseAmt:0}"></div><div class="form-group"><label>현재잔액</label><input type="number" id="ma-cur" value="${r?r.curAmt:0}"></div></div><div class="modal-footer"><button onclick="closeAccModal()">취소</button><button class="primary" onclick="saveAcc()">저장</button></div></div>`;
   showDynModal(html);
 }
-
-function saveAcc() {
-  const code=document.getElementById('ma-code').value.trim();
-  const bank=document.getElementById('ma-bank').value.trim();
-  const no=document.getElementById('ma-no').value.trim();
+function saveAcc(){
+  const code=document.getElementById('ma-code').value.trim(), bank=document.getElementById('ma-bank').value.trim(), no=document.getElementById('ma-no').value.trim();
   if(!code||!bank||!no){alert('필수항목 입력해주세요.');return;}
-  const row={id:editAccId||accNextId++,code,bank,accNo:no,alias:document.getElementById('ma-alias').value,
-    baseAmt:parseFloat(document.getElementById('ma-base').value)||0,
-    curAmt:parseFloat(document.getElementById('ma-cur').value)||0};
-  if(editAccId){const i=accData.findIndex(x=>x.id===editAccId);accData[i]=row;}
-  else accData.push(row);
-  closeAccModal(); renderAcc();
+  const row={id:editAccId||accNextId++,code,bank,accNo:no,alias:document.getElementById('ma-alias').value,baseAmt:parseFloat(document.getElementById('ma-base').value)||0,curAmt:parseFloat(document.getElementById('ma-cur').value)||0};
+  if(editAccId){const i=accData.findIndex(x=>x.id===editAccId);accData[i]=row;}else accData.push(row);
+  closeAccModal();renderAcc();
 }
-
 function deleteAcc(id){if(confirm('삭제하시겠습니까?')){accData=accData.filter(x=>x.id!==id);renderAcc();}}
-
-function openLoanModal(id) {
-  editLoanId = id||null;
-  const r = id ? loanData.find(x=>x.id===id) : null;
-  const html = `<div class="modal" style="width:620px;">
-    <h2>${r?'대출 수정':'대출 추가'}</h2>
-    <div class="form-grid">
-      <div class="form-group"><label>코드 *</label><input id="ml-code" value="${r?r.code:''}"></div>
-      <div class="form-group"><label>은행명 *</label><input id="ml-bank" value="${r?r.bank:''}"></div>
-      <div class="form-group"><label>계좌번호</label><input id="ml-no" value="${r?r.accNo:''}"></div>
-      <div class="form-group"><label>최초실행일</label><input type="date" id="ml-start" value="${r?r.startDate:''}"></div>
-      <div class="form-group"><label>재실행일</label><input type="date" id="ml-re" value="${r?r.reDate:''}"></div>
-      <div class="form-group"><label>만기일</label><input type="date" id="ml-exp" value="${r?r.expDate:''}"></div>
-      <div class="form-group"><label>대출원금</label><input type="number" id="ml-prin" value="${r?r.principal:0}"></div>
-      <div class="form-group"><label>금리 (%)</label><input type="number" step="0.01" id="ml-rate" value="${r?r.rate:0}" oninput="calcInterest()"></div>
-      <div class="form-group"><label>금리비고</label><input id="ml-ratenote" value="${r?r.rateNote:''}"></div>
-      <div class="form-group"><label>이자금액 (자동)</label><input type="number" id="ml-int" value="${r?r.interest:0}" readonly style="background:#f9f9f9;"></div>
-      <div class="form-group"><label>대출잔액</label><input type="number" id="ml-bal" value="${r?r.balance:0}"></div>
-      <div class="form-group"><label>담보내역</label><input id="ml-col" value="${r?r.collateral:''}"></div>
-      <div class="form-group full"><label>비고</label><input id="ml-note" value="${r?r.note:''}"></div>
-    </div>
-    <div class="modal-footer">
-      <button onclick="closeAccModal()">취소</button>
-      <button class="primary" onclick="saveLoan()">저장</button>
-    </div>
-  </div>`;
+function openLoanModal(id){
+  editLoanId=id||null;const r=id?loanData.find(x=>x.id===id):null;
+  const html=`<div class="modal" style="width:620px;"><h2>${r?'대출 수정':'대출 추가'}</h2><div class="form-grid"><div class="form-group"><label>코드 *</label><input id="ml-code" value="${r?r.code:''}"></div><div class="form-group"><label>은행명 *</label><input id="ml-bank" value="${r?r.bank:''}"></div><div class="form-group"><label>계좌번호</label><input id="ml-no" value="${r?r.accNo||'':''}"></div><div class="form-group"><label>최초실행일</label><input type="date" id="ml-start" value="${r?r.startDate||'':''}"></div><div class="form-group"><label>재실행일</label><input type="date" id="ml-re" value="${r?r.reDate||'':''}"></div><div class="form-group"><label>만기일</label><input type="date" id="ml-exp" value="${r?r.expDate||'':''}"></div><div class="form-group"><label>대출원금</label><input type="number" id="ml-prin" value="${r?r.principal:0}"></div><div class="form-group"><label>금리 (%)</label><input type="number" step="0.01" id="ml-rate" value="${r?r.rate:0}" oninput="calcInterest()"></div><div class="form-group"><label>금리비고</label><input id="ml-ratenote" value="${r?r.rateNote||'':''}"></div><div class="form-group"><label>이자금액 (자동)</label><input type="number" id="ml-int" value="${r?r.interest:0}" readonly style="background:#f9f9f9;"></div><div class="form-group"><label>대출잔액</label><input type="number" id="ml-bal" value="${r?r.balance:0}"></div><div class="form-group"><label>담보내역</label><input id="ml-col" value="${r?r.collateral||'':''}"></div><div class="form-group full"><label>비고</label><input id="ml-note" value="${r?r.note||'':''}"></div></div><div class="modal-footer"><button onclick="closeAccModal()">취소</button><button class="primary" onclick="saveLoan()">저장</button></div></div>`;
   showDynModal(html);
 }
-
-function calcInterest() {
-  const prin = parseFloat(document.getElementById('ml-prin').value)||0;
-  const rate = parseFloat(document.getElementById('ml-rate').value)||0;
-  document.getElementById('ml-int').value = Math.round(prin * rate / 100 / 12);
-}
-
-function saveLoan() {
-  const code=document.getElementById('ml-code').value.trim();
-  const bank=document.getElementById('ml-bank').value.trim();
+function calcInterest(){const p=parseFloat(document.getElementById('ml-prin').value)||0, r=parseFloat(document.getElementById('ml-rate').value)||0;document.getElementById('ml-int').value=Math.round(p*r/100/12);}
+function saveLoan(){
+  const code=document.getElementById('ml-code').value.trim(), bank=document.getElementById('ml-bank').value.trim();
   if(!code||!bank){alert('필수항목 입력해주세요.');return;}
-  const row={id:editLoanId||loanNextId++,code,bank,
-    accNo:document.getElementById('ml-no').value,
-    startDate:document.getElementById('ml-start').value,
-    reDate:document.getElementById('ml-re').value,
-    expDate:document.getElementById('ml-exp').value,
-    principal:parseFloat(document.getElementById('ml-prin').value)||0,
-    rate:parseFloat(document.getElementById('ml-rate').value)||0,
-    rateNote:document.getElementById('ml-ratenote').value,
-    interest:parseFloat(document.getElementById('ml-int').value)||0,
-    balance:parseFloat(document.getElementById('ml-bal').value)||0,
-    collateral:document.getElementById('ml-col').value,
-    note:document.getElementById('ml-note').value};
-  if(editLoanId){const i=loanData.findIndex(x=>x.id===editLoanId);loanData[i]=row;}
-  else loanData.push(row);
-  closeAccModal(); renderLoan();
+  const row={id:editLoanId||loanNextId++,code,bank,accNo:document.getElementById('ml-no').value,startDate:document.getElementById('ml-start').value,reDate:document.getElementById('ml-re').value,expDate:document.getElementById('ml-exp').value,principal:parseFloat(document.getElementById('ml-prin').value)||0,rate:parseFloat(document.getElementById('ml-rate').value)||0,rateNote:document.getElementById('ml-ratenote').value,interest:parseFloat(document.getElementById('ml-int').value)||0,balance:parseFloat(document.getElementById('ml-bal').value)||0,collateral:document.getElementById('ml-col').value,note:document.getElementById('ml-note').value};
+  if(editLoanId){const i=loanData.findIndex(x=>x.id===editLoanId);loanData[i]=row;}else loanData.push(row);
+  closeAccModal();renderLoan();
 }
-
 function deleteLoan(id){if(confirm('삭제하시겠습니까?')){loanData=loanData.filter(x=>x.id!==id);renderLoan();}}
+function exportAccExcel(){const rows=[['코드','은행명','계좌번호','계좌별명','기초잔액','현재잔액']];accData.forEach(r=>rows.push([r.code,r.bank,r.accNo,r.alias||'',r.baseAmt,r.curAmt]));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'계좌내역');XLSX.writeFile(wb,'계좌내역.xlsx');}
+function exportLoanExcel(){const rows=[['코드','은행명','계좌번호','최초실행일','재실행일','만기일','대출원금','금리','금리비고','이자금액','대출잔액','담보내역','비고']];loanData.forEach(r=>rows.push([r.code,r.bank,r.accNo||'',r.startDate||'',r.reDate||'',r.expDate||'',r.principal,r.rate,r.rateNote||'',r.interest,r.balance,r.collateral||'',r.note||'']));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'대출내역');XLSX.writeFile(wb,'대출내역.xlsx');}
 
-function showDynModal(html) {
-  let bg = document.getElementById('dyn-modal-bg');
-  if(!bg){bg=document.createElement('div');bg.id='dyn-modal-bg';bg.className='modal-bg';document.body.appendChild(bg);}
-  bg.innerHTML = html;
-  bg.classList.add('open');
+// ===== 거래처관리 =====
+function initStoreAccSelect(){
+  const el=document.getElementById('store-f-acc');if(!el)return;
+  el.innerHTML='<option value="">전체 모계좌</option>'+depAccounts.map(a=>`<option value="${a.code}">${a.code} ${a.accNo}</option>`).join('');
 }
-function closeAccModal(){document.getElementById('dyn-modal-bg').classList.remove('open');}
-
-function exportAccExcel() {
-  const rows=[['코드','은행명','계좌번호','계좌별명','기초잔액','현재잔액']];
-  accData.forEach(r=>rows.push([r.code,r.bank,r.accNo,r.alias,r.baseAmt,r.curAmt]));
-  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'계좌내역');
-  XLSX.writeFile(wb,'계좌내역.xlsx');
-}
-function exportLoanExcel() {
-  const rows=[['코드','은행명','계좌번호','최초실행일','재실행일','만기일','대출원금','금리','금리비고','이자금액','대출잔액','담보내역','비고']];
-  loanData.forEach(r=>rows.push([r.code,r.bank,r.accNo,r.startDate,r.reDate,r.expDate,r.principal,r.rate,r.rateNote,r.interest,r.balance,r.collateral,r.note]));
-  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'대출내역');
-  XLSX.writeFile(wb,'대출내역.xlsx');
-}
-
-// 페이지 진입시 초기 렌더
-const _origShowPage = showPage;
-  // ===== 거래처관리 =====
-let storeData = [];
-let storeNextId = 1;
-let storeFiltered = [];
-let storeUploadRows = [];
-
-function initStoreAccSelect() {
-  const el = document.getElementById('store-f-acc');
-  if(!el) return;
-  el.innerHTML = '<option value="">전체 모계좌</option>' +
-    depAccounts.map(a => `<option value="${a.code}">${a.code} ${a.accNo}</option>`).join('');
-}
-
-function applyStoreFilter() {
-  const keyword = document.getElementById('store-f-keyword').value.trim().toLowerCase();
-  const status  = document.getElementById('store-f-status').value;
-  const acc     = document.getElementById('store-f-acc').value;
-  storeFiltered = storeData.filter(r => {
-    if(status && r.status !== status) return false;
-    if(acc && r.parentAcc !== acc) return false;
-    if(keyword && !r.code.toLowerCase().includes(keyword) &&
-       !r.name.toLowerCase().includes(keyword) &&
-       !r.owner.toLowerCase().includes(keyword)) return false;
+function applyStoreFilter(){
+  const keyword=document.getElementById('store-f-keyword').value.trim().toLowerCase();
+  const status=document.getElementById('store-f-status').value, acc=document.getElementById('store-f-acc').value;
+  storeFiltered=storeData.filter(r=>{
+    if(status&&r.status!==status)return false;
+    if(acc&&r.parentAcc!==acc)return false;
+    if(keyword&&!r.code.toLowerCase().includes(keyword)&&!(r.name||'').toLowerCase().includes(keyword)&&!(r.owner||'').toLowerCase().includes(keyword))return false;
     return true;
   });
   renderStore(storeFiltered);
 }
-
-function resetStoreFilter() {
-  document.getElementById('store-f-keyword').value = '';
-  document.getElementById('store-f-status').value  = '';
-  document.getElementById('store-f-acc').value     = '';
-  storeFiltered = [...storeData];
-  renderStore(storeFiltered);
-}
-
-function renderStore(data) {
-  const tbody = document.getElementById('store-tbody');
-  if(!tbody) return;
-  tbody.innerHTML = '';
-  data.forEach(r => {
-    const statusColor = r.status==='정상'?'#0F6E56': r.status==='휴업'?'#F0921E':'#D42020';
-    const statusBg    = r.status==='정상'?'#E1F5EE': r.status==='휴업'?'#FFF3E0':'#FAECE7';
-    tbody.innerHTML += `<tr>
-      <td><input type="checkbox" class="store-chk" value="${r.id}"></td>
-      <td style="font-weight:600;color:#2563eb;">${r.code}</td>
-      <td style="font-weight:500;">${r.name}</td>
-      <td>${r.owner||'-'}</td>
-      <td style="font-size:11px;">${r.bizNo||'-'}</td>
-      <td style="font-size:11px;">${r.virtualAccNo||'-'}</td>
-      <td style="font-size:11px;">${r.parentAcc||'-'}</td>
-      <td class="num">${r.limit?r.limit.toLocaleString():'-'}</td>
-      <td class="num">${r.initBalance?r.initBalance.toLocaleString():'0'}</td>
-      <td><span style="font-size:10px;padding:2px 8px;border-radius:4px;background:${statusBg};color:${statusColor};border:0.5px solid ${statusColor}55;">${r.status}</span></td>
-      <td style="font-size:11px;">${r.note1||'-'}</td>
-      <td style="font-size:11px;">${r.note2||'-'}</td>
-      <td>
-        <a href="#" onclick="openStoreModal(${r.id})" style="font-size:11px;color:#888;margin-right:8px;">수정</a>
-        <a href="#" onclick="deleteStore(${r.id})" style="font-size:11px;color:#D42020;">삭제</a>
-      </td>
-    </tr>`;
+function resetStoreFilter(){document.getElementById('store-f-keyword').value='';document.getElementById('store-f-status').value='';document.getElementById('store-f-acc').value='';storeFiltered=[...storeData];renderStore(storeFiltered);}
+function renderStore(data){
+  const tbody=document.getElementById('store-tbody');if(!tbody)return;
+  tbody.innerHTML='';
+  data.forEach(r=>{
+    const sc=r.status==='정상'?'#0F6E56':r.status==='휴업'?'#F0921E':'#D42020';
+    const sb=r.status==='정상'?'#E1F5EE':r.status==='휴업'?'#FFF3E0':'#FAECE7';
+    tbody.innerHTML+=`<tr><td><input type="checkbox" class="store-chk" value="${r.id}"></td><td style="font-weight:600;color:#2563eb;">${r.code}</td><td style="font-weight:500;">${r.name}</td><td>${r.owner||'-'}</td><td style="font-size:11px;">${r.bizNo||'-'}</td><td style="font-size:11px;">${r.virtualAccNo||'-'}</td><td style="font-size:11px;">${r.parentAcc||'-'}</td><td class="num">${r.limit?r.limit.toLocaleString():'-'}</td><td class="num">${r.initBalance?r.initBalance.toLocaleString():'0'}</td><td><span style="font-size:10px;padding:2px 8px;border-radius:4px;background:${sb};color:${sc};border:0.5px solid ${sc}55;">${r.status}</span></td><td style="font-size:11px;">${r.note1||'-'}</td><td style="font-size:11px;">${r.note2||'-'}</td><td><a href="#" onclick="openStoreModal(${r.id})" style="font-size:11px;color:#888;margin-right:8px;">수정</a><a href="#" onclick="deleteStore(${r.id})" style="font-size:11px;color:#D42020;">삭제</a></td></tr>`;
   });
-
-  // 요약 카드
-  document.getElementById('store-cnt-all').textContent    = storeData.length + '개';
-  document.getElementById('store-cnt-normal').textContent = storeData.filter(r=>r.status==='정상').length + '개';
-  document.getElementById('store-cnt-pause').textContent  = storeData.filter(r=>r.status==='휴업').length + '개';
-  document.getElementById('store-cnt-close').textContent  = storeData.filter(r=>r.status==='폐업').length + '개';
-  document.getElementById('store-count').textContent      = `(${data.length}건)`;
+  document.getElementById('store-cnt-all').textContent=storeData.length+'개';
+  document.getElementById('store-cnt-normal').textContent=storeData.filter(r=>r.status==='정상').length+'개';
+  document.getElementById('store-cnt-pause').textContent=storeData.filter(r=>r.status==='휴업').length+'개';
+  document.getElementById('store-cnt-close').textContent=storeData.filter(r=>r.status==='폐업').length+'개';
+  document.getElementById('store-count').textContent=`(${data.length}건)`;
 }
-
-function openStoreModal(id) {
-  const r = id ? storeData.find(x=>x.id===id) : null;
-  const accOpts = depAccounts.map(a =>
-    `<option value="${a.code}" ${r&&r.parentAcc===a.code?'selected':''}>${a.code} - ${a.bank} ${a.accNo}</option>`
-  ).join('');
-  const html = `<div class="modal" style="width:620px;">
-    <h2>${r ? '가맹점 수정' : '가맹점 추가'}</h2>
-    <div class="form-grid">
-      <div class="form-group"><label>가맹점코드 *</label><input id="sm-code" value="${r?r.code:''}"></div>
-      <div class="form-group"><label>가맹점명 *</label><input id="sm-name" value="${r?r.name:''}"></div>
-      <div class="form-group"><label>대표자명</label><input id="sm-owner" value="${r?r.owner:''}"></div>
-      <div class="form-group"><label>사업자번호</label><input id="sm-bizno" value="${r?r.bizNo:''}" placeholder="000-00-00000"></div>
-      <div class="form-group"><label>가상계좌번호</label><input id="sm-vacc" value="${r?r.virtualAccNo:''}"></div>
-      <div class="form-group"><label>연결 모계좌</label>
-        <select id="sm-pacc"><option value="">선택</option>${accOpts}</select>
-      </div>
-      <div class="form-group"><label>한도금액</label><input type="number" id="sm-limit" value="${r?r.limit:0}"></div>
-      <div class="form-group"><label>초기 미수금잔액</label><input type="number" id="sm-init" value="${r?r.initBalance:0}"></div>
-      <div class="form-group"><label>상태</label>
-        <select id="sm-status">
-          <option value="정상" ${r&&r.status==='정상'?'selected':''}>정상</option>
-          <option value="휴업" ${r&&r.status==='휴업'?'selected':''}>휴업</option>
-          <option value="폐업" ${r&&r.status==='폐업'?'selected':''}>폐업</option>
-        </select>
-      </div>
-      <div class="form-group"></div>
-      <div class="form-group"><label>비고1</label><input id="sm-note1" value="${r?r.note1:''}"></div>
-      <div class="form-group"><label>비고2</label><input id="sm-note2" value="${r?r.note2:''}"></div>
-    </div>
-    <div class="modal-footer">
-      <button onclick="closeAccModal()">취소</button>
-      <button class="primary" onclick="saveStore(${id||'null'})">저장</button>
-    </div>
-  </div>`;
+function openStoreModal(id){
+  const r=id?storeData.find(x=>x.id===id):null;
+  const accOpts=depAccounts.map(a=>`<option value="${a.code}" ${r&&r.parentAcc===a.code?'selected':''}>${a.code} - ${a.bank} ${a.accNo}</option>`).join('');
+  const html=`<div class="modal" style="width:620px;"><h2>${r?'가맹점 수정':'가맹점 추가'}</h2><div class="form-grid"><div class="form-group"><label>가맹점코드 *</label><input id="sm-code" value="${r?r.code:''}"></div><div class="form-group"><label>가맹점명 *</label><input id="sm-name" value="${r?r.name:''}"></div><div class="form-group"><label>대표자명</label><input id="sm-owner" value="${r?r.owner||'':''}"></div><div class="form-group"><label>사업자번호</label><input id="sm-bizno" value="${r?r.bizNo||'':''}" placeholder="000-00-00000"></div><div class="form-group"><label>가상계좌번호</label><input id="sm-vacc" value="${r?r.virtualAccNo||'':''}"></div><div class="form-group"><label>연결 모계좌</label><select id="sm-pacc"><option value="">선택</option>${accOpts}</select></div><div class="form-group"><label>한도금액</label><input type="number" id="sm-limit" value="${r?r.limit||0:0}"></div><div class="form-group"><label>초기 미수금잔액</label><input type="number" id="sm-init" value="${r?r.initBalance||0:0}"></div><div class="form-group"><label>상태</label><select id="sm-status"><option value="정상" ${r&&r.status==='정상'?'selected':''}>정상</option><option value="휴업" ${r&&r.status==='휴업'?'selected':''}>휴업</option><option value="폐업" ${r&&r.status==='폐업'?'selected':''}>폐업</option></select></div><div class="form-group"></div><div class="form-group"><label>비고1</label><input id="sm-note1" value="${r?r.note1||'':''}"></div><div class="form-group"><label>비고2</label><input id="sm-note2" value="${r?r.note2||'':''}"></div></div><div class="modal-footer"><button onclick="closeAccModal()">취소</button><button class="primary" onclick="saveStore(${id||'null'})">저장</button></div></div>`;
   showDynModal(html);
 }
-
-function saveStore(id) {
-  const code = document.getElementById('sm-code').value.trim();
-  const name = document.getElementById('sm-name').value.trim();
+function saveStore(id){
+  const code=document.getElementById('sm-code').value.trim(), name=document.getElementById('sm-name').value.trim();
   if(!code||!name){alert('가맹점코드와 가맹점명은 필수입니다.');return;}
-  const row = {
-    id: id||storeNextId++,
-    code, name,
-    owner:      document.getElementById('sm-owner').value.trim(),
-    bizNo:      document.getElementById('sm-bizno').value.trim(),
-    virtualAccNo: document.getElementById('sm-vacc').value.trim(),
-    parentAcc:  document.getElementById('sm-pacc').value,
-    limit:      parseFloat(document.getElementById('sm-limit').value)||0,
-    initBalance:parseFloat(document.getElementById('sm-init').value)||0,
-    status:     document.getElementById('sm-status').value,
-    note1:      document.getElementById('sm-note1').value,
-    note2:      document.getElementById('sm-note2').value,
-  };
-  if(id){const i=storeData.findIndex(x=>x.id===id);storeData[i]=row;}
-  else storeData.push(row);
-  closeAccModal();
-  applyStoreFilter();
+  const row={id:id&&id!=='null'?id:storeNextId++,code,name,owner:document.getElementById('sm-owner').value.trim(),bizNo:document.getElementById('sm-bizno').value.trim(),virtualAccNo:document.getElementById('sm-vacc').value.trim(),parentAcc:document.getElementById('sm-pacc').value,limit:parseFloat(document.getElementById('sm-limit').value)||0,initBalance:parseFloat(document.getElementById('sm-init').value)||0,status:document.getElementById('sm-status').value,note1:document.getElementById('sm-note1').value,note2:document.getElementById('sm-note2').value};
+  if(id&&id!=='null'){const i=storeData.findIndex(x=>x.id===id);storeData[i]=row;}else storeData.push(row);
+  closeAccModal();applyStoreFilter();
 }
-
-function deleteStore(id){
-  if(confirm('삭제하시겠습니까?')){storeData=storeData.filter(x=>x.id!==id);applyStoreFilter();}
-}
-
+function deleteStore(id){if(confirm('삭제하시겠습니까?')){storeData=storeData.filter(x=>x.id!==id);applyStoreFilter();}}
 function storeToggleAll(chk){document.querySelectorAll('.store-chk').forEach(c=>c.checked=chk.checked);}
 function getStoreChecked(){return [...document.querySelectorAll('.store-chk:checked')].map(c=>parseInt(c.value));}
-
-function editStoreSelected(){
-  const ids=getStoreChecked();
-  if(ids.length!==1){alert('수정할 항목 1건을 선택해주세요.');return;}
-  openStoreModal(ids[0]);
-}
-
-function deleteStoreSelected(){
-  const ids=getStoreChecked();
-  if(!ids.length){alert('삭제할 항목을 선택해주세요.');return;}
-  if(confirm(ids.length+'건을 삭제하시겠습니까?')){
-    storeData=storeData.filter(r=>!ids.includes(r.id));
-    applyStoreFilter();
-  }
-}
-
-// 거래처 엑셀 업로드
+function editStoreSelected(){const ids=getStoreChecked();if(ids.length!==1){alert('수정할 항목 1건을 선택해주세요.');return;}openStoreModal(ids[0]);}
+function deleteStoreSelected(){const ids=getStoreChecked();if(!ids.length){alert('삭제할 항목을 선택해주세요.');return;}if(confirm(ids.length+'건을 삭제하시겠습니까?')){storeData=storeData.filter(r=>!ids.includes(r.id));applyStoreFilter();}}
 function openStoreUpload(){
-  const html=`<div class="modal" style="width:500px;">
-    <h2>거래처 엑셀 업로드</h2>
-    <p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>가맹점코드</strong> / 가맹점명 / 대표자명 / 사업자번호 / 가상계좌번호 / 연결모계좌 / 한도금액 / 초기미수금 / 상태 / 비고1 / 비고2</p>
-    <div class="upload-area" onclick="document.getElementById('store-xl-input').click()">
-      <div style="font-size:24px;">📂</div>
-      <p>클릭하여 엑셀 파일 선택 (.xlsx / .xls / .csv)</p>
-      <input type="file" id="store-xl-input" accept=".xlsx,.xls,.csv" style="display:none;" onchange="previewStoreExcel(this)">
-    </div>
-    <div class="upload-preview" id="store-xl-preview"></div>
-    <div class="modal-footer">
-      <button onclick="closeAccModal()">취소</button>
-      <button class="primary" onclick="importStoreExcel()">업로드 적용</button>
-    </div>
-  </div>`;
+  const html=`<div class="modal" style="width:500px;"><h2>거래처 엑셀 업로드</h2><p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>가맹점코드</strong> / 가맹점명 / 대표자명 / 사업자번호 / 가상계좌번호 / 연결모계좌 / 한도금액 / 초기미수금 / 상태 / 비고1 / 비고2</p><div class="upload-area" onclick="document.getElementById('store-xl-input').click()"><div style="font-size:24px;">📂</div><p>클릭하여 엑셀 파일 선택</p><input type="file" id="store-xl-input" accept=".xlsx,.xls,.csv" style="display:none;" onchange="previewStoreExcel(this)"></div><div class="upload-preview" id="store-xl-preview"></div><div class="modal-footer"><button onclick="closeAccModal()">취소</button><button class="primary" onclick="importStoreExcel()">업로드 적용</button></div></div>`;
   showDynModal(html);
 }
-
-function previewStoreExcel(input){
-  const file=input.files[0]; if(!file) return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const wb=XLSX.read(e.target.result,{type:'binary'});
-    storeUploadRows=[];
-    let sheetInfo=[];
-    wb.SheetNames.forEach(name=>{
-      const ws=wb.Sheets[name];
-      const rows=XLSX.utils.sheet_to_json(ws,{header:1});
-      const dataRows=rows.slice(1).filter(r=>r.length>0);
-      storeUploadRows=storeUploadRows.concat(dataRows);
-      sheetInfo.push(`${name}(${dataRows.length}건)`);
-    });
-    const prev=document.getElementById('store-xl-preview');
-    prev.style.display='block';
-    prev.innerHTML=`✅ 총 <strong>${storeUploadRows.length}건</strong> 감지됨 — 시트: ${sheetInfo.join(', ')}`;
-  };
-  reader.readAsBinaryString(file);
-}
-
+function previewStoreExcel(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{const wb=XLSX.read(e.target.result,{type:'binary'});storeUploadRows=[];let info=[];wb.SheetNames.forEach(name=>{const rows=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1});const dr=rows.slice(1).filter(r=>r.length>0);storeUploadRows=storeUploadRows.concat(dr);info.push(`${name}(${dr.length}건)`);});const p=document.getElementById('store-xl-preview');p.style.display='block';p.innerHTML=`✅ 총 <strong>${storeUploadRows.length}건</strong> — 시트: ${info.join(', ')}`;};reader.readAsBinaryString(file);}
 function importStoreExcel(){
   if(!storeUploadRows.length){alert('파일을 먼저 선택해주세요.');return;}
   const cnt=storeUploadRows.length;
   storeUploadRows.forEach(r=>{
-    // 중복코드 체크 — 있으면 업데이트, 없으면 추가
-    const code=String(r[0]||'').trim();
-    if(!code) return;
+    const code=String(r[0]||'').trim();if(!code)return;
     const existing=storeData.find(x=>x.code===code);
-    const row={
-      id: existing?existing.id:storeNextId++,
-      code,
-      name:         String(r[1]||''),
-      owner:        String(r[2]||''),
-      bizNo:        String(r[3]||''),
-      virtualAccNo: String(r[4]||''),
-      parentAcc:    String(r[5]||''),
-      limit:        parseFloat(r[6])||0,
-      initBalance:  parseFloat(r[7])||0,
-      status:       String(r[8]||'정상'),
-      note1:        String(r[9]||''),
-      note2:        String(r[10]||''),
-    };
-    if(existing){const i=storeData.findIndex(x=>x.code===code);storeData[i]=row;}
-    else storeData.push(row);
+    const row={id:existing?existing.id:storeNextId++,code,name:String(r[1]||''),owner:String(r[2]||''),bizNo:String(r[3]||''),virtualAccNo:String(r[4]||''),parentAcc:String(r[5]||''),limit:parseFloat(r[6])||0,initBalance:parseFloat(r[7])||0,status:String(r[8]||'정상'),note1:String(r[9]||''),note2:String(r[10]||'')};
+    if(existing){const i=storeData.findIndex(x=>x.code===code);storeData[i]=row;}else storeData.push(row);
   });
-  storeUploadRows=[];
-  closeAccModal();
-  applyStoreFilter();
-  alert(cnt+'건 업로드 완료');
+  storeUploadRows=[];closeAccModal();applyStoreFilter();alert(cnt+'건 업로드 완료');
 }
+function exportStoreExcel(){const rows=[['가맹점코드','가맹점명','대표자명','사업자번호','가상계좌번호','연결모계좌','한도금액','초기미수금','상태','비고1','비고2']];storeFiltered.forEach(r=>rows.push([r.code,r.name,r.owner||'',r.bizNo||'',r.virtualAccNo||'',r.parentAcc||'',r.limit,r.initBalance,r.status,r.note1||'',r.note2||'']));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'거래처');XLSX.writeFile(wb,'거래처목록.xlsx');}
 
-function exportStoreExcel(){
-  const rows=[['가맹점코드','가맹점명','대표자명','사업자번호','가상계좌번호','연결모계좌','한도금액','초기미수금','상태','비고1','비고2']];
-  storeFiltered.forEach(r=>rows.push([r.code,r.name,r.owner,r.bizNo,r.virtualAccNo,r.parentAcc,r.limit,r.initBalance,r.status,r.note1,r.note2]));
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'거래처');
-  XLSX.writeFile(wb,'거래처목록.xlsx');
-}
-// 가맹점코드로 거래처 정보 조회 (공통 유틸)
-function getStoreByCode(code) {
-  return storeData.find(s => s.code === code) || null;
-}
-
-// 매출내역 테이블에서 더블클릭시 가맹점 정보 툴팁
-function showStoreTip(code) {
-  const s = getStoreByCode(code);
-  if(!s) return;
-  alert(`[${s.code}] ${s.name}\n대표자: ${s.owner||'-'}\n사업자: ${s.bizNo||'-'}\n한도: ${s.limit?s.limit.toLocaleString():'미설정'}\n상태: ${s.status}`);
-}
 // ===== 미수금관리 =====
-function applyArFilter() {
-  const start   = document.getElementById('ar-f-start').value;
-  const end     = document.getElementById('ar-f-end').value;
-  const keyword = document.getElementById('ar-f-keyword').value.trim().toLowerCase();
-  const status  = document.getElementById('ar-f-status').value;
-  const arType  = document.getElementById('ar-f-ar').value;
-
-  // 가맹점 기준으로 집계
-  let stores = storeData.filter(s => {
-    if(status && s.status !== status) return false;
-    if(keyword && !s.code.toLowerCase().includes(keyword) &&
-       !s.name.toLowerCase().includes(keyword)) return false;
+function applyArFilter(){
+  const start=document.getElementById('ar-f-start').value, end=document.getElementById('ar-f-end').value;
+  const keyword=document.getElementById('ar-f-keyword').value.trim().toLowerCase();
+  const status=document.getElementById('ar-f-status').value, arType=document.getElementById('ar-f-ar').value;
+  let stores=storeData.filter(s=>{
+    if(status&&s.status!==status)return false;
+    if(keyword&&!s.code.toLowerCase().includes(keyword)&&!(s.name||'').toLowerCase().includes(keyword))return false;
     return true;
   });
-
-  const result = stores.map(s => {
-    // 기간 매출 합계
-    const salesAmt = salesData
-      .filter(r => r.storeCode === s.code && r.date >= start && r.date <= end)
-      .reduce((sum, r) => sum + r.outTotal, 0);
-    const salesCnt = salesData
-      .filter(r => r.storeCode === s.code && r.date >= start && r.date <= end).length;
-
-    // 기간 입금 합계
-    const incomeAmt = depData
-      .filter(r => r.storeCode === s.code && r.date >= start && r.date <= end)
-      .reduce((sum, r) => sum + r.inAmt, 0);
-    const incomeCnt = depData
-      .filter(r => r.storeCode === s.code && r.date >= start && r.date <= end).length;
-
-    // 미수금 = 초기미수금 + 기간매출 - 기간입금
-    const ar = (s.initBalance || 0) + salesAmt - incomeAmt;
-    // 한도잔여 = 한도 - 미수금
-    const limitLeft = (s.limit || 0) - ar;
-
-    return { ...s, salesAmt, salesCnt, incomeAmt, incomeCnt, ar, limitLeft };
+  const result=stores.map(s=>{
+    const salesRows=salesData.filter(r=>r.storeCode===s.code&&r.date>=start&&r.date<=end);
+    const salesAmt=salesRows.reduce((sum,r)=>sum+(r.outTotal||0),0), salesCnt=salesRows.length;
+    const incomeRows=depData.filter(r=>r.storeCode===s.code&&r.date>=start&&r.date<=end);
+    const incomeAmt=incomeRows.reduce((sum,r)=>sum+(r.inAmt||0),0), incomeCnt=incomeRows.length;
+    const ar=(s.initBalance||0)+salesAmt-incomeAmt;
+    const limitLeft=(s.limit||0)-ar;
+    return{...s,salesAmt,salesCnt,incomeAmt,incomeCnt,ar,limitLeft};
   });
-
-  // 미수금 필터
-  let filtered = result;
-  if(arType === 'over')  filtered = result.filter(r => r.ar > 0);
-  if(arType === 'zero')  filtered = result.filter(r => r.ar === 0);
-  if(arType === 'minus') filtered = result.filter(r => r.ar < 0);
-
-  // 미수금 내림차순 정렬
-  filtered.sort((a,b) => b.ar - a.ar);
-
+  let filtered=result;
+  if(arType==='over')filtered=result.filter(r=>r.ar>0);
+  if(arType==='zero')filtered=result.filter(r=>r.ar===0);
+  if(arType==='minus')filtered=result.filter(r=>r.ar<0);
+  filtered.sort((a,b)=>b.ar-a.ar);
   renderAr(filtered);
 }
-
-function renderAr(data) {
-  const tbody = document.getElementById('ar-tbody');
-  const tfoot = document.getElementById('ar-tfoot');
-  if(!tbody) return;
-  tbody.innerHTML = '';
-
-  data.forEach(r => {
-    const arColor     = r.ar > 0 ? '#D42020' : r.ar < 0 ? '#0F6E56' : '#333';
-    const limitColor  = r.limitLeft < 0 ? '#D42020' : '#0F6E56';
-    const statusColor = r.status==='정상'?'#0F6E56': r.status==='휴업'?'#F0921E':'#D42020';
-    const statusBg    = r.status==='정상'?'#E1F5EE': r.status==='휴업'?'#FFF3E0':'#FAECE7';
-
-    tbody.innerHTML += `<tr>
-      <td style="font-weight:600;color:#2563eb;">${r.code}</td>
-      <td style="font-weight:500;">${r.name}</td>
-      <td style="font-size:11px;">${r.owner||'-'}</td>
-      <td><span style="font-size:10px;padding:2px 8px;border-radius:4px;
-          background:${statusBg};color:${statusColor};
-          border:0.5px solid ${statusColor}55;">${r.status}</span></td>
-      <td class="num">${r.limit ? r.limit.toLocaleString() : '-'}</td>
-      <td class="num">${r.initBalance ? r.initBalance.toLocaleString() : '0'}</td>
-      <td class="num">${r.salesAmt ? r.salesAmt.toLocaleString() : '-'}
-        <span style="font-size:10px;color:#aaa;">${r.salesCnt?'('+r.salesCnt+'건)':''}</span>
-      </td>
-      <td class="num" style="color:#2563eb;">${r.incomeAmt ? r.incomeAmt.toLocaleString() : '-'}
-        <span style="font-size:10px;color:#aaa;">${r.incomeCnt?'('+r.incomeCnt+'건)':''}</span>
-      </td>
-      <td class="num" style="font-weight:700;color:${arColor};">
-        ${r.ar !== 0 ? (r.ar > 0 ? '' : '-') + '₩' + Math.abs(r.ar).toLocaleString() : '₩0'}
-      </td>
-      <td class="num" style="color:${limitColor};">
-        ${r.limit ? (r.limitLeft > 0 ? '' : '-') + '₩' + Math.abs(r.limitLeft).toLocaleString() : '-'}
-      </td>
-      <td style="font-size:11px;">${r.note1||'-'}</td>
-    </tr>`;
+function renderAr(data){
+  const tbody=document.getElementById('ar-tbody'), tfoot=document.getElementById('ar-tfoot');
+  if(!tbody)return;tbody.innerHTML='';
+  data.forEach(r=>{
+    const ac=r.ar>0?'#D42020':r.ar<0?'#0F6E56':'#333';
+    const lc=r.limitLeft<0?'#D42020':'#0F6E56';
+    const sc=r.status==='정상'?'#0F6E56':r.status==='휴업'?'#F0921E':'#D42020';
+    const sb=r.status==='정상'?'#E1F5EE':r.status==='휴업'?'#FFF3E0':'#FAECE7';
+    tbody.innerHTML+=`<tr><td style="font-weight:600;color:#2563eb;">${r.code}</td><td style="font-weight:500;">${r.name}</td><td style="font-size:11px;">${r.owner||'-'}</td><td><span style="font-size:10px;padding:2px 8px;border-radius:4px;background:${sb};color:${sc};border:0.5px solid ${sc}55;">${r.status}</span></td><td class="num">${r.limit?r.limit.toLocaleString():'-'}</td><td class="num">${r.initBalance?r.initBalance.toLocaleString():'0'}</td><td class="num">${r.salesAmt?r.salesAmt.toLocaleString():'-'}<span style="font-size:10px;color:#aaa;">${r.salesCnt?'('+r.salesCnt+'건)':''}</span></td><td class="num" style="color:#2563eb;">${r.incomeAmt?r.incomeAmt.toLocaleString():'-'}<span style="font-size:10px;color:#aaa;">${r.incomeCnt?'('+r.incomeCnt+'건)':''}</span></td><td class="num" style="font-weight:700;color:${ac};">${r.ar!==0?(r.ar>0?'':'-')+'₩'+Math.abs(r.ar).toLocaleString():'₩0'}</td><td class="num" style="color:${lc};">${r.limit?(r.limitLeft>0?'':'-')+'₩'+Math.abs(r.limitLeft).toLocaleString():'-'}</td><td style="font-size:11px;">${r.note1||'-'}</td></tr>`;
   });
-
-  // 합계행
-  const totSales  = data.reduce((s,r) => s + r.salesAmt, 0);
-  const totIncome = data.reduce((s,r) => s + r.incomeAmt, 0);
-  const totAr     = data.reduce((s,r) => s + r.ar, 0);
-  tfoot.innerHTML = `<tr style="background:#f9f9f9;font-weight:600;font-size:12px;">
-    <td colspan="6" style="padding:10px 12px;">합계 (${data.length}개 가맹점)</td>
-    <td class="num" style="padding:10px 12px;">₩${totSales.toLocaleString()}</td>
-    <td class="num" style="padding:10px 12px;color:#2563eb;">₩${totIncome.toLocaleString()}</td>
-    <td class="num" style="padding:10px 12px;color:${totAr>0?'#D42020':'#0F6E56'};">
-      ${totAr>0?'':'- '}₩${Math.abs(totAr).toLocaleString()}
-    </td>
-    <td colspan="2"></td>
-  </tr>`;
-
-  // 요약 카드
-  const overStores = data.filter(r => r.ar > 0);
-  document.getElementById('ar-total').textContent     = '₩' + totAr.toLocaleString();
-  document.getElementById('ar-total-cnt').textContent = data.length + '개 가맹점';
-  document.getElementById('ar-over').textContent      = '₩' + overStores.reduce((s,r)=>s+r.ar,0).toLocaleString();
-  document.getElementById('ar-over-cnt').textContent  = overStores.length + '개';
-  document.getElementById('ar-sales').textContent     = '₩' + totSales.toLocaleString();
-  document.getElementById('ar-sales-cnt').textContent = data.reduce((s,r)=>s+r.salesCnt,0) + '건';
-  document.getElementById('ar-income').textContent    = '₩' + totIncome.toLocaleString();
-  document.getElementById('ar-income-cnt').textContent= data.reduce((s,r)=>s+r.incomeCnt,0) + '건';
-  document.getElementById('ar-count').textContent     = `(${data.length}건)`;
+  const tS=data.reduce((s,r)=>s+r.salesAmt,0), tI=data.reduce((s,r)=>s+r.incomeAmt,0), tA=data.reduce((s,r)=>s+r.ar,0);
+  tfoot.innerHTML=`<tr style="background:#f9f9f9;font-weight:600;font-size:12px;"><td colspan="6" style="padding:10px 12px;">합계 (${data.length}개 가맹점)</td><td class="num" style="padding:10px 12px;">₩${tS.toLocaleString()}</td><td class="num" style="padding:10px 12px;color:#2563eb;">₩${tI.toLocaleString()}</td><td class="num" style="padding:10px 12px;color:${tA>0?'#D42020':'#0F6E56'};">${tA>0?'':'-'}₩${Math.abs(tA).toLocaleString()}</td><td colspan="2"></td></tr>`;
+  const over=data.filter(r=>r.ar>0);
+  document.getElementById('ar-total').textContent='₩'+tA.toLocaleString();
+  document.getElementById('ar-total-cnt').textContent=data.length+'개 가맹점';
+  document.getElementById('ar-over').textContent='₩'+over.reduce((s,r)=>s+r.ar,0).toLocaleString();
+  document.getElementById('ar-over-cnt').textContent=over.length+'개';
+  document.getElementById('ar-sales').textContent='₩'+tS.toLocaleString();
+  document.getElementById('ar-sales-cnt').textContent=data.reduce((s,r)=>s+r.salesCnt,0)+'건';
+  document.getElementById('ar-income').textContent='₩'+tI.toLocaleString();
+  document.getElementById('ar-income-cnt').textContent=data.reduce((s,r)=>s+r.incomeCnt,0)+'건';
+  document.getElementById('ar-count').textContent=`(${data.length}건)`;
 }
+function resetArFilter(){document.getElementById('ar-f-start').value='2026-06-01';document.getElementById('ar-f-end').value='2026-06-30';document.getElementById('ar-f-keyword').value='';document.getElementById('ar-f-status').value='';document.getElementById('ar-f-ar').value='';applyArFilter();}
+function exportArExcel(){const rows=[['가맹점코드','가맹점명','대표자','상태','한도금액','초기미수금','기간매출','기간입금','미수금','한도잔여','비고1']];document.querySelectorAll('#ar-tbody tr').forEach(tr=>{rows.push([...tr.querySelectorAll('td')].map(td=>td.textContent.trim()));});const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'미수금현황');XLSX.writeFile(wb,'미수금현황_'+new Date().toLocaleDateString('ko-KR')+'.xlsx');}
 
-function resetArFilter() {
-  document.getElementById('ar-f-start').value   = '2026-06-01';
-  document.getElementById('ar-f-end').value     = '2026-06-30';
-  document.getElementById('ar-f-keyword').value = '';
-  document.getElementById('ar-f-status').value  = '';
-  document.getElementById('ar-f-ar').value      = '';
-  applyArFilter();
+// ===== 리포트 =====
+function applyRptFilter(){
+  const start=document.getElementById('rpt-f-start').value, end=document.getElementById('rpt-f-end').value, menu=document.getElementById('rpt-f-menu').value;
+  let rows=[];
+  if(menu==='all'||menu==='sales'){salesData.forEach(r=>{if(r.date>=start&&r.date<=end)rows.push({date:r.date,section:'매출관리',account:r.storeCode?'가맹점 매출':'기타 매출',target:r.storeName||'-',inAmt:r.outTotal||0,outAmt:0,amt:r.outTotal||0,note:r.productName||''});});}
+  if(menu==='all'||menu==='deposit'){depData.forEach(r=>{if(r.date>=start&&r.date<=end)rows.push({date:r.date,section:'예금관리',account:r.noteType||'기타',target:r.storeCode||r.accNo||'-',inAmt:r.inAmt||0,outAmt:r.outAmt||0,amt:(r.inAmt||0)-(r.outAmt||0),note:r.detail||''});});}
+  if(menu==='all'||menu==='account'){accData.forEach(r=>{rows.push({date:'-',section:'계좌관리',account:'계좌잔액',target:r.alias||r.bank,inAmt:r.curAmt||0,outAmt:0,amt:r.curAmt||0,note:r.accNo});});loanData.forEach(r=>{rows.push({date:'-',section:'대출관리',account:'대출잔액',target:r.bank,inAmt:0,outAmt:r.balance||0,amt:-(r.balance||0),note:r.collateral||''});});}
+  rows.sort((a,b)=>a.date.localeCompare(b.date));
+  renderRpt(rows);
 }
+function renderRpt(rows){
+  const salesFr=rows.filter(r=>r.account==='가맹점 매출'), salesEtc=rows.filter(r=>r.account==='기타 매출');
+  const inFr=rows.filter(r=>r.section==='예금관리'&&r.account==='가맹점 입금');
+  const inEtc=rows.filter(r=>r.section==='예금관리'&&r.account!=='가맹점 입금');
+  const depFinal=(()=>{const codes=[...new Set(depData.map(r=>r.code))];return codes.reduce((s,code)=>{const items=depData.filter(x=>x.code===code).sort((a,b)=>b.date.localeCompare(a.date));return s+(items[0]?items[0].finalBal||0:0);},0);})();
+  document.getElementById('rpt-sales-fr').textContent='₩'+salesFr.reduce((s,r)=>s+r.amt,0).toLocaleString();
+  document.getElementById('rpt-sales-fr-cnt').textContent=salesFr.length+'건';
+  document.getElementById('rpt-sales-etc').textContent='₩'+salesEtc.reduce((s,r)=>s+r.amt,0).toLocaleString();
+  document.getElementById('rpt-sales-etc-cnt').textContent=salesEtc.length+'건';
+  document.getElementById('rpt-in-fr').textContent='₩'+inFr.reduce((s,r)=>s+r.inAmt,0).toLocaleString();
+  document.getElementById('rpt-in-fr-cnt').textContent=inFr.length+'건';
+  document.getElementById('rpt-in-etc').textContent='₩'+inEtc.reduce((s,r)=>s+r.inAmt,0).toLocaleString();
+  document.getElementById('rpt-in-etc-cnt').textContent=inEtc.length+'건';
+  document.getElementById('rpt-final').textContent='₩'+depFinal.toLocaleString();
+  const accMap={};
+  rows.forEach(r=>{const key=r.section+'||'+r.account;if(!accMap[key])accMap[key]={section:r.section,account:r.account,cnt:0,inAmt:0,outAmt:0,amt:0};accMap[key].cnt++;accMap[key].inAmt+=r.inAmt;accMap[key].outAmt+=r.outAmt;accMap[key].amt+=r.amt;});
+  const accTbody=document.getElementById('rpt-acc-tbody');accTbody.innerHTML='';
+  Object.values(accMap).forEach(g=>{accTbody.innerHTML+=`<tr><td style="font-size:11px;padding:4px 8px;border-radius:4px;background:#f0f0f0;">${g.section}</td><td style="font-weight:500;">${g.account}</td><td class="num">${g.cnt}건</td><td class="num" style="color:#2563eb;">${g.inAmt>0?'₩'+g.inAmt.toLocaleString():'-'}</td><td class="num" style="color:#D42020;">${g.outAmt>0?'₩'+g.outAmt.toLocaleString():'-'}</td><td class="num" style="font-weight:600;">₩${g.amt.toLocaleString()}</td></tr>`;});
+  const tI=Object.values(accMap).reduce((s,g)=>s+g.inAmt,0), tO=Object.values(accMap).reduce((s,g)=>s+g.outAmt,0), tA=Object.values(accMap).reduce((s,g)=>s+g.amt,0);
+  accTbody.innerHTML+=`<tr style="background:#f9f9f9;font-weight:600;"><td colspan="2" style="padding:10px 12px;">합계</td><td class="num" style="padding:10px 12px;">${rows.length}건</td><td class="num" style="padding:10px 12px;color:#2563eb;">₩${tI.toLocaleString()}</td><td class="num" style="padding:10px 12px;color:#D42020;">₩${tO.toLocaleString()}</td><td class="num" style="padding:10px 12px;">₩${tA.toLocaleString()}</td></tr>`;
+  const detailTbody=document.getElementById('rpt-detail-tbody');detailTbody.innerHTML='';
+  rows.forEach(r=>{detailTbody.innerHTML+=`<tr><td>${r.date}</td><td style="font-size:11px;">${r.section}</td><td>${r.account}</td><td>${r.target}</td><td class="num" style="color:#2563eb;">${r.inAmt>0?'₩'+r.inAmt.toLocaleString():'-'}</td><td class="num" style="color:#D42020;">${r.outAmt>0?'₩'+r.outAmt.toLocaleString():'-'}</td><td class="num" style="font-weight:500;">₩${r.amt.toLocaleString()}</td><td style="font-size:11px;">${r.note}</td></tr>`;});
+  document.getElementById('rpt-count').textContent=`(${rows.length}건)`;
+}
+function resetRptFilter(){document.getElementById('rpt-f-start').value='2026-06-01';document.getElementById('rpt-f-end').value='2026-06-30';document.getElementById('rpt-f-menu').value='all';document.getElementById('rpt-acc-tbody').innerHTML='';document.getElementById('rpt-detail-tbody').innerHTML='';['rpt-sales-fr','rpt-sales-etc','rpt-in-fr','rpt-in-etc','rpt-final'].forEach(id=>document.getElementById(id).textContent='₩0');}
+function exportRptExcel(){const rows=[['일자','구분','계정과목','거래처/매장','입금','출금','금액','비고']];document.querySelectorAll('#rpt-detail-tbody tr').forEach(tr=>{rows.push([...tr.querySelectorAll('td')].map(td=>td.textContent.trim()));});const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'리포트');XLSX.writeFile(wb,'리포트_'+new Date().toLocaleDateString('ko-KR')+'.xlsx');}
 
-function exportArExcel() {
-  const rows = [['가맹점코드','가맹점명','대표자','상태','한도금액','초기미수금','기간매출','기간입금','미수금','한도잔여','비고1']];
-  document.querySelectorAll('#ar-tbody tr').forEach(tr => {
-    const tds = [...tr.querySelectorAll('td')].map(td => td.textContent.trim());
-    rows.push(tds);
-  });
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), '미수금현황');
-  XLSX.writeFile(wb, '미수금현황_' + new Date().toLocaleDateString('ko-KR') + '.xlsx');
-}  
+// ===== 초기화 =====
+initFirebase();
+renderTable(filteredData);
 </script>
 </body>
 </html>
