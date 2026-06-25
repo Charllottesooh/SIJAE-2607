@@ -1174,10 +1174,16 @@ function recalcDepBalances(){
   const totIn=data.reduce((s,r)=>s+(r.inAmt||0),0);
 const totOut=data.reduce((s,r)=>s+(r.outAmt||0),0);
 
-// 계좌별 첫 거래 전잔액 합계
+// 계좌별 첫 거래 전잔액 합계 (거래없는 계좌는 현재잔액으로)
 const firstByAcc={};
+depAccounts.forEach(a=>{
+  const acc=accData.find(x=>x.code===a.code);
+  firstByAcc[a.code]=acc?(acc.curAmt||0):0;
+});
 [...data].sort((a,b)=>a.date.localeCompare(b.date)||(a.id||0)-(b.id||0)).forEach(r=>{
-  if(!firstByAcc[r.code])firstByAcc[r.code]=r.prevBal||0;
+  if(firstByAcc[r.code]===undefined||firstByAcc[r.code]===null){
+    firstByAcc[r.code]=r.prevBal||0;
+  }
 });
 const totPrev=Object.values(firstByAcc).reduce((s,v)=>s+v,0);
 
