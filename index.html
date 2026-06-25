@@ -997,7 +997,31 @@ function exportExcel(){
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'매출내역');
   XLSX.writeFile(wb,'시재_매출매입내역_202607부터_내앱백업자료임.xlsx');
 }
-function saveImage(){html2canvas(document.getElementById('content')).then(canvas=>{const a=document.createElement('a');a.download='시재보고2607_'+new Date().toLocaleDateString('ko-KR')+'.png';a.href=canvas.toDataURL();a.click();});}
+function saveImage(){
+  const content = document.getElementById('content');
+  const scrollTop = content.scrollTop;
+  content.scrollTop = 0;
+  const fullHeight = content.scrollHeight;
+  const origOverflow = content.style.overflow;
+  content.style.overflow = 'visible';
+  content.style.height = fullHeight + 'px';
+  html2canvas(content, {
+    scrollX: 0, scrollY: 0,
+    width: content.scrollWidth,
+    height: fullHeight,
+    windowWidth: content.scrollWidth,
+    windowHeight: fullHeight,
+    useCORS: true
+  }).then(canvas=>{
+    content.style.overflow = origOverflow;
+    content.style.height = '';
+    content.scrollTop = scrollTop;
+    const a=document.createElement('a');
+    a.download='시재보고2607_'+new Date().toLocaleDateString('ko-KR')+'.png';
+    a.href=canvas.toDataURL();
+    a.click();
+  });
+}
 function showStoreTip(code){const s=getStoreByCode(code);if(!s)return;alert(`[${s.code}] ${s.name}\n대표자: ${s.owner||'-'}\n사업자: ${s.bizNo||'-'}\n한도: ${s.limit?s.limit.toLocaleString():'미설정'}\n상태: ${s.status}`);}
 
 // ===== 매출계산서 =====
@@ -1012,11 +1036,15 @@ function applyInvoiceFilter(){
   const type=document.getElementById('inv-f-type').value, tax=document.getElementById('inv-f-tax').value;
   const keyword=document.getElementById('inv-f-keyword').value.trim().toLowerCase();
   let data=salesData.filter(r=>{
-    if(start&&r.date<start)return false; if(end&&r.date>end)return false;
+    if(start&&r.date<start)return false;
+    if(end&&r.date>end)return false;
     if(tax&&r.taxType!==tax)return false;
     if(keyword&&!r.storeName.toLowerCase().includes(keyword)&&!r.storeCode.toLowerCase().includes(keyword)&&!r.productName.toLowerCase().includes(keyword)&&!r.productCode.toLowerCase().includes(keyword))return false;
     return true;
   });
+  if(type==='store') renderInvoiceByStore(data); else renderInvoiceByProduct(data);
+  closeInvDetail();
+}
   const taxable=data.filter(r=>r.taxType==='과세'), exempt=data.filter(r=>r.taxType==='면세');
   document.getElementById('inv-taxable').textContent='₩'+taxable.reduce((s,r)=>s+(r.outTotal||0),0).toLocaleString();
   document.getElementById('inv-taxable-cnt').textContent=taxable.length+'건';
