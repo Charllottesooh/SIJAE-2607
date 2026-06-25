@@ -975,11 +975,33 @@ function exportExcel(){
 }
 
 function saveImage(){
+  // 현재 페이지와 날짜 확인
+  const pageTitle = document.getElementById('page-title').textContent;
+  let dateStr = '';
+  const activePage = document.querySelector('.page.active');
+  if(activePage){
+    const start = activePage.querySelector('input[type="date"]');
+    const end = activePage.querySelectorAll('input[type="date"]')[1];
+    if(start && end) dateStr = start.value + ' ~ ' + end.value;
+    else if(start) dateStr = start.value;
+  }
+
+  // 타이틀 바 생성
+  const titleBar = document.createElement('div');
+  titleBar.style.cssText = 'background:#090909;color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;margin-bottom:0;';
+  titleBar.innerHTML = `
+    <div style="font-size:18px;font-weight:700;">일일시재보고 · ${pageTitle}</div>
+    <div style="font-size:15px;font-weight:600;color:#F0921E;">조회기간: ${dateStr}</div>
+  `;
+
   const content = document.getElementById('content');
+  content.insertBefore(titleBar, content.firstChild);
+
   const origHeight = content.style.height;
   const origOverflow = content.style.overflow;
   content.style.height = content.scrollHeight + 'px';
   content.style.overflow = 'visible';
+
   html2canvas(content, {
     scrollX:0, scrollY:0,
     width: content.scrollWidth,
@@ -988,8 +1010,9 @@ function saveImage(){
   }).then(canvas=>{
     content.style.height = origHeight;
     content.style.overflow = origOverflow;
+    content.removeChild(titleBar);
     const a=document.createElement('a');
-    a.download='시재보고2607_'+new Date().toLocaleDateString('ko-KR')+'.png';
+    a.download='일일시재보고_'+pageTitle+'_'+new Date().toLocaleDateString('ko-KR')+'.png';
     a.href=canvas.toDataURL();
     a.click();
   });
