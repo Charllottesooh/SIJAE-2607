@@ -216,12 +216,13 @@ input[type="checkbox"] { cursor: pointer; }
           <button onclick="resetInvoiceFilter()">초기화</button>
           <button onclick="exportInvoiceExcel()">엑셀 다운로드</button>
         </div>
-        <div class="card-section" style="grid-template-columns:repeat(4,1fr);">
-          <div class="summary-card color-red"><div class="label">과세 합계</div><div class="value" id="inv-taxable">₩0</div><div class="sub" id="inv-taxable-cnt">0건</div></div>
-          <div class="summary-card color-green"><div class="label">면세 합계</div><div class="value" id="inv-exempt">₩0</div><div class="sub" id="inv-exempt-cnt">0건</div></div>
-          <div class="summary-card color-orange"><div class="label">부가세 합계</div><div class="value" id="inv-vat">₩0</div></div>
-          <div class="summary-card color-blue"><div class="label">총 합계금액</div><div class="value" id="inv-total">₩0</div><div class="sub" id="inv-total-cnt">0건</div></div>
-        </div>
+        <div class="card-section" style="grid-template-columns:repeat(5,1fr);">
+  <div class="summary-card color-red"><div class="label">가맹점 매출</div><div class="value" id="rpt-sales-fr">₩0</div><div class="sub" id="rpt-sales-fr-cnt">0건</div></div>
+  <div class="summary-card color-blue"><div class="label">가맹점 입금</div><div class="value" id="rpt-in-fr">₩0</div><div class="sub" id="rpt-in-fr-cnt">0건</div></div>
+  <div class="summary-card color-purple"><div class="label">기타 입금</div><div class="value" id="rpt-in-etc">₩0</div><div class="sub" id="rpt-in-etc-cnt">0건</div></div>
+  <div class="summary-card color-green"><div class="label">계좌잔액</div><div class="value" id="rpt-final">₩0</div><div class="sub">예금 기준</div></div>
+  <div class="summary-card color-orange"><div class="label">대출잔액</div><div class="value" id="rpt-loan">₩0</div><div class="sub" id="rpt-loan-cnt">0건</div></div>
+</div>
         <div class="table-wrap">
           <div class="table-header">
             <span class="title" id="inv-table-title">매장별 과세/면세 요약</span>
@@ -1481,47 +1482,100 @@ function applyRptFilter(){
   renderRpt(rows);
 }
 function renderRpt(rows){
-  const salesFr=rows.filter(r=>r.account==='가맹점 매출'), salesEtc=rows.filter(r=>r.account==='기타 매출');
+  const salesFr=rows.filter(r=>r.account==='가맹점 매출');
   const inFr=rows.filter(r=>r.section==='예금관리'&&r.account==='가맹점 입금');
   const inEtc=rows.filter(r=>r.section==='예금관리'&&r.account!=='가맹점 입금');
+
   const depFinal=(()=>{
-  const latestMap={};
-  depData.forEach(r=>{
-    if(!latestMap[r.code]||r.date>latestMap[r.code].date){
-      latestMap[r.code]=r;
-    }
-  });
-  return Object.values(latestMap).reduce((s,r)=>s+(r.finalBal||0),0);
-})();
+    const latestMap={};
+    depData.forEach(r=>{
+      if(!latestMap[r.code]||r.date>latestMap[r.code].date) latestMap[r.code]=r;
+    });
+    return Object.values(latestMap).reduce((s,r)=>s+(r.finalBal||0),0);
+  })();
+  const loanTotal=loanData.reduce((s,r)=>s+(r.balance||0),0);
+
   document.getElementById('rpt-sales-fr').textContent='₩'+salesFr.reduce((s,r)=>s+r.amt,0).toLocaleString();
   document.getElementById('rpt-sales-fr-cnt').textContent=salesFr.length+'건';
-  document.getElementById('rpt-sales-etc').textContent='₩'+salesEtc.reduce((s,r)=>s+r.amt,0).toLocaleString();
-  document.getElementById('rpt-sales-etc-cnt').textContent=salesEtc.length+'건';
   document.getElementById('rpt-in-fr').textContent='₩'+inFr.reduce((s,r)=>s+r.inAmt,0).toLocaleString();
   document.getElementById('rpt-in-fr-cnt').textContent=inFr.length+'건';
   document.getElementById('rpt-in-etc').textContent='₩'+inEtc.reduce((s,r)=>s+r.inAmt,0).toLocaleString();
   document.getElementById('rpt-in-etc-cnt').textContent=inEtc.length+'건';
   document.getElementById('rpt-final').textContent='₩'+depFinal.toLocaleString();
+  document.getElementById('rpt-loan').textContent='₩'+loanTotal.toLocaleString();
+  document.getElementById('rpt-loan-cnt').textContent=loanData.length+'건';
+
+  // 계정별 합계 (대출관리 제외)
   const accMap={};
-  rows.forEach(r=>{const key=r.section+'||'+r.account;if(!accMap[key])accMap[key]={section:r.section,account:r.account,cnt:0,inAmt:0,outAmt:0,amt:0};accMap[key].cnt++;accMap[key].inAmt+=r.inAmt;accMap[key].outAmt+=r.outAmt;accMap[key].amt+=r.amt;});
+  rows.filter(r=>r.section!=='대출관리').forEach(r=>{
+    const key=r.section+'||'+r.account;
+    if(!accMap[key])accMap[key]={section:r.section,account:r.account,cnt:0,inAmt:0,outAmt:0,amt:0};
+    accMap[key].cnt++;accMap[key].inAmt+=r.inAmt;accMap[key].outAmt+=r.outAmt;accMap[key].amt+=r.amt;
+  });
+
+  // 대출관리 별도
+  const loanMap={};
+  rows.filter(r=>r.section==='대출관리').forEach(r=>{
+    const key=r.section+'||'+r.account;
+    if(!loanMap[key])loanMap[key]={section:r.section,account:r.account,cnt:0,inAmt:0,outAmt:0,amt:0};
+    loanMap[key].cnt++;loanMap[key].inAmt+=r.inAmt;loanMap[key].outAmt+=r.outAmt;loanMap[key].amt+=r.amt;
+  });
+
   const accTbody=document.getElementById('rpt-acc-tbody');
-const accHtml=Object.values(accMap).map(g=>`<tr>...</tr>`).join('');
-accTbody.innerHTML=accHtml;
-  Object.values(accMap).forEach(g=>{accTbody.innerHTML+=`<tr><td style="font-size:11px;padding:4px 8px;border-radius:4px;background:#f0f0f0;">${g.section}</td><td style="font-weight:500;">${g.account}</td><td class="num">${g.cnt}건</td><td class="num" style="color:#2563eb;">${g.inAmt>0?'₩'+g.inAmt.toLocaleString():'-'}</td><td class="num" style="color:#D42020;">${g.outAmt>0?'₩'+g.outAmt.toLocaleString():'-'}</td><td class="num" style="font-weight:600;">₩${g.amt.toLocaleString()}</td></tr>`;});
-  const tI=Object.values(accMap).reduce((s,g)=>s+g.inAmt,0), tO=Object.values(accMap).reduce((s,g)=>s+g.outAmt,0), tA=Object.values(accMap).reduce((s,g)=>s+g.amt,0);
-  accTbody.innerHTML+=`<tr style="background:#f9f9f9;font-weight:600;"><td colspan="2" style="padding:10px 12px;">합계</td><td class="num" style="padding:10px 12px;">${rows.length}건</td><td class="num" style="padding:10px 12px;color:#2563eb;">₩${tI.toLocaleString()}</td><td class="num" style="padding:10px 12px;color:#D42020;">₩${tO.toLocaleString()}</td><td class="num" style="padding:10px 12px;">₩${tA.toLocaleString()}</td></tr>`;
+  accTbody.innerHTML='';
+
+  // 일반 항목
+  Object.values(accMap).forEach(g=>{
+    accTbody.innerHTML+=`<tr>
+      <td style="font-size:13px;font-weight:700;padding:4px 8px;border-radius:4px;background:#f0f0f0;">${g.section}</td>
+      <td style="font-weight:500;">${g.account}</td>
+      <td class="num">${g.cnt}건</td>
+      <td class="num" style="color:#2563eb;">${g.inAmt>0?'₩'+g.inAmt.toLocaleString():'-'}</td>
+      <td class="num" style="color:#D42020;">${g.outAmt>0?'₩'+g.outAmt.toLocaleString():'-'}</td>
+      <td class="num" style="font-weight:600;">₩${g.amt.toLocaleString()}</td>
+    </tr>`;
+  });
+
+  // 합계
+  const tI=Object.values(accMap).reduce((s,g)=>s+g.inAmt,0);
+  const tO=Object.values(accMap).reduce((s,g)=>s+g.outAmt,0);
+  const tA=Object.values(accMap).reduce((s,g)=>s+g.amt,0);
+  const tCnt=Object.values(accMap).reduce((s,g)=>s+g.cnt,0);
+  accTbody.innerHTML+=`<tr style="background:#f9f9f9;font-weight:600;">
+    <td colspan="2" style="padding:10px 12px;">합계</td>
+    <td class="num" style="padding:10px 12px;">${tCnt}건</td>
+    <td class="num" style="padding:10px 12px;color:#2563eb;">₩${tI.toLocaleString()}</td>
+    <td class="num" style="padding:10px 12px;color:#D42020;">₩${tO.toLocaleString()}</td>
+    <td class="num" style="padding:10px 12px;">₩${tA.toLocaleString()}</td>
+  </tr>`;
+
+  // 대출관리 별도 하단
+  if(Object.values(loanMap).length>0){
+    accTbody.innerHTML+=`<tr><td colspan="6" style="padding:10px 12px;font-size:12px;color:#888;border-top:2px solid #e0e0e0;">※ 대출 현황 (합계 미포함)</td></tr>`;
+    Object.values(loanMap).forEach(g=>{
+      accTbody.innerHTML+=`<tr style="background:#fff8f8;">
+        <td style="font-size:13px;font-weight:700;padding:4px 8px;border-radius:4px;background:#fde8e8;color:#D42020;">${g.section}</td>
+        <td style="font-weight:500;">${g.account}</td>
+        <td class="num">${g.cnt}건</td>
+        <td class="num" style="color:#2563eb;">${g.inAmt>0?'₩'+g.inAmt.toLocaleString():'-'}</td>
+        <td class="num" style="color:#D42020;">${g.outAmt>0?'₩'+g.outAmt.toLocaleString():'-'}</td>
+        <td class="num" style="font-weight:600;color:#D42020;">₩${Math.abs(g.amt).toLocaleString()}</td>
+      </tr>`;
+    });
+  }
+
+  // 전체 거래내역
   const detailTbody=document.getElementById('rpt-detail-tbody');
-const detailHtml=rows.map(r=>`<tr>
-  <td>${r.date}</td>
-  <td style="font-size:11px;">${r.section}</td>
-  <td>${r.account}</td>
-  <td>${r.target}</td>
-  <td class="num" style="color:#2563eb;">${r.inAmt>0?'₩'+r.inAmt.toLocaleString():'-'}</td>
-  <td class="num" style="color:#D42020;">${r.outAmt>0?'₩'+r.outAmt.toLocaleString():'-'}</td>
-  <td class="num" style="font-weight:500;">₩${r.amt.toLocaleString()}</td>
-  <td style="font-size:11px;">${r.note}</td>
-</tr>`).join('');
-detailTbody.innerHTML=detailHtml;
+  detailTbody.innerHTML=rows.map(r=>`<tr>
+    <td>${r.date}</td>
+    <td style="font-size:11px;">${r.section}</td>
+    <td>${r.account}</td>
+    <td>${r.target}</td>
+    <td class="num" style="color:#2563eb;">${r.inAmt>0?'₩'+r.inAmt.toLocaleString():'-'}</td>
+    <td class="num" style="color:#D42020;">${r.outAmt>0?'₩'+r.outAmt.toLocaleString():'-'}</td>
+    <td class="num" style="font-weight:500;">₩${r.amt.toLocaleString()}</td>
+    <td style="font-size:11px;">${r.note}</td>
+  </tr>`).join('');
   document.getElementById('rpt-count').textContent=`(${rows.length}건)`;
 }
 function resetRptFilter(){document.getElementById('rpt-f-start').value='2026-06-01';document.getElementById('rpt-f-end').value='2026-06-30';document.getElementById('rpt-f-menu').value='all';document.getElementById('rpt-acc-tbody').innerHTML='';document.getElementById('rpt-detail-tbody').innerHTML='';['rpt-sales-fr','rpt-sales-etc','rpt-in-fr','rpt-in-etc','rpt-final'].forEach(id=>document.getElementById(id).textContent='₩0');}
