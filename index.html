@@ -699,6 +699,12 @@ async function loadFromFirebase() {
       storeData = stSnap;
       storeNextId = Math.max(...storeData.map(r=>r.id||0)) + 1;
     }
+    try {
+  const ntSnap = await load('noteTypes');
+  if(ntSnap.length) {
+    depNoteTypes = ntSnap.map(t=>({name:t.name, color:t.color}));
+  }
+} catch(e) {}
     setStatus('fb', true, 'Firebase 로드완료');
   } catch(e) {
     setStatus('fb', false, 'Firebase 로드오류');
@@ -1228,14 +1234,12 @@ function openDepAccMgr(){
 function addNoteType(){const val=document.getElementById('new-note-type').value.trim(),col=document.getElementById('new-note-color').value;if(!val)return;depNoteTypes.push({name:val,color:col});openDepAccMgr();}
 function deleteNoteType(i){depNoteTypes.splice(i,1);openDepAccMgr();}
 function saveNoteTypes(){
-  depNoteTypes = depNoteTypes.map((_,i)=>({
-    name: document.getElementById('nt-'+i).value.trim(),
-    color: document.getElementById('ntc-'+i).value
+  depNoteTypes=depNoteTypes.map((_,i)=>({
+    name:document.getElementById('nt-'+i).value.trim(),
+    color:document.getElementById('ntc-'+i).value
   })).filter(x=>x.name);
-  localStorage.setItem('depNoteTypes', JSON.stringify(depNoteTypes));
   closeAccModal();
   initDepSelects();
-  // Firebase에 저장
   saveToFirebase('noteTypes', depNoteTypes.map((t,i)=>({id:i+1,...t})));
 }
 
