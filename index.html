@@ -1276,7 +1276,8 @@ function saveDepRow(){
   if(editDepId){const i=depData.findIndex(x=>x.id===editDepId);depData[i]=row;}
   else depData.unshift(row);
   recalcDepBalances();
-  fbSaveOne('deposit', row);
+  // 같은 계좌 전체 재저장
+  depData.filter(r=>r.code===code).forEach(r=>fbSaveOne('deposit',r));
   closeAccModal(); applyDepFilter();
 }
 
