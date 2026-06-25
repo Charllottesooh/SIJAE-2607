@@ -1084,7 +1084,24 @@ function getNoteTypeBadge(noteType){
   const color=nt?nt.color:'#888', bg=nt?nt.color+'22':'#eee', border=nt?nt.color+'55':'#ddd';
   return `<span class="tax-badge" style="background:${bg};color:${color};border:0.5px solid ${border};">${noteType}</span>`;
 }
-
+function recalcDepBalances(){
+  const byAcc={};
+  depData.forEach(r=>{
+    if(!byAcc[r.code])byAcc[r.code]=[];
+    byAcc[r.code].push(r);
+  });
+  Object.keys(byAcc).forEach(code=>{
+    byAcc[code].sort((a,b)=>a.date.localeCompare(b.date));
+    const acc=accData.find(x=>x.code===code);
+    let bal=acc?(acc.curAmt||0):0;
+    byAcc[code].forEach(r=>{
+      r.prevBal=bal;
+      r.finalBal=bal+(r.inAmt||0)-(r.outAmt||0);
+      bal=r.finalBal;
+    });
+  });
+}
+  
 function renderDep(data){
   const tbody=document.getElementById('dep-tbody'), tfoot=document.getElementById('dep-tfoot');
   if(!tbody)return;
