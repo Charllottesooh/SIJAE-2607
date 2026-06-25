@@ -767,7 +767,7 @@ function showPage(key, el) {
   const titles = {sales:'매출내역',account:'계좌 및 대출',deposit:'입출금내역',report:'리포트',store:'거래처관리',arpage:'미수금관리'};
   document.getElementById('page-title').textContent = titles[key]||key;
   if(key==='account') renderAcc();
-  if(key==='deposit') { initDepSelects(); depFiltered=[...depData]; depFiltered.sort((a,b)=>b.date.localeCompare(a.date)); renderDep(depFiltered); }
+  if(key==='deposit') { recalcDepBalances(); initDepSelects(); depFiltered=[...depData]; depFiltered.sort((a,b)=>b.date.localeCompare(a.date)); renderDep(depFiltered); }
   if(key==='report') { resetRptFilter(); }
   if(key==='store') { initStoreAccSelect(); storeFiltered=[...storeData]; renderStore(storeFiltered); }
   if(key==='arpage') { applyArFilter(); }
