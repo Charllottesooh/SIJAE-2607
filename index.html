@@ -670,8 +670,8 @@ async function loadFromFirebase() {
       const snap = await getDocs(collection(fbDb, name));
       return snap.docs.map(d=>({...d.data(), _docId:d.id}));
     };
-    const [sSnap, dSnap, aSnap, lSnap, stSnap, ntSnap] = await Promise.all([
-  load('sales'), load('deposit'), load('accounts'), load('loans'), load('stores'), load('noteTypes')
+   const [sSnap, dSnap, aSnap, lSnap, stSnap] = await Promise.all([
+  load('sales'), load('deposit'), load('accounts'), load('loans'), load('stores')
 ]);
     if(sSnap.length) {
       salesData = sSnap;
@@ -680,8 +680,12 @@ async function loadFromFirebase() {
       filteredData = [...salesData];
       renderTable(filteredData);
     }
-    if(ntSnap.length) {
-  depNoteTypes = ntSnap.map(t=>({name:t.name, color:t.color}));
+ try {
+  const ntSnap = await load('noteTypes');
+  if(ntSnap.length) {
+    depNoteTypes = ntSnap.map(t=>({name:t.name, color:t.color}));
+  }
+} catch(e) { /* 없으면 기본값 유지 */ }
 }
     if(dSnap.length) {
       depData = dSnap;
