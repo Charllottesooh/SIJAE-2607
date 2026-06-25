@@ -973,8 +973,7 @@ function previewExcel(input){
     p.innerHTML=`✅ 총 <strong>${uploadedRows.length}건</strong> — 시트: ${info.join(', ')}`;
   };
   reader.readAsBinaryString(file);
-}
-function importExcel(){
+}function importExcel(){
   if(!uploadedRows.length){alert('파일을 먼저 선택해주세요.');return;}
   const cnt=uploadedRows.length;
   uploadedRows.forEach(r=>{
@@ -984,7 +983,9 @@ function importExcel(){
       else date=String(rawDate).replace(/\./g,'-').replace(/(\d{4})-(\d{1,2})-(\d{1,2})/,(_,y,m,d)=>`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
     }
     const outVat=parseFloat(r[11])||0, outTotal=parseFloat(r[12])||0;
-    salesData.unshift({id:nextId++,date,storeCode:String(r[1]||''),storeName:String(r[2]||''),productCode:String(r[3]||''),productName:String(r[4]||''),unit:String(r[5]||''),inQty:parseFloat(r[6])||0,outCount:parseFloat(r[7])||0,supply:parseFloat(r[8])||0,outQty:parseFloat(r[9])||0,outPrice:parseFloat(r[10])||0,outVat,outTotal,taxType:outVat>0?'과세':'면세',note:String(r[13]||'')});
+    const row={id:nextId++,date,storeCode:String(r[1]||''),storeName:String(r[2]||''),productCode:String(r[3]||''),productName:String(r[4]||''),unit:String(r[5]||''),inQty:parseFloat(r[6])||0,outCount:parseFloat(r[7])||0,supply:parseFloat(r[8])||0,outQty:parseFloat(r[9])||0,outPrice:parseFloat(r[10])||0,outVat,outTotal,taxType:outVat>0?'과세':'면세',note:String(r[13]||'')};
+    salesData.unshift(row);
+    fbSaveOne('sales', row); // ← Firebase 단건 저장
   });
   uploadedRows=[];
   document.getElementById('upload-preview').style.display='none';
@@ -1270,7 +1271,7 @@ function importDepExcel(){
     const amt=parseFloat(r[4])||0;
     const stCode=String(r[0]||'').trim();
     const stObj=storeData.find(x=>x.code===stCode);
-    depData.unshift({
+    const row={
       id:depNextId++, date,
       code:'ACC001', bank:'기업', accNo:'148-023233-04-166',
       storeCode:stCode,
@@ -1283,7 +1284,9 @@ function importDepExcel(){
       detail:String(r[5]||''),
       note:String(r[6]||''),
       modDate:String(r[7]||''),
-    });
+    };
+    depData.unshift(row);
+    fbSaveOne('deposit', row); // ← Firebase 단건 저장
   });
   depUploadRows=[];
   closeAccModal(); applyDepFilter();
