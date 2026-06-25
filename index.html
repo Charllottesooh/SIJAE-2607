@@ -1092,7 +1092,10 @@ function recalcDepBalances(){
     byAcc[r.code].push(r);
   });
   Object.keys(byAcc).forEach(code=>{
-    byAcc[code].sort((a,b)=>a.date.localeCompare(b.date));
+    byAcc[code].sort((a,b)=>{
+      if(a.date!==b.date)return a.date.localeCompare(b.date);
+      return (a.id||0)-(b.id||0);
+    });
     const acc=accData.find(x=>x.code===code);
     let bal=acc?(acc.curAmt||0):0;
     byAcc[code].forEach(r=>{
@@ -1102,13 +1105,34 @@ function recalcDepBalances(){
     });
   });
 }
-  
-function renderDep(data){
+  function renderDep(data){
   const tbody=document.getElementById('dep-tbody'), tfoot=document.getElementById('dep-tfoot');
   if(!tbody)return;
   tbody.innerHTML='';
-  data.forEach(r=>{
+
+  // 계좌코드순 정렬, 같은 계좌 내 날짜+id순
+  const sorted=[...data].sort((a,b)=>{
+    if(a.code!==b.code)return a.code.localeCompare(b.code);
+    if(a.date!==b.date)return a.date.localeCompare(b.date);
+    return (a.id||0)-(b.id||0);
+  });
+
+  // 거래없는 계좌도 표시 (계좌목록 기준)
+  const codesInData=new Set(sorted.map(r=>r.code));
+  const emptyAccs=depAccounts.filter(a=>!codesInData.has(a.code));
+
+  // 계좌별 배경색 (홀수번째 계좌 = 연한 파란색)
+  const accOrder={};
+  depAccounts.forEach((a,i)=>accOrder[a.code]=i);
+  const getBg=code=>{
+    const idx=depAccounts.findIndex(a=>a.code===code);
+    return idx%2===0?'#f7f9ff':'#ffffff';
+  };
+
+  sorted.forEach(r=>{
+    const bg=getBg(r.code);
     const tr=document.createElement('tr');
+    tr.style.background=bg;
     tr.innerHTML=`
       <td><input type="checkbox" class="dep-chk" value="${r.id}"></td>
       <td style="font-size:11px;color:#888;">${r.code||''}</td>
@@ -1117,7 +1141,7 @@ function renderDep(data){
       <td style="font-size:11px;color:#2563eb;font-weight:500;">${r.storeCode||'-'}</td>
       <td style="font-size:11px;">${r.storeName||'-'}</td>
       <td>${getNoteTypeBadge(r.noteType)}</td>
-      <td class="num">${(r.prevBal||0).toLocaleString()}</td>
+      <td class="num" style="color:#bbb;">${(r.prevBal||0).toLocaleString()}</td>
       <td class="num" style="color:#2563eb;font-weight:500;">${r.inAmt>0?r.inAmt.toLocaleString():'-'}</td>
       <td class="num" style="color:#D42020;font-weight:500;">${r.outAmt>0?r.outAmt.toLocaleString():'-'}</td>
       <td class="num" style="color:#0F6E56;font-weight:500;">${(r.finalBal||0).toLocaleString()}</td>
@@ -1127,8 +1151,31 @@ function renderDep(data){
     tr.ondblclick=()=>openDepModal(r.id);
     tbody.appendChild(tr);
   });
-  const totIn=data.reduce((s,r)=>s+(r.inAmt||0),0), totOut=data.reduce((s,r)=>s+(r.outAmt||0),0), totFinal=data.reduce((s,r)=>s+(r.finalBal||0),0), totPrev=data.reduce((s,r)=>s+(r.prevBal||0),0);
-  tfoot.innerHTML=`<tr style="background:#f9f9f9;font-weight:600;font-size:12px;"><td colspan="7" style="padding:10px 12px;">합계</td><td class="num" style="padding:10px 12px;">${totPrev.toLocaleString()}</td><td class="num" style="padding:10px 12px;color:#2563eb;">${totIn.toLocaleString()}</td><td class="num" style="padding:10px 12px;color:#D42020;">${totOut.toLocaleString()}</td><td class="num" style="padding:10px 12px;color:#0F6E56;">${totFinal.toLocaleString()}</td><td colspan="3"></td></tr>`;
+
+  // 거래없는 계좌 표시
+  emptyAccs.forEach(a=>{
+    const acc=accData.find(x=>x.code===a.code);
+    const bg=getBg(a.code);
+    const tr=document.createElement('tr');
+    tr.style.background=bg;
+    tr.innerHTML=`
+      <td></td>
+      <td style="font-size:11px;color:#888;">${a.code}</td>
+      <td>${a.bank}</td>
+      <td style="font-size:11px;">${a.accNo}</td>
+      <td>-</td><td>-</td><td>-</td>
+      <td class="num" style="color:#bbb;">${acc?(acc.curAmt||0).toLocaleString():'0'}</td>
+      <td>-</td><td>-</td>
+      <td class="num" style="color:#0F6E56;font-weight:500;">${acc?(acc.curAmt||0).toLocaleString():'0'}</td>
+      <td></td><td></td><td></td>`;
+    tbody.appendChild(tr);
+  });
+
+  const totIn=data.reduce((s,r)=>s+(r.inAmt||0),0);
+  const totOut=data.reduce((s,r)=>s+(r.outAmt||0),0);
+  const totFinal=data.reduce((s,r)=>s+(r.finalBal||0),0);
+  const totPrev=data.reduce((s,r)=>s+(r.prevBal||0),0);
+  tfoot.innerHTML=`<tr style="background:#f9f9f9;font-weight:600;font-size:12px;"><td colspan="7" style="padding:10px 12px;">합계</td><td class="num" style="padding:10px 12px;color:#bbb;">${totPrev.toLocaleString()}</td><td class="num" style="padding:10px 12px;color:#2563eb;">${totIn.toLocaleString()}</td><td class="num" style="padding:10px 12px;color:#D42020;">${totOut.toLocaleString()}</td><td class="num" style="padding:10px 12px;color:#0F6E56;">${totFinal.toLocaleString()}</td><td colspan="3"></td></tr>`;
   document.getElementById('dep-count').textContent=`(${data.length}건)`;
   updateDepCards(data);
 }
@@ -1219,15 +1266,16 @@ function saveDepRow(){
     storeCode:document.getElementById('dp-stcode').value,
     storeName:document.getElementById('dp-stname').value,
     noteType:document.getElementById('dp-type').value,
-    prevBal:parseFloat(document.getElementById('dp-prev').value)||0,
+    prevBal:0,
     inAmt:parseFloat(document.getElementById('dp-in').value)||0,
     outAmt:parseFloat(document.getElementById('dp-out').value)||0,
-    finalBal:parseFloat(document.getElementById('dp-final').value)||0,
+    finalBal:0,
     detail:document.getElementById('dp-detail').value,
     note:document.getElementById('dp-note').value,
   };
   if(editDepId){const i=depData.findIndex(x=>x.id===editDepId);depData[i]=row;}
   else depData.unshift(row);
+  recalcDepBalances();
   fbSaveOne('deposit', row);
   closeAccModal(); applyDepFilter();
 }
