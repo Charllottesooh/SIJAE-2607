@@ -133,7 +133,7 @@ input[type="checkbox"] { cursor: pointer; }
         <option value="2026-05">2026년 5월</option>
         <option value="2026-04">2026년 4월</option>
       </select>
-      <button onclick="saveDepBalances()">잔액 저장</button>
+      <button onclick="saveImage()">🖼 저장</button>
       <button onclick="window.print()">🖨 인쇄</button>
       <button class="primary" onclick="openAddModal()">+ 추가</button>
     </div>
@@ -363,10 +363,9 @@ input[type="checkbox"] { cursor: pointer; }
           <div class="tbl-scroll">
             <table>
               <thead><tr>
-  <th>코드</th><th>은행명</th><th>계좌번호</th><th>계좌별명</th>
-  <th class="num">기초잔액</th><th class="num">현재잔액</th>
-  <th>비고</th><th>관리</th>
-</tr></thead>
+                <th>코드</th><th>은행명</th><th>계좌번호</th><th>계좌별명</th>
+                <th class="num">기초잔액</th><th class="num">현재잔액</th><th>관리</th>
+              </tr></thead>
               <tbody id="acc-tbody"></tbody>
             </table>
           </div>
@@ -633,16 +632,7 @@ function setStatus(type, ok, msg) {
   txt.style.color = ok?'#0F6E56':'#D42020';
   txt.textContent = msg;
 }
-function saveDepBalances(){
-  if(!confirm('재계산된 잔액을 Firebase에 저장하시겠습니까?')) return;
-  recalcDepBalances();
-  let cnt=0;
-  depData.forEach(r=>{
-    fbSaveOne('deposit', r);
-    cnt++;
-  });
-  alert(cnt+'건 잔액 저장 완료');
-}
+
 async function initFirebase() {
   try {
     const {initializeApp} = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
@@ -777,13 +767,7 @@ function showPage(key, el) {
   const titles = {sales:'매출내역',account:'계좌 및 대출',deposit:'입출금내역',report:'리포트',store:'거래처관리',arpage:'미수금관리'};
   document.getElementById('page-title').textContent = titles[key]||key;
   if(key==='account') renderAcc();
-  if(key==='deposit') {
-  recalcDepBalances(); // ← 추가
-  initDepSelects();
-  depFiltered=[...depData];
-  depFiltered.sort((a,b)=>b.date.localeCompare(a.date));
-  renderDep(depFiltered);
-}
+  if(key==='deposit') { initDepSelects(); depFiltered=[...depData]; depFiltered.sort((a,b)=>b.date.localeCompare(a.date)); renderDep(depFiltered); }
   if(key==='report') { resetRptFilter(); }
   if(key==='store') { initStoreAccSelect(); storeFiltered=[...storeData]; renderStore(storeFiltered); }
   if(key==='arpage') { applyArFilter(); }
@@ -1101,32 +1085,6 @@ function getNoteTypeBadge(noteType){
   return `<span class="tax-badge" style="background:${bg};color:${color};border:0.5px solid ${border};">${noteType}</span>`;
 }
 
-  function recalcDepBalances(){
-  // 계좌별로 날짜순 정렬 후 잔액 재계산
-  const accMap = {};
-  depAccounts.forEach(a => {
-    const acc = accData.find(x=>x.code===a.code);
-    accMap[a.code] = acc ? (acc.curAmt||0) : 0;
-  });
-
-  // 계좌별 거래내역 날짜순 정렬
-  const byAcc = {};
-  depData.forEach(r=>{
-    if(!byAcc[r.code]) byAcc[r.code]=[];
-    byAcc[r.code].push(r);
-  });
-
-  Object.keys(byAcc).forEach(code=>{
-    byAcc[code].sort((a,b)=>a.date.localeCompare(b.date));
-    let bal = accMap[code]||0;
-    byAcc[code].forEach(r=>{
-      r.prevBal = bal;
-      r.finalBal = bal + (r.inAmt||0) - (r.outAmt||0);
-      bal = r.finalBal;
-    });
-  });
-}
-  
 function renderDep(data){
   const tbody=document.getElementById('dep-tbody'), tfoot=document.getElementById('dep-tfoot');
   if(!tbody)return;
@@ -1169,7 +1127,6 @@ function updateDepCards(data){
 }
 
 function applyDepFilter(){
-  recalcDepBalances();
   const start=document.getElementById('dep-f-start').value, end=document.getElementById('dep-f-end').value;
   const code=document.getElementById('dep-f-code').value, type=document.getElementById('dep-f-type').value;
   const storeKw=(document.getElementById('dep-f-store')||{value:''}).value.trim().toLowerCase();
@@ -1343,7 +1300,7 @@ function switchAccTab(tab,el){
 }
 function renderAcc(){
   const tbody=document.getElementById('acc-tbody');tbody.innerHTML='';
-  accData.forEach(r=>{tbody.innerHTML+=`<tr><td>${r.code}</td><td>${r.bank}</td><td>${r.accNo}</td><td>${r.alias||'-'}</td><td class="num">${(r.baseAmt||0).toLocaleString()}</td><td class="num">${(r.curAmt||0).toLocaleString()}</td><td style="font-size:11px;color:#888;">${r.note||''}</td><td><a href="#" onclick="openAccModal(${r.id})" style="font-size:11px;color:#888;margin-right:8px;">수정</a><a href="#" onclick="deleteAcc(${r.id})" style="font-size:11px;color:#D42020;">삭제</a></td></tr>`;});
+  accData.forEach(r=>{tbody.innerHTML+=`<tr><td>${r.code}</td><td>${r.bank}</td><td>${r.accNo}</td><td>${r.alias||'-'}</td><td class="num">${(r.baseAmt||0).toLocaleString()}</td><td class="num">${(r.curAmt||0).toLocaleString()}</td><td><a href="#" onclick="openAccModal(${r.id})" style="font-size:11px;color:#888;margin-right:8px;">수정</a><a href="#" onclick="deleteAcc(${r.id})" style="font-size:11px;color:#D42020;">삭제</a></td></tr>`;});
   document.getElementById('acc-count').textContent=accData.length+'개';
   document.getElementById('acc-base').textContent='₩'+accData.reduce((s,r)=>s+(r.baseAmt||0),0).toLocaleString();
   document.getElementById('acc-current').textContent='₩'+accData.reduce((s,r)=>s+(r.curAmt||0),0).toLocaleString();
@@ -1360,13 +1317,13 @@ function renderLoan(){
 }
 function openAccModal(id){
   editAccId=id||null;const r=id?accData.find(x=>x.id===id):null;
-  const html=`<div class="modal" style="width:480px;"><h2>${r?'계좌 수정':'계좌 추가'}</h2><div class="form-grid"><div class="form-group"><label>코드 *</label><input id="ma-code" value="${r?r.code:''}"></div><div class="form-group"><label>은행명 *</label><input id="ma-bank" value="${r?r.bank:''}"></div><div class="form-group"><label>계좌번호 *</label><input id="ma-no" value="${r?r.accNo:''}"></div><div class="form-group"><label>계좌별명</label><input id="ma-alias" value="${r?r.alias||'':''}"></div><div class="form-group"><label>기초잔액</label><input type="number" id="ma-base" value="${r?r.baseAmt:0}"></div><div class="form-group"><label>현재잔액</label><input type="number" id="ma-cur" value="${r?r.curAmt:0}"></div><div class="form-group full"><label>비고</label><input id="ma-note" value="${r?r.note||'':'}" placeholder="예) 26년 5월31일자 마감 잔액"></div></div><div class="modal-footer"><button onclick="closeAccModal()">취소</button><button class="primary" onclick="saveAcc()">저장</button></div></div>`;
+  const html=`<div class="modal" style="width:480px;"><h2>${r?'계좌 수정':'계좌 추가'}</h2><div class="form-grid"><div class="form-group"><label>코드 *</label><input id="ma-code" value="${r?r.code:''}"></div><div class="form-group"><label>은행명 *</label><input id="ma-bank" value="${r?r.bank:''}"></div><div class="form-group"><label>계좌번호 *</label><input id="ma-no" value="${r?r.accNo:''}"></div><div class="form-group"><label>계좌별명</label><input id="ma-alias" value="${r?r.alias||'':''}"></div><div class="form-group"><label>기초잔액</label><input type="number" id="ma-base" value="${r?r.baseAmt:0}"></div><div class="form-group"><label>현재잔액</label><input type="number" id="ma-cur" value="${r?r.curAmt:0}"></div></div><div class="modal-footer"><button onclick="closeAccModal()">취소</button><button class="primary" onclick="saveAcc()">저장</button></div></div>`;
   showDynModal(html);
 }
 function saveAcc(){
   const code=document.getElementById('ma-code').value.trim(), bank=document.getElementById('ma-bank').value.trim(), no=document.getElementById('ma-no').value.trim();
   if(!code||!bank||!no){alert('필수항목 입력해주세요.');return;}
-  const row={id:editAccId||accNextId++,code,bank,accNo:no,alias:document.getElementById('ma-alias').value,baseAmt:parseFloat(document.getElementById('ma-base').value)||0,curAmt:parseFloat(document.getElementById('ma-cur').value)||0,note:document.getElementById('ma-note').value};
+  const row={id:editAccId||accNextId++,code,bank,accNo:no,alias:document.getElementById('ma-alias').value,baseAmt:parseFloat(document.getElementById('ma-base').value)||0,curAmt:parseFloat(document.getElementById('ma-cur').value)||0};
   if(editAccId){const i=accData.findIndex(x=>x.id===editAccId);accData[i]=row;}else accData.push(row);
   fbSaveOne('accounts', row);
   closeAccModal();renderAcc();
