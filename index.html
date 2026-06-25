@@ -710,20 +710,29 @@ async function saveToFirebase(collectionName, data) {
   if(!fbReady) return;
   const {collection, getDocs, doc, writeBatch} = window._fbFs;
   try {
+    const chunkSize = 400;
+    // 삭제도 400건씩
     const existing = await getDocs(collection(fbDb, collectionName));
     if(!existing.empty) {
-      const b = writeBatch(fbDb);
-      existing.docs.forEach(d=>b.delete(doc(fbDb,collectionName,d.id)));
-      await b.commit();
+      const delDocs = existing.docs;
+      for(let i=0; i<delDocs.length; i+=chunkSize) {
+        const b = writeBatch(fbDb);
+        delDocs.slice(i, i+chunkSize).forEach(d=>b.delete(doc(fbDb,collectionName,d.id)));
+        await b.commit();
+      }
     }
+    // 저장도 400건씩
     if(data.length>0) {
-      const b = writeBatch(fbDb);
-      data.forEach((row,i)=>{
-        const clean = JSON.parse(JSON.stringify(row));
-        delete clean._docId;
-        b.set(doc(fbDb,collectionName,String(row.id||i+1)), clean);
-      });
-      await b.commit();
+      for(let i=0; i<data.length; i+=chunkSize) {
+        const chunk = data.slice(i, i+chunkSize);
+        const b = writeBatch(fbDb);
+        chunk.forEach((row,j)=>{
+          const clean = JSON.parse(JSON.stringify(row));
+          delete clean._docId;
+          b.set(doc(fbDb,collectionName,String(row.id||i+j+1)), clean);
+        });
+        await b.commit();
+      }
     }
     setStatus('fb', true, 'Firebase 저장완료');
   } catch(e) {
