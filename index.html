@@ -418,6 +418,7 @@ input[type="checkbox"] { cursor: pointer; }
         <button onclick="resetDepFilter()">초기화</button>
         <button onclick="openDepAccMgr()">계정관리</button>
         <button onclick="openDepUpload()">엑셀 업로드</button>
+        <button onclick="saveDepBalances()">잔액 저장</button>
         <button onclick="exportDepExcel()">엑셀 다운로드</button>
       </div>
       <div class="table-wrap">
@@ -1300,6 +1301,12 @@ function importDepExcel(){
   depUploadRows=[];
   closeAccModal(); applyDepFilter();
   alert(cnt+'건 업로드 완료');
+}
+  function saveDepBalances(){
+  if(!confirm('재계산된 잔액을 Firebase에 저장하시겠습니까?')) return;
+  recalcDepBalances();
+  depData.forEach(r=>fbSaveOne('deposit', r));
+  alert(depData.length+'건 잔액 저장 완료');
 }
 function exportDepExcel(){
   const rows=[['일자','코드','은행명','계좌번호','가맹점코드','가맹점명','비고유형','전잔액','입금','출금','최종잔액','상세내역','비고']];
