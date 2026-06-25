@@ -141,16 +141,16 @@ input[type="checkbox"] { cursor: pointer; }
 
   <div id="content">
 
-    <!-- ===== 매출내역 ===== -->
-    <div id="sales-title-bar" style="background:#E8F4F8;border-radius:10px;padding:24px;text-align:center;margin-bottom:20px;">
-  <div style="font-size:22px;font-weight:700;color:#111;margin-bottom:8px;">일일시재보고 · 매출내역</div>
-  <div id="sales-title-date" style="font-size:17px;font-weight:600;color:#2563eb;">2026-06-01 ~ 2026-06-30</div>
-</div>
-    <div id="page-sales" class="page active">
-      <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:1.5px solid #e0e0e0;">
-        <div class="acc-tab active" onclick="switchSalesTab('sales-daily',this)">일별거래내역</div>
-        <div class="acc-tab" onclick="switchSalesTab('sales-invoice',this)">매출계산서발행</div>
-      </div>
+<!-- ===== 매출내역 ===== -->
+<div id="page-sales" class="page active">
+  <div id="sales-title-bar" style="background:#E8F4F8;border-radius:10px;padding:24px;text-align:center;margin-bottom:20px;">
+    <div style="font-size:22px;font-weight:700;color:#111;margin-bottom:8px;">일일시재보고 · 매출내역</div>
+    <div id="sales-title-date" style="font-size:17px;font-weight:600;color:#2563eb;">2026-06-01 ~ 2026-06-30</div>
+  </div>
+  <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:1.5px solid #e0e0e0;">
+    <div class="acc-tab active" onclick="switchSalesTab('sales-daily',this)">일별거래내역</div>
+    <div class="acc-tab" onclick="switchSalesTab('sales-invoice',this)">매출계산서발행</div>
+  </div>
 
       <div id="sales-daily">
         <div class="card-section">
