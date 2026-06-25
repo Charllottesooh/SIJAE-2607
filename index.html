@@ -606,6 +606,8 @@ let depNoteTypes = [
   {name:'기타',        color:'#888'},
 ];
 
+  const _saved = localStorage.getItem('depNoteTypes');
+if(_saved) depNoteTypes = JSON.parse(_saved);
 let depData = [], depNextId = 1, editDepId = null, depFiltered = [], depUploadRows = [];
 
 let accData = [], loanData = [], accNextId = 1, loanNextId = 1, editAccId = null, editLoanId = null;
@@ -1210,6 +1212,7 @@ function saveNoteTypes(){
     name: document.getElementById('nt-'+i).value.trim(),
     color: document.getElementById('ntc-'+i).value
   })).filter(x=>x.name);
+  localStorage.setItem('depNoteTypes', JSON.stringify(depNoteTypes));
   closeAccModal();
   initDepSelects();
   // Firebase에 저장
