@@ -126,11 +126,8 @@ input[type="checkbox"] { cursor: pointer; }
         <span id="fb-dot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
         <span id="fb-txt" style="color:#888;">Firebase 미연결</span>
       </span>
-      <span id="gs-status" style="display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:#f9f9f9;border:0.5px solid #e0e0e0;">
-        <span id="gs-dot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;"></span>
-        <span id="gs-txt" style="color:#888;">Sheets 미연결</span>
-      </span>
-      <button onclick="syncSheets()" style="font-size:11px;padding:4px 10px;border-radius:6px;border:0.5px solid #2563eb;color:#2563eb;background:#fff;cursor:pointer;">📊 Sheets 저장</button>
+      
+      
     </div>
     <div class="topbar-right">
       <select id="month-select" onchange="filterByMonth()">
@@ -997,7 +994,7 @@ function exportExcel(){
   const rows=[['날짜','매장코드','매장명','상품코드','상품명','단위','입수','출고횟수','공급가','출고수량','출고단가','출고부가세','출고합계금액','과세구분','비고']];
   filteredData.forEach(r=>rows.push([r.date,r.storeCode,r.storeName,r.productCode,r.productName,r.unit,r.inQty,r.outCount,r.supply,r.outQty,r.outPrice,r.outVat,r.outTotal,r.taxType,r.note]));
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'매출내역');
-  XLSX.writeFile(wb,'매출내역_'+new Date().toLocaleDateString('ko-KR')+'.xlsx');
+  XLSX.writeFile(wb,'시재_매출매입내역_202607부터_내앱백업자료임.xlsx');
 }
 function saveImage(){html2canvas(document.getElementById('content')).then(canvas=>{const a=document.createElement('a');a.download='시재보고2607_'+new Date().toLocaleDateString('ko-KR')+'.png';a.href=canvas.toDataURL();a.click();});}
 function showStoreTip(code){const s=getStoreByCode(code);if(!s)return;alert(`[${s.code}] ${s.name}\n대표자: ${s.owner||'-'}\n사업자: ${s.bizNo||'-'}\n한도: ${s.limit?s.limit.toLocaleString():'미설정'}\n상태: ${s.status}`);}
