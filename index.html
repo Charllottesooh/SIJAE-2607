@@ -1144,6 +1144,7 @@ function updateDepCards(data){
 }
 
 function applyDepFilter(){
+  recalcDepBalances();
   const start=document.getElementById('dep-f-start').value, end=document.getElementById('dep-f-end').value;
   const code=document.getElementById('dep-f-code').value, type=document.getElementById('dep-f-type').value;
   const storeKw=(document.getElementById('dep-f-store')||{value:''}).value.trim().toLowerCase();
