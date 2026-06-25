@@ -665,56 +665,46 @@ async function initFirebase() {
 async function loadFromFirebase() {
   if(!fbReady) return;
   const {collection, getDocs} = window._fbFs;
-  let retries = 3;
-  while(retries > 0) {
-    try {
-      const load = async name => {
-        const snap = await getDocs(collection(fbDb, name));
-        return snap.docs.map(d=>({...d.data(), _docId:d.id}));
-      };
-      const [sSnap, dSnap, aSnap, lSnap, stSnap] = await Promise.all([
-        load('sales'), load('deposit'), load('accounts'), load('loans'), load('stores')
-      ]);
-      if(sSnap.length) {
-        salesData = sSnap;
-        nextId = Math.max(...salesData.map(r=>r.id||0)) + 1;
-        salesData.sort((a,b)=>b.date.localeCompare(a.date));
-        filteredData = [...salesData];
-        renderTable(filteredData);
-      }
-      if(dSnap.length) {
-        depData = dSnap;
-        depNextId = Math.max(...depData.map(r=>r.id||0)) + 1;
-        depFiltered = [...depData];
-      }
-      if(aSnap.length) {
-        accData = aSnap;
-        accNextId = Math.max(...accData.map(r=>r.id||0)) + 1;
-      }
-      if(lSnap.length) {
-        loanData = lSnap;
-        loanNextId = Math.max(...loanData.map(r=>r.id||0)) + 1;
-      }
-      if(stSnap.length) {
-        storeData = stSnap;
-        storeNextId = Math.max(...storeData.map(r=>r.id||0)) + 1;
-      }
-      try {
-        const ntSnap = await load('noteTypes');
-        if(ntSnap.length) depNoteTypes = ntSnap.map(t=>({name:t.name, color:t.color}));
-      } catch(e) {}
-      setStatus('fb', true, 'Firebase 로드완료');
-      return; // 성공시 종료
-    } catch(e) {
-      retries--;
-      if(retries > 0) {
-        setStatus('fb', false, `로드 재시도 중... (${3-retries}/3)`);
-        await new Promise(r=>setTimeout(r, 2000)); // 2초 후 재시도
-      } else {
-        setStatus('fb', false, 'Firebase 로드오류');
-        console.error(e);
-      }
+  try {
+    const load = async name => {
+      const snap = await getDocs(collection(fbDb, name));
+      return snap.docs.map(d=>({...d.data(), _docId:d.id}));
+    };
+    const [sSnap, dSnap, aSnap, lSnap, stSnap] = await Promise.all([
+      load('sales'), load('deposit'), load('accounts'), load('loans'), load('stores')
+    ]);
+    if(sSnap.length) {
+      salesData = sSnap;
+      nextId = Math.max(...salesData.map(r=>r.id||0)) + 1;
+      salesData.sort((a,b)=>b.date.localeCompare(a.date));
+      filteredData = [...salesData];
+      renderTable(filteredData);
     }
+    if(dSnap.length) {
+      depData = dSnap;
+      depNextId = Math.max(...depData.map(r=>r.id||0)) + 1;
+      depFiltered = [...depData];
+    }
+    if(aSnap.length) {
+      accData = aSnap;
+      accNextId = Math.max(...accData.map(r=>r.id||0)) + 1;
+    }
+    if(lSnap.length) {
+      loanData = lSnap;
+      loanNextId = Math.max(...loanData.map(r=>r.id||0)) + 1;
+    }
+    if(stSnap.length) {
+      storeData = stSnap;
+      storeNextId = Math.max(...storeData.map(r=>r.id||0)) + 1;
+    }
+    try {
+      const ntSnap = await load('noteTypes');
+      if(ntSnap.length) depNoteTypes = ntSnap.map(t=>({name:t.name, color:t.color}));
+    } catch(e) {}
+    setStatus('fb', true, 'Firebase 로드완료');
+  } catch(e) {
+    setStatus('fb', false, 'Firebase 로드오류');
+    console.error(e);
   }
 }
 
