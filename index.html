@@ -715,7 +715,7 @@ async function loadFromFirebase() {
     }
     try {
       const ntSnap = await load('noteTypes');
-      if(ntSnap.length) depNoteTypes = ntSnap.map(t=>({name:t.name, color:t.color}));
+if(ntSnap.length) depNoteTypes = ntSnap.map(t=>({name:t.name, color:t.color}));
     } catch(e) {}
     setStatus('fb', true, 'Firebase 로드완료');
   } catch(e) {
@@ -1387,7 +1387,7 @@ function saveNoteTypes(){
   })).filter(x=>x.name);
   closeAccModal();
   initDepSelects();
-  saveToFirebase('noteTypes', depNoteTypes.map((t,i)=>({id:i+1,...t})));
+  depNoteTypes.forEach((t,i)=>fbSaveOne('noteTypes',{id:i+1,...t}));
 }
 
 function openDepUpload(){
