@@ -1122,6 +1122,22 @@ function recalcDepBalances(){
   if(!tbody)return;
   tbody.innerHTML='';
 
+    // 계좌코드 숫자 기준 정렬
+const sorted=[...data].sort((a,b)=>{
+  const aNum=parseInt(a.code.replace(/\D/g,''))||0;
+  const bNum=parseInt(b.code.replace(/\D/g,''))||0;
+  if(aNum!==bNum)return aNum-bNum;
+  if(a.date!==b.date)return a.date.localeCompare(b.date);
+  return (a.id||0)-(b.id||0);
+});
+
+// 계좌별 그룹 생성
+const groups={};
+sorted.forEach(r=>{
+  if(!groups[r.code])groups[r.code]={rows:[],bank:r.bank,accNo:r.accNo};
+  groups[r.code].rows.push(r);
+});
+
   // 전체 계좌를 번호순으로 합쳐서 렌더링
   depAccounts.slice().sort((a,b)=>{
     const aNum=parseInt(a.code.replace(/\D/g,''))||0;
