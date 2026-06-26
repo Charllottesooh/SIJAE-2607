@@ -1142,27 +1142,31 @@ function recalcDepBalances(){
   };
 
   sorted.forEach(r=>{
-    const bg=getBg(r.code);
-    const tr=document.createElement('tr');
-    tr.style.background=bg;
-    tr.innerHTML=`
-      <td><input type="checkbox" class="dep-chk" value="${r.id}"></td>
-      <td style="font-size:11px;color:#888;">${r.code||''}</td>
-      <td>${r.bank||''}</td>
-      <td style="font-size:11px;">${r.accNo||''}</td>
-      <td style="font-size:11px;color:#2563eb;font-weight:500;">${r.storeCode||'-'}</td>
-      <td style="font-size:11px;">${r.storeName||'-'}</td>
-      <td>${getNoteTypeBadge(r.noteType)}</td>
-      <td class="num" style="color:#bbb;">${(r.prevBal||0).toLocaleString()}</td>
-      <td class="num" style="color:#2563eb;font-weight:500;">${r.inAmt>0?r.inAmt.toLocaleString():'-'}</td>
-      <td class="num" style="color:#D42020;font-weight:500;">${r.outAmt>0?r.outAmt.toLocaleString():'-'}</td>
-      <td class="num" style="color:#0F6E56;font-weight:500;">${(r.finalBal||0).toLocaleString()}</td>
-      <td style="font-size:11px;">${r.detail||''}</td>
-      <td style="font-size:11px;">${r.note||''}</td>
-      <td style="font-size:11px;">${r.date||''}</td>`;
-    tr.ondblclick=()=>openDepModal(r.id);
-    tbody.appendChild(tr);
-  });
+    let prevCode='';
+sorted.forEach(r=>{
+  const bg=getBg(r.code);
+  const borderTop=r.code!==prevCode&&prevCode!==''?'border-top:2px solid #2563eb;':'';
+  prevCode=r.code;
+  const tr=document.createElement('tr');
+  tr.style.background=bg;
+  tr.innerHTML=`
+    <td style="${borderTop}"><input type="checkbox" class="dep-chk" value="${r.id}"></td>
+    <td style="font-size:11px;color:#888;${borderTop}">${r.code||''}</td>
+    <td style="${borderTop}">${r.bank||''}</td>
+    <td style="font-size:11px;${borderTop}">${r.accNo||''}</td>
+    <td style="font-size:11px;color:#2563eb;font-weight:500;${borderTop}">${r.storeCode||'-'}</td>
+    <td style="font-size:11px;${borderTop}">${r.storeName||'-'}</td>
+    <td style="${borderTop}">${getNoteTypeBadge(r.noteType)}</td>
+    <td class="num" style="color:#bbb;${borderTop}">${(r.prevBal||0).toLocaleString()}</td>
+    <td class="num" style="color:#2563eb;font-weight:500;${borderTop}">${r.inAmt>0?r.inAmt.toLocaleString():'-'}</td>
+    <td class="num" style="color:#D42020;font-weight:500;${borderTop}">${r.outAmt>0?r.outAmt.toLocaleString():'-'}</td>
+    <td class="num" style="color:#0F6E56;font-weight:500;${borderTop}">${(r.finalBal||0).toLocaleString()}</td>
+    <td style="font-size:11px;${borderTop}">${r.detail||''}</td>
+    <td style="font-size:11px;${borderTop}">${r.note||''}</td>
+    <td style="font-size:11px;${borderTop}">${r.date||''}</td>`;
+  tr.ondblclick=()=>openDepModal(r.id);
+  tbody.appendChild(tr);
+});
 
   // 거래없는 계좌 표시
   emptyAccs.forEach(a=>{
