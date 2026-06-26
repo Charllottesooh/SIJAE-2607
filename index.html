@@ -1236,7 +1236,7 @@ sorted.forEach(r=>{
   </tr>`;
   document.getElementById('dep-count').textContent=`(${data.length}건)`;
   updateDepCards(data);
-  
+  }
 function updateDepCards(data){
   const totIn=data.reduce((s,r)=>s+(r.inAmt||0),0), totFinal=data.reduce((s,r)=>s+(r.finalBal||0),0);
   const salesAmt=filteredData.reduce((s,r)=>s+(r.outTotal||0),0);
