@@ -1122,130 +1122,70 @@ function recalcDepBalances(){
   if(!tbody)return;
   tbody.innerHTML='';
 
-  // 계좌코드 숫자 기준 정렬
-  const sorted=[...data].sort((a,b)=>{
-    const aNum=parseInt(a.code.replace(/\D/g,''))||0;
-    const bNum=parseInt(b.code.replace(/\D/g,''))||0;
-    if(aNum!==bNum)return aNum-bNum;
-    if(a.date!==b.date)return a.date.localeCompare(b.date);
-    return (a.id||0)-(b.id||0);
-  });
-
-  // 거래없는 계좌
-  const codesInData=new Set(sorted.map(r=>r.code));
-  const emptyAccs=depAccounts.filter(a=>!codesInData.has(a.code)).sort((a,b)=>{
+  // 전체 계좌를 번호순으로 합쳐서 렌더링
+  depAccounts.slice().sort((a,b)=>{
     const aNum=parseInt(a.code.replace(/\D/g,''))||0;
     const bNum=parseInt(b.code.replace(/\D/g,''))||0;
     return aNum-bNum;
-  });
-
-  // 계좌별 그룹 생성
-  const groups={};
-  sorted.forEach(r=>{
-    if(!groups[r.code])groups[r.code]={rows:[],bank:r.bank,accNo:r.accNo};
-    groups[r.code].rows.push(r);
-  });
-
-  // 거래있는 계좌 렌더링
- Object.keys(groups).sort((a,b)=>{
-  const aNum=parseInt(a.replace(/\D/g,''))||0;
-  const bNum=parseInt(b.replace(/\D/g,''))||0;
-  return aNum-bNum;
-}).forEach(code=>{
-    const g=groups[code];
-    const firstRow=g.rows[0];
-    const lastRow=g.rows[g.rows.length-1];
-    // 그룹 헤더
-    const htr=document.createElement('tr');
-    htr.innerHTML=`<td colspan="14" style="padding:8px 12px;background:#e8f0fb;color:#1e3a5f;font-weight:700;font-size:12px;border-top:2px solid #2563eb;">
-  ${code} &nbsp;·&nbsp; ${g.bank} &nbsp;${g.accNo}
-  <span style="font-size:11px;font-weight:400;color:#2563eb;margin-left:12px;">전잔액: ${(firstRow.prevBal||0).toLocaleString()} &nbsp;|&nbsp; 최종잔액: ${(lastRow.finalBal||0).toLocaleString()}</span>
-</td>`;
-    tbody.appendChild(htr);
-    // 거래 행
-    g.rows.forEach(r=>{
-      const tr=document.createElement('tr');
-      tr.style.background='#fff';
-      tr.innerHTML=`
-  <td style="padding:12px 10px;"><input type="checkbox" class="dep-chk" value="${r.id}"></td>
-  <td style="padding:12px 10px;font-size:11px;color:#888;">${r.code||''}</td>
-  <td style="padding:12px 10px;">${r.bank||''}</td>
-  <td style="padding:12px 10px;font-size:11px;">${r.accNo||''}</td>
-  <td style="padding:12px 10px;font-size:11px;color:#2563eb;font-weight:500;">${r.storeCode||'-'}</td>
-  <td style="padding:12px 10px;font-size:11px;">${r.storeName||'-'}</td>
-  <td style="padding:12px 10px;">${getNoteTypeBadge(r.noteType)}</td>
-  <td class="num" style="padding:12px 10px;color:#bbb;">${(r.prevBal||0).toLocaleString()}</td>
-  <td class="num" style="padding:12px 10px;color:#2563eb;font-weight:500;">${r.inAmt>0?r.inAmt.toLocaleString():'-'}</td>
-  <td class="num" style="padding:12px 10px;color:#D42020;font-weight:500;">${r.outAmt>0?r.outAmt.toLocaleString():'-'}</td>
-  <td class="num" style="padding:12px 10px;color:#0F6E56;font-weight:500;">${(r.finalBal||0).toLocaleString()}</td>
-  <td style="padding:12px 10px;font-size:11px;">${r.detail||''}</td>
-  <td style="padding:12px 10px;font-size:11px;">${r.note||''}</td>
-  <td style="padding:12px 10px;font-size:11px;">${r.date||''}</td>`;
-      tr.ondblclick=()=>openDepModal(r.id);
-      tbody.appendChild(tr);
-    });
-  });
-
-  // 거래없는 계좌 렌더링
-  emptyAccs.forEach(a=>{
-    const acc=accData.find(x=>x.code===a.code);
-    const bal=acc?(acc.curAmt||0):0;
-    const htr=document.createElement('tr');
-    htr.innerHTML=`<td colspan="14" style="padding:8px 12px;background:#e8f0fb;color:#1e3a5f;font-weight:700;font-size:12px;border-top:2px solid #2563eb;">
-  ${a.code} &nbsp;·&nbsp; ${a.bank} &nbsp;${a.accNo}
-  <span style="font-size:11px;font-weight:400;color:#2563eb;margin-left:12px;">거래없음 &nbsp;|&nbsp; 잔액: ${bal.toLocaleString()}</span>
-</td>`;
-    tbody.appendChild(htr);
-    const tr=document.createElement('tr');
-    tr.style.background='#f7f9ff';
-    tr.innerHTML=`
-      <td></td>
-      <td style="font-size:11px;color:#888;">${a.code}</td>
-      <td>${a.bank}</td>
-      <td style="font-size:11px;">${a.accNo}</td>
-      <td>-</td><td>-</td><td>-</td>
-      <td class="num" style="color:#bbb;">${bal.toLocaleString()}</td>
-      <td>-</td><td>-</td>
-      <td class="num" style="color:#0F6E56;font-weight:500;">${bal.toLocaleString()}</td>
-      <td></td><td></td><td style="font-size:11px;color:#aaa;">거래없음</td>`;
-    tbody.appendChild(tr);
-  });
-
-  // 합계 계산
-  const totIn=data.reduce((s,r)=>s+(r.inAmt||0),0);
-  const totOut=data.reduce((s,r)=>s+(r.outAmt||0),0);
-  const firstByAcc={};
-  depAccounts.forEach(a=>{
-    const acc=accData.find(x=>x.code===a.code);
-    firstByAcc[a.code]=acc?(acc.curAmt||0):0;
-  });
-  [...data].sort((a,b)=>a.date.localeCompare(b.date)||(a.id||0)-(b.id||0)).forEach(r=>{
-    if(firstByAcc[r.code]===undefined||firstByAcc[r.code]===null) firstByAcc[r.code]=r.prevBal||0;
-  });
-  const totPrev=Object.values(firstByAcc).reduce((s,v)=>s+v,0);
-  const lastByAcc={};
-  [...data].sort((a,b)=>a.date.localeCompare(b.date)||(a.id||0)-(b.id||0)).forEach(r=>{
-    lastByAcc[r.code]=r.finalBal||0;
-  });
-  depAccounts.forEach(a=>{
-    if(!lastByAcc[a.code]){
+  }).forEach(a=>{
+    if(groups[a.code]){
+      // 거래있는 계좌
+      const g=groups[a.code];
+      const firstRow=g.rows[0];
+      const lastRow=g.rows[g.rows.length-1];
+      const htr=document.createElement('tr');
+      htr.innerHTML=`<td colspan="14" style="padding:8px 12px;background:#e8f0fb;color:#1e3a5f;font-weight:700;font-size:12px;border-top:2px solid #2563eb;">
+        ${a.code} &nbsp;·&nbsp; ${g.bank} &nbsp;${g.accNo}
+        <span style="font-size:11px;font-weight:400;color:#2563eb;margin-left:12px;">전잔액: ${(firstRow.prevBal||0).toLocaleString()} &nbsp;|&nbsp; 최종잔액: ${(lastRow.finalBal||0).toLocaleString()}</span>
+      </td>`;
+      tbody.appendChild(htr);
+      g.rows.forEach(r=>{
+        const tr=document.createElement('tr');
+        tr.style.background='#fff';
+        tr.innerHTML=`
+          <td style="padding:12px 10px;"><input type="checkbox" class="dep-chk" value="${r.id}"></td>
+          <td style="padding:12px 10px;font-size:11px;color:#888;">${r.code||''}</td>
+          <td style="padding:12px 10px;">${r.bank||''}</td>
+          <td style="padding:12px 10px;font-size:11px;">${r.accNo||''}</td>
+          <td style="padding:12px 10px;font-size:11px;color:#2563eb;font-weight:500;">${r.storeCode||'-'}</td>
+          <td style="padding:12px 10px;font-size:11px;">${r.storeName||'-'}</td>
+          <td style="padding:12px 10px;">${getNoteTypeBadge(r.noteType)}</td>
+          <td class="num" style="padding:12px 10px;color:#bbb;">${(r.prevBal||0).toLocaleString()}</td>
+          <td class="num" style="padding:12px 10px;color:#2563eb;font-weight:500;">${r.inAmt>0?r.inAmt.toLocaleString():'-'}</td>
+          <td class="num" style="padding:12px 10px;color:#D42020;font-weight:500;">${r.outAmt>0?r.outAmt.toLocaleString():'-'}</td>
+          <td class="num" style="padding:12px 10px;color:#0F6E56;font-weight:500;">${(r.finalBal||0).toLocaleString()}</td>
+          <td style="padding:12px 10px;font-size:11px;">${r.detail||''}</td>
+          <td style="padding:12px 10px;font-size:11px;">${r.note||''}</td>
+          <td style="padding:12px 10px;font-size:11px;">${r.date||''}</td>`;
+        tr.ondblclick=()=>openDepModal(r.id);
+        tbody.appendChild(tr);
+      });
+    } else {
+      // 거래없는 계좌
       const acc=accData.find(x=>x.code===a.code);
-      if(acc)lastByAcc[a.code]=acc.curAmt||0;
+      const bal=acc?(acc.curAmt||0):0;
+      const htr=document.createElement('tr');
+      htr.innerHTML=`<td colspan="14" style="padding:8px 12px;background:#e8f0fb;color:#1e3a5f;font-weight:700;font-size:12px;border-top:2px solid #2563eb;">
+        ${a.code} &nbsp;·&nbsp; ${a.bank} &nbsp;${a.accNo}
+        <span style="font-size:11px;font-weight:400;color:#2563eb;margin-left:12px;">거래없음 &nbsp;|&nbsp; 잔액: ${bal.toLocaleString()}</span>
+      </td>`;
+      tbody.appendChild(htr);
+      const tr=document.createElement('tr');
+      tr.style.background='#f7f9ff';
+      tr.innerHTML=`
+        <td style="padding:12px 10px;"></td>
+        <td style="padding:12px 10px;font-size:11px;color:#888;">${a.code}</td>
+        <td style="padding:12px 10px;">${a.bank}</td>
+        <td style="padding:12px 10px;font-size:11px;">${a.accNo}</td>
+        <td style="padding:12px 10px;">-</td><td style="padding:12px 10px;">-</td><td style="padding:12px 10px;">-</td>
+        <td class="num" style="padding:12px 10px;color:#bbb;">${bal.toLocaleString()}</td>
+        <td style="padding:12px 10px;">-</td><td style="padding:12px 10px;">-</td>
+        <td class="num" style="padding:12px 10px;color:#0F6E56;font-weight:500;">${bal.toLocaleString()}</td>
+        <td style="padding:12px 10px;"></td><td style="padding:12px 10px;"></td>
+        <td style="padding:12px 10px;font-size:11px;color:#aaa;">거래없음</td>`;
+      tbody.appendChild(tr);
     }
   });
-  const totFinal=Object.values(lastByAcc).reduce((s,v)=>s+v,0);
-
-  tfoot.innerHTML=`<tr style="background:#444;color:#fff;font-weight:700;font-size:13px;">
-    <td colspan="7" style="padding:12px 14px;">최종 합계</td>
-    <td class="num" style="padding:12px 14px;color:#ccc;">${totPrev.toLocaleString()}</td>
-    <td class="num" style="padding:12px 14px;color:#93c5fd;">${totIn.toLocaleString()}</td>
-    <td class="num" style="padding:12px 14px;color:#fca5a5;">${totOut.toLocaleString()}</td>
-    <td class="num" style="padding:12px 14px;color:#6ee7b7;">${totFinal.toLocaleString()}</td>
-    <td colspan="3"></td>
-  </tr>`;
-
-  document.getElementById('dep-count').textContent=`(${data.length}건)`;
-  updateDepCards(data);
 }
 
 function updateDepCards(data){
