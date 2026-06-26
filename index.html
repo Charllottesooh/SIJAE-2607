@@ -1147,40 +1147,40 @@ function recalcDepBalances(){
   });
 
   // 거래있는 계좌 렌더링
-  Object.keys(groups).sort((a,b)=>{
-    const aNum=parseInt(a.replace(/\D/g,''))||0;
-    const bNum=parseInt(b.replace(/\D/g,''))||0;
-    return aNum-bNum;
-  }).forEach(code=>{
+ Object.keys(groups).sort((a,b)=>{
+  const aNum=parseInt(a.replace(/\D/g,''))||0;
+  const bNum=parseInt(b.replace(/\D/g,''))||0;
+  return aNum-bNum;
+}).forEach(code=>{
     const g=groups[code];
     const firstRow=g.rows[0];
     const lastRow=g.rows[g.rows.length-1];
     // 그룹 헤더
     const htr=document.createElement('tr');
-    htr.innerHTML=`<td colspan="14" style="padding:7px 12px;background:#1e3a5f;color:#fff;font-weight:700;font-size:12px;">
-      ${code} &nbsp;·&nbsp; ${g.bank} &nbsp;${g.accNo}
-      <span style="font-size:11px;font-weight:400;color:#93c5fd;margin-left:12px;">전잔액: ${(firstRow.prevBal||0).toLocaleString()} &nbsp;|&nbsp; 최종잔액: ${(lastRow.finalBal||0).toLocaleString()}</span>
-    </td>`;
+    htr.innerHTML=`<td colspan="14" style="padding:8px 12px;background:#e8f0fb;color:#1e3a5f;font-weight:700;font-size:12px;border-top:2px solid #2563eb;">
+  ${code} &nbsp;·&nbsp; ${g.bank} &nbsp;${g.accNo}
+  <span style="font-size:11px;font-weight:400;color:#2563eb;margin-left:12px;">전잔액: ${(firstRow.prevBal||0).toLocaleString()} &nbsp;|&nbsp; 최종잔액: ${(lastRow.finalBal||0).toLocaleString()}</span>
+</td>`;
     tbody.appendChild(htr);
     // 거래 행
     g.rows.forEach(r=>{
       const tr=document.createElement('tr');
       tr.style.background='#fff';
       tr.innerHTML=`
-        <td><input type="checkbox" class="dep-chk" value="${r.id}"></td>
-        <td style="font-size:11px;color:#888;">${r.code||''}</td>
-        <td>${r.bank||''}</td>
-        <td style="font-size:11px;">${r.accNo||''}</td>
-        <td style="font-size:11px;color:#2563eb;font-weight:500;">${r.storeCode||'-'}</td>
-        <td style="font-size:11px;">${r.storeName||'-'}</td>
-        <td>${getNoteTypeBadge(r.noteType)}</td>
-        <td class="num" style="color:#bbb;">${(r.prevBal||0).toLocaleString()}</td>
-        <td class="num" style="color:#2563eb;font-weight:500;">${r.inAmt>0?r.inAmt.toLocaleString():'-'}</td>
-        <td class="num" style="color:#D42020;font-weight:500;">${r.outAmt>0?r.outAmt.toLocaleString():'-'}</td>
-        <td class="num" style="color:#0F6E56;font-weight:500;">${(r.finalBal||0).toLocaleString()}</td>
-        <td style="font-size:11px;">${r.detail||''}</td>
-        <td style="font-size:11px;">${r.note||''}</td>
-        <td style="font-size:11px;">${r.date||''}</td>`;
+  <td style="padding:12px 10px;"><input type="checkbox" class="dep-chk" value="${r.id}"></td>
+  <td style="padding:12px 10px;font-size:11px;color:#888;">${r.code||''}</td>
+  <td style="padding:12px 10px;">${r.bank||''}</td>
+  <td style="padding:12px 10px;font-size:11px;">${r.accNo||''}</td>
+  <td style="padding:12px 10px;font-size:11px;color:#2563eb;font-weight:500;">${r.storeCode||'-'}</td>
+  <td style="padding:12px 10px;font-size:11px;">${r.storeName||'-'}</td>
+  <td style="padding:12px 10px;">${getNoteTypeBadge(r.noteType)}</td>
+  <td class="num" style="padding:12px 10px;color:#bbb;">${(r.prevBal||0).toLocaleString()}</td>
+  <td class="num" style="padding:12px 10px;color:#2563eb;font-weight:500;">${r.inAmt>0?r.inAmt.toLocaleString():'-'}</td>
+  <td class="num" style="padding:12px 10px;color:#D42020;font-weight:500;">${r.outAmt>0?r.outAmt.toLocaleString():'-'}</td>
+  <td class="num" style="padding:12px 10px;color:#0F6E56;font-weight:500;">${(r.finalBal||0).toLocaleString()}</td>
+  <td style="padding:12px 10px;font-size:11px;">${r.detail||''}</td>
+  <td style="padding:12px 10px;font-size:11px;">${r.note||''}</td>
+  <td style="padding:12px 10px;font-size:11px;">${r.date||''}</td>`;
       tr.ondblclick=()=>openDepModal(r.id);
       tbody.appendChild(tr);
     });
@@ -1191,10 +1191,10 @@ function recalcDepBalances(){
     const acc=accData.find(x=>x.code===a.code);
     const bal=acc?(acc.curAmt||0):0;
     const htr=document.createElement('tr');
-    htr.innerHTML=`<td colspan="14" style="padding:7px 12px;background:#1e3a5f;color:#fff;font-weight:700;font-size:12px;">
-      ${a.code} &nbsp;·&nbsp; ${a.bank} &nbsp;${a.accNo}
-      <span style="font-size:11px;font-weight:400;color:#93c5fd;margin-left:12px;">거래없음 &nbsp;|&nbsp; 잔액: ${bal.toLocaleString()}</span>
-    </td>`;
+    htr.innerHTML=`<td colspan="14" style="padding:8px 12px;background:#e8f0fb;color:#1e3a5f;font-weight:700;font-size:12px;border-top:2px solid #2563eb;">
+  ${a.code} &nbsp;·&nbsp; ${a.bank} &nbsp;${a.accNo}
+  <span style="font-size:11px;font-weight:400;color:#2563eb;margin-left:12px;">거래없음 &nbsp;|&nbsp; 잔액: ${bal.toLocaleString()}</span>
+</td>`;
     tbody.appendChild(htr);
     const tr=document.createElement('tr');
     tr.style.background='#f7f9ff';
