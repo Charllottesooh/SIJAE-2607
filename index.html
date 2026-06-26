@@ -1203,7 +1203,40 @@ sorted.forEach(r=>{
     }
   });
 }
-
+// 합계 계산
+  const totIn=data.reduce((s,r)=>s+(r.inAmt||0),0);
+  const totOut=data.reduce((s,r)=>s+(r.outAmt||0),0);
+  const firstByAcc={};
+  depAccounts.forEach(a=>{
+    const acc=accData.find(x=>x.code===a.code);
+    firstByAcc[a.code]=acc?(acc.curAmt||0):0;
+  });
+  [...data].sort((a,b)=>a.date.localeCompare(b.date)||(a.id||0)-(b.id||0)).forEach(r=>{
+    if(firstByAcc[r.code]===undefined||firstByAcc[r.code]===null) firstByAcc[r.code]=r.prevBal||0;
+  });
+  const totPrev=Object.values(firstByAcc).reduce((s,v)=>s+v,0);
+  const lastByAcc={};
+  [...data].sort((a,b)=>a.date.localeCompare(b.date)||(a.id||0)-(b.id||0)).forEach(r=>{
+    lastByAcc[r.code]=r.finalBal||0;
+  });
+  depAccounts.forEach(a=>{
+    if(!lastByAcc[a.code]){
+      const acc=accData.find(x=>x.code===a.code);
+      if(acc)lastByAcc[a.code]=acc.curAmt||0;
+    }
+  });
+  const totFinal=Object.values(lastByAcc).reduce((s,v)=>s+v,0);
+  tfoot.innerHTML=`<tr style="background:#444;color:#fff;font-weight:700;font-size:13px;">
+    <td colspan="7" style="padding:12px 14px;">최종 합계</td>
+    <td class="num" style="padding:12px 14px;color:#ccc;">${totPrev.toLocaleString()}</td>
+    <td class="num" style="padding:12px 14px;color:#93c5fd;">${totIn.toLocaleString()}</td>
+    <td class="num" style="padding:12px 14px;color:#fca5a5;">${totOut.toLocaleString()}</td>
+    <td class="num" style="padding:12px 14px;color:#6ee7b7;">${totFinal.toLocaleString()}</td>
+    <td colspan="3"></td>
+  </tr>`;
+  document.getElementById('dep-count').textContent=`(${data.length}건)`;
+  updateDepCards(data);
+  
 function updateDepCards(data){
   const totIn=data.reduce((s,r)=>s+(r.inAmt||0),0), totFinal=data.reduce((s,r)=>s+(r.finalBal||0),0);
   const salesAmt=filteredData.reduce((s,r)=>s+(r.outTotal||0),0);
