@@ -1124,14 +1124,21 @@ function recalcDepBalances(){
 
   // 계좌코드순 정렬, 같은 계좌 내 날짜+id순
   const sorted=[...data].sort((a,b)=>{
-    if(a.code!==b.code)return a.code.localeCompare(b.code);
-    if(a.date!==b.date)return a.date.localeCompare(b.date);
-    return (a.id||0)-(b.id||0);
-  });
+  // 계좌코드 숫자 기준 정렬 (ACC001, ACC002... 순서)
+  const aNum=parseInt(a.code.replace(/\D/g,''))||0;
+  const bNum=parseInt(b.code.replace(/\D/g,''))||0;
+  if(aNum!==bNum)return aNum-bNum;
+  if(a.date!==b.date)return a.date.localeCompare(b.date);
+  return (a.id||0)-(b.id||0);
+});
 
   // 거래없는 계좌도 표시 (계좌목록 기준)
   const codesInData=new Set(sorted.map(r=>r.code));
-  const emptyAccs=depAccounts.filter(a=>!codesInData.has(a.code));
+ const emptyAccs=depAccounts.filter(a=>!codesInData.has(a.code)).sort((a,b)=>{
+  const aNum=parseInt(a.code.replace(/\D/g,''))||0;
+  const bNum=parseInt(b.code.replace(/\D/g,''))||0;
+  return aNum-bNum;
+});
 
   // 계좌별 배경색 (홀수번째 계좌 = 연한 파란색)
   const accOrder={};
@@ -1170,22 +1177,24 @@ sorted.forEach(r=>{
 
   // 거래없는 계좌 표시
   emptyAccs.forEach(a=>{
-    const acc=accData.find(x=>x.code===a.code);
-    const bg=getBg(a.code);
-    const tr=document.createElement('tr');
-    tr.style.background=bg;
-    tr.innerHTML=`
-      <td></td>
-      <td style="font-size:11px;color:#888;">${a.code}</td>
-      <td>${a.bank}</td>
-      <td style="font-size:11px;">${a.accNo}</td>
-      <td>-</td><td>-</td><td>-</td>
-      <td class="num" style="color:#bbb;">${acc?(acc.curAmt||0).toLocaleString():'0'}</td>
-      <td>-</td><td>-</td>
-      <td class="num" style="color:#0F6E56;font-weight:500;">${acc?(acc.curAmt||0).toLocaleString():'0'}</td>
-      <td></td><td></td><td></td>`;
-    tbody.appendChild(tr);
-  });
+  const acc=accData.find(x=>x.code===a.code);
+  const bg=getBg(a.code);
+  const borderTop=a.code!==prevCode&&prevCode!==''?'border-top:2px solid #2563eb;':'';
+  prevCode=a.code;
+  const tr=document.createElement('tr');
+  tr.style.background=bg;
+  tr.innerHTML=`
+    <td style="${borderTop}"></td>
+    <td style="font-size:11px;color:#888;${borderTop}">${a.code}</td>
+    <td style="${borderTop}">${a.bank}</td>
+    <td style="font-size:11px;${borderTop}">${a.accNo}</td>
+    <td style="${borderTop}">-</td><td style="${borderTop}">-</td><td style="${borderTop}">-</td>
+    <td class="num" style="color:#bbb;${borderTop}">${acc?(acc.curAmt||0).toLocaleString():'0'}</td>
+    <td style="${borderTop}">-</td><td style="${borderTop}">-</td>
+    <td class="num" style="color:#0F6E56;font-weight:500;${borderTop}">${acc?(acc.curAmt||0).toLocaleString():'0'}</td>
+    <td style="${borderTop}"></td><td style="${borderTop}"></td><td style="${borderTop}"></td>`;
+  tbody.appendChild(tr);
+});
 
   const totIn=data.reduce((s,r)=>s+(r.inAmt||0),0);
 const totOut=data.reduce((s,r)=>s+(r.outAmt||0),0);
