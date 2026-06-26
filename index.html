@@ -430,7 +430,6 @@ input[type="checkbox"] { cursor: pointer; }
         <button onclick="resetDepFilter()">초기화</button>
         <button onclick="openDepAccMgr()">계정관리</button>
         <button onclick="openDepUpload()">엑셀 업로드</button>
-        <button onclick="saveDepBalances()">잔액 저장</button>
         <button onclick="exportDepExcel()">엑셀 다운로드</button>
       </div>
       <div class="table-wrap">
@@ -997,6 +996,7 @@ function exportExcel(){
 }
 
 function saveImage(){
+  const pageKey = document.querySelector('.page.active').id.replace('page-','');
   const content = document.getElementById('content');
   const origHeight = content.style.height;
   const origOverflow = content.style.overflow;
@@ -1006,14 +1006,16 @@ function saveImage(){
     scrollX:0, scrollY:0,
     width: content.scrollWidth,
     height: content.scrollHeight,
-    useCORS: true
+    useCORS: true,
+    windowHeight: content.scrollHeight
   }).then(canvas=>{
     content.style.height = origHeight;
     content.style.overflow = origOverflow;
-    const pageTitle=document.getElementById('page-title').textContent;
-    const a=document.createElement('a');
-    a.download='일일시재보고_'+pageTitle+'_'+new Date().toLocaleDateString('ko-KR')+'.png';
-    a.href=canvas.toDataURL();
+    const pageTitle = document.getElementById('page-title').textContent;
+    const date = new Date().toLocaleDateString('ko-KR');
+    const a = document.createElement('a');
+    a.download = '시재보고_' + pageTitle + '_' + date + '.png';
+    a.href = canvas.toDataURL('image/png');
     a.click();
   });
 }
