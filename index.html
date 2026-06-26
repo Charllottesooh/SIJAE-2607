@@ -994,27 +994,38 @@ function exportExcel(){
 }
 
 function saveImage(){
-  const pageKey = document.querySelector('.page.active').id.replace('page-','');
   const content = document.getElementById('content');
-  const origHeight = content.style.height;
-  const origOverflow = content.style.overflow;
-  content.style.height = content.scrollHeight + 'px';
-  content.style.overflow = 'visible';
+  const pageTitle = document.getElementById('page-title').textContent;
+  const date = new Date().toLocaleDateString('ko-KR');
+
+  // 스크롤 높이 저장
+  const scrollTop = content.scrollTop;
+  content.scrollTop = 0;
+
   html2canvas(content, {
-    scrollX:0, scrollY:0,
+    scrollX: 0,
+    scrollY: 0,
+    useCORS: true,
+    allowTaint: true,
     width: content.scrollWidth,
     height: content.scrollHeight,
-    useCORS: true,
-    windowHeight: content.scrollHeight
-  }).then(canvas=>{
-    content.style.height = origHeight;
-    content.style.overflow = origOverflow;
-    const pageTitle = document.getElementById('page-title').textContent;
-    const date = new Date().toLocaleDateString('ko-KR');
+    windowWidth: content.scrollWidth,
+    windowHeight: content.scrollHeight,
+    onclone: function(doc) {
+      const el = doc.getElementById('content');
+      el.style.height = el.scrollHeight + 'px';
+      el.style.overflow = 'visible';
+    }
+  }).then(canvas => {
+    content.scrollTop = scrollTop;
     const a = document.createElement('a');
     a.download = '시재보고_' + pageTitle + '_' + date + '.png';
     a.href = canvas.toDataURL('image/png');
     a.click();
+  }).catch(e => {
+    content.scrollTop = scrollTop;
+    console.error(e);
+    alert('이미지 저장 실패: ' + e.message);
   });
 }
 
