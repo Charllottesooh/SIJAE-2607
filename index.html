@@ -1790,25 +1790,6 @@ function resetRptFilter() {
   });
 }
 
-  const detailTbody=document.getElementById('rpt-detail-tbody');
-  detailTbody.innerHTML=rows.map(r=>`<tr><td>${r.date}</td><td style="font-size:11px;">${r.section}</td><td>${r.account}</td><td>${r.target}</td><td class="num" style="color:#2563eb;">${r.inAmt>0?'₩'+r.inAmt.toLocaleString():'-'}</td><td class="num" style="color:#D42020;">${r.outAmt>0?'₩'+r.outAmt.toLocaleString():'-'}</td><td class="num" style="font-weight:500;">₩${r.amt.toLocaleString()}</td><td style="font-size:11px;">${r.note}</td></tr>`).join('');
-  document.getElementById('rpt-count').textContent=`(${rows.length}건)`;
-}
-
-function resetRptFilter(){
-  document.getElementById('rpt-f-start').value='2026-06-01';
-  document.getElementById('rpt-f-end').value='2026-06-30';
-  document.getElementById('rpt-f-menu').value='all';
-  document.getElementById('rpt-acc-tbody').innerHTML='';
-  document.getElementById('rpt-detail-tbody').innerHTML='';
-  ['rpt-sales-fr','rpt-in-fr','rpt-in-etc','rpt-final','rpt-loan'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.textContent='₩0';
-  });
-  ['rpt-sales-fr-cnt','rpt-in-fr-cnt','rpt-in-etc-cnt','rpt-loan-cnt'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.textContent='0건';
-  });
-}
-
 function exportRptExcel() {
   const start = document.getElementById('rpt-f-start').value;
   const end = document.getElementById('rpt-f-end').value;
