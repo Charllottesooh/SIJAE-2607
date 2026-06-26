@@ -1106,7 +1106,7 @@ function recalcDepBalances(){
   Object.keys(byAcc).forEach(code=>{
     byAcc[code].sort((a,b)=>{
       if(a.date!==b.date)return a.date.localeCompare(b.date);
-      return (a.id||0)-(b.id||0);
+      return String(a._docId||'').localeCompare(String(b._docId||''));
     });
     const acc=accData.find(x=>x.code===code);
     let bal=acc?(acc.curAmt||0):0;
