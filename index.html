@@ -116,6 +116,10 @@ input[type="checkbox"] { cursor: pointer; }
     <div class="menu-group-label">분석</div>
     <div class="menu-item" onclick="showPage('report',this)">리포트</div>
   </div>
+  <div class="menu-group" style="margin-top:auto;border-top:0.5px solid rgba(255,255,255,0.08);padding-top:12px;">
+  <div class="menu-group-label">시스템 정보</div>
+  <div class="menu-item" onclick="showFirebaseInfo(this)" style="font-size:11px;">🔥 Firebase 자동저장</div>
+</div>
 </div>
 
 <div id="main">
@@ -133,7 +137,7 @@ input[type="checkbox"] { cursor: pointer; }
         <option value="2026-05">2026년 5월</option>
         <option value="2026-04">2026년 4월</option>
       </select>
-      <button onclick="saveImage()">🖼 저장</button>
+    
       <button onclick="window.print()">🖨 인쇄</button>
       <button class="primary" onclick="openAddModal()">+ 추가</button>
     </div>
@@ -1653,11 +1657,11 @@ function renderRpt(salesRows, depRows, start, end) {
   document.getElementById('rpt-final').textContent = fmt(depFinal);
 
   // ── 매출관리 그룹 ──
-  const addGrpHead = (label, color) => {
+ const addGrpHead = (label, color) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td colspan="5" style="background:${color};color:#fff;font-size:12px;font-weight:700;padding:9px 14px;letter-spacing:0.03em;">${label}</td>`;
+    tr.innerHTML = `<td colspan="5" style="background:${color};color:#1e3a5f;font-size:12px;font-weight:700;padding:9px 14px;letter-spacing:0.03em;">${label}</td>`;
     tbody.appendChild(tr);
-  };
+};
 
   const addAccRow = (name, cnt, inAmt, outAmt, detailRows, detailCols) => {
     const rowId = 'rpt-det-' + Math.random().toString(36).slice(2,8);
@@ -1688,29 +1692,29 @@ function renderRpt(salesRows, depRows, start, end) {
     };
   };
 
-  const addSubtotal = (label, cnt, inAmt, outAmt, color) => {
+const addSubtotal = (label, cnt, inAmt, outAmt, color) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td colspan="2" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#fff;">${label}</td>
-      <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#fff;">${cnt}건</td>
-      <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#fff;">${inAmt>0?'₩'+inAmt.toLocaleString():'-'}</td>
-      <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#fff;">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>`;
+      <td colspan="2" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#333;">${label}</td>
+      <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#333;">${cnt}건</td>
+      <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#333;">${inAmt>0?'₩'+inAmt.toLocaleString():'-'}</td>
+      <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#333;">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>`;
     tbody.appendChild(tr);
-  };
+};
 
   // 매출관리
   if (salesRows.length > 0) {
-    addGrpHead('매출관리', '#1e3a5f');
+ addGrpHead('매출관리', '#dce8f5');
     const sIn = salesRows.reduce((s,r)=>s+(r.outTotal||0),0);
     addAccRow('가맹점 매출', salesRows.length, sIn, 0,
       salesRows.slice(0,50),
       ['date:날짜','storeName:매장명','outTotal:금액','taxType:과세구분']);
-    addSubtotal('매출관리 소계', salesRows.length, sIn, 0, '#1e3a5f');
+    addSubtotal('매출관리 소계', salesRows.length, sIn, 0, '#dce8f5');
   }
 
   // 예금관리 — 계정별 그룹화
   if (depRows.length > 0) {
-    addGrpHead('예금관리', '#063318');
+    addGrpHead('예금관리', '#d4ede5');
     const noteMap = {};
     depRows.forEach(r => {
       const k = r.noteType || '기타';
@@ -1727,7 +1731,7 @@ function renderRpt(salesRows, depRows, start, end) {
         rows.slice(0,50),
         ['date:날짜','code:계좌','inAmt:입금','outAmt:출금','note:비고']);
     });
-    addSubtotal('예금관리 소계', totCnt, totIn, totOut, '#063318');
+    addSubtotal('예금관리 소계', totCnt, totIn, totOut, '#d4ede5');
   }
 
   // 전체 합계행
@@ -1802,7 +1806,72 @@ function exportRptExcel() {
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'리포트');
   XLSX.writeFile(wb,'월별자금리포트_'+start+'_'+end+'.xlsx');
 }
+function showFirebaseInfo(el) {
+  document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active'));
+  el.classList.add('active');
+  showDynModal(`<div class="modal" style="width:580px;max-height:80vh;overflow-y:auto;">
+    <h2 style="color:#F0921E;margin-bottom:16px;">🔥 Firebase 자동저장 정보</h2>
 
+    <div style="font-size:12px;line-height:1.9;color:#333;">
+
+      <div style="background:#f9f9f9;border-radius:8px;padding:14px 16px;margin-bottom:14px;border-left:3px solid #F0921E;">
+        <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:8px;">📌 프로젝트 기본정보</div>
+        <table style="width:100%;font-size:12px;border-collapse:collapse;">
+          <tr><td style="padding:4px 0;color:#888;width:140px;">프로젝트 ID</td><td style="font-weight:600;">sijae-202607</td></tr>
+          <tr><td style="padding:4px 0;color:#888;">Auth Domain</td><td style="font-weight:600;">sijae-202607.firebaseapp.com</td></tr>
+          <tr><td style="padding:4px 0;color:#888;">Storage Bucket</td><td style="font-weight:600;">sijae-202607.firebasestorage.app</td></tr>
+          <tr><td style="padding:4px 0;color:#888;">App ID</td><td style="font-weight:600;font-size:11px;">1:587529949522:web:408deca43deffdcc482a8b</td></tr>
+          <tr><td style="padding:4px 0;color:#888;">API Key</td><td style="font-weight:600;font-size:11px;">AIzaSyCwczMPx-W07iuv3YCLtbymAjoPOb-xpP4</td></tr>
+        </table>
+      </div>
+
+      <div style="background:#f9f9f9;border-radius:8px;padding:14px 16px;margin-bottom:14px;border-left:3px solid #2563eb;">
+        <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:8px;">🗄️ Firestore 컬렉션 구조</div>
+        <table style="width:100%;font-size:12px;border-collapse:collapse;">
+          <tr style="background:#e8f0fb;"><th style="padding:5px 8px;text-align:left;">컬렉션명</th><th style="padding:5px 8px;text-align:left;">내용</th><th style="padding:5px 8px;text-align:left;">저장방식</th></tr>
+          <tr><td style="padding:5px 8px;font-weight:600;">sales</td><td style="padding:5px 8px;">매출내역</td><td style="padding:5px 8px;color:#0F6E56;">fbSaveOne (건별)</td></tr>
+          <tr style="background:#fafafa;"><td style="padding:5px 8px;font-weight:600;">deposit</td><td style="padding:5px 8px;">입출금내역</td><td style="padding:5px 8px;color:#0F6E56;">fbSaveOne (건별)</td></tr>
+          <tr><td style="padding:5px 8px;font-weight:600;">accounts</td><td style="padding:5px 8px;">계좌 마스터</td><td style="padding:5px 8px;color:#0F6E56;">fbSaveOne (건별)</td></tr>
+          <tr style="background:#fafafa;"><td style="padding:5px 8px;font-weight:600;">loans</td><td style="padding:5px 8px;">대출내역</td><td style="padding:5px 8px;color:#0F6E56;">fbSaveOne (건별)</td></tr>
+          <tr><td style="padding:5px 8px;font-weight:600;">stores</td><td style="padding:5px 8px;">가맹점 마스터</td><td style="padding:5px 8px;color:#0F6E56;">fbSaveOne (건별)</td></tr>
+          <tr style="background:#fafafa;"><td style="padding:5px 8px;font-weight:600;">noteTypes</td><td style="padding:5px 8px;">비고유형(계정과목)</td><td style="padding:5px 8px;color:#F0921E;">saveToFirebase (전체)</td></tr>
+        </table>
+      </div>
+
+      <div style="background:#f9f9f9;border-radius:8px;padding:14px 16px;margin-bottom:14px;border-left:3px solid #0F6E56;">
+        <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:8px;">⚡ 자동저장 방식</div>
+        <div style="font-size:12px;color:#444;line-height:2;">
+          • 데이터 추가/수정/삭제 즉시 <strong>자동으로 Firebase에 저장</strong>됨<br>
+          • 저장방식: <strong>fbSaveOne</strong> — 변경된 1건만 setDoc으로 저장 (데이터 손실 위험 없음)<br>
+          • 앱 새로고침 시 Firebase에서 <strong>자동 로드</strong><br>
+          • 상단 상태표시: <span style="color:#0F6E56;font-weight:600;">● Firebase 로드완료</span> 확인 후 사용
+        </div>
+      </div>
+
+      <div style="background:#f9f9f9;border-radius:8px;padding:14px 16px;margin-bottom:14px;border-left:3px solid #7c3aed;">
+        <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:8px;">📋 Google Apps Script (Sheets 연동)</div>
+        <div style="font-size:11px;color:#555;word-break:break-all;line-height:1.8;">
+          URL: <strong>https://script.google.com/macros/s/AKfycbyYguYaXYHifl0BWimCdzfYWjdvXFbwwBbNDZNoQvm_sHI9_fvyrAKB_5AOER2N4L7n/exec</strong><br>
+          용도: 시트 데이터 replace 방식으로 Google Sheets 백업
+        </div>
+      </div>
+
+      <div style="background:#fff8e6;border-radius:8px;padding:14px 16px;border-left:3px solid #F5A800;">
+        <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:8px;">⚠️ 주의사항</div>
+        <div style="font-size:12px;color:#555;line-height:2;">
+          • <strong>계좌 마스터(accounts)의 curAmt</strong> = 5월 31일 기준잔액 → 절대 수정 금지<br>
+          • deposit의 prevBal/finalBal은 <strong>앱에서 자동 재계산</strong>됨 (Firebase 저장값 무시)<br>
+          • noteTypes만 전체 일괄저장 방식 사용 (건수 적어서 안전)<br>
+          • GitHub Pages URL: <strong>https://charllottesooh.github.io/SIJAE-2607/</strong>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+      <button onclick="closeAccModal()" style="font-size:12px;padding:8px 18px;border-radius:6px;border:0.5px solid #ddd;background:#090909;color:#fff;cursor:pointer;">닫기</button>
+    </div>
+  </div>`);
+}
 // ===== 초기화 =====
 initFirebase();
 renderTable(filteredData);
