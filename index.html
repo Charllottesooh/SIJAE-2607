@@ -457,57 +457,64 @@ input[type="checkbox"] { cursor: pointer; }
       </div>
     </div>
 
-    <!-- ===== 리포트 ===== -->
-    <div id="page-report" class="page">
-      <div class="card-section" style="grid-template-columns:repeat(5,1fr);">
-        <div class="summary-card color-red"><div class="label">가맹점 매출</div><div class="value" id="rpt-sales-fr">₩0</div><div class="sub" id="rpt-sales-fr-cnt">0건</div></div>
-        <div class="summary-card color-blue"><div class="label">가맹점 입금</div><div class="value" id="rpt-in-fr">₩0</div><div class="sub" id="rpt-in-fr-cnt">0건</div></div>
-        <div class="summary-card color-purple"><div class="label">기타 입금</div><div class="value" id="rpt-in-etc">₩0</div><div class="sub" id="rpt-in-etc-cnt">0건</div></div>
-        <div class="summary-card color-green"><div class="label">계좌잔액</div><div class="value" id="rpt-final">₩0</div><div class="sub">예금 기준</div></div>
-        <div class="summary-card color-orange"><div class="label">대출잔액</div><div class="value" id="rpt-loan">₩0</div><div class="sub" id="rpt-loan-cnt">0건</div></div>
-      </div>
-      <div class="filter-bar">
-        <input type="date" id="rpt-f-start" value="2026-06-01">
-        <span style="font-size:12px;color:#aaa;">~</span>
-        <input type="date" id="rpt-f-end" value="2026-06-30">
-        <select id="rpt-f-menu">
-          <option value="all">전체</option>
-          <option value="sales">매출관리</option>
-          <option value="deposit">예금관리</option>
-          <option value="account">계좌/대출</option>
-        </select>
-        <button class="search" onclick="applyRptFilter()">조회</button>
-        <button onclick="resetRptFilter()">초기화</button>
-        <button onclick="exportRptExcel()">엑셀 다운로드</button>
-      </div>
-      <div class="table-wrap">
-        <div class="table-header"><span class="title">계정별 합계</span></div>
-        <div class="tbl-scroll">
-          <table>
-            <thead><tr>
-              <th>구분</th><th>계정과목</th><th class="num">건수</th>
-              <th class="num">입금합계</th><th class="num">출금합계</th><th class="num">합계금액</th>
-            </tr></thead>
-            <tbody id="rpt-acc-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <div class="table-header">
-          <span class="title">전체 거래내역 <span id="rpt-count" style="font-size:11px;color:#aaa;font-weight:400;"></span></span>
-        </div>
-        <div class="tbl-scroll">
-          <table>
-            <thead><tr>
-              <th>일자</th><th>구분</th><th>계정과목</th><th>거래처/매장</th>
-              <th class="num">입금</th><th class="num">출금</th><th class="num">금액</th><th>비고</th>
-            </tr></thead>
-            <tbody id="rpt-detail-tbody"></tbody>
-          </table>
-        </div>
-      </div>
+<!-- ===== 리포트 ===== -->
+<div id="page-report" class="page">
+  <div id="rpt-title-bar" style="background:#E8F4F8;border-radius:10px;padding:24px;text-align:center;margin-bottom:20px;">
+    <div style="font-size:22px;font-weight:700;color:#111;margin-bottom:8px;">월별 자금 리포트</div>
+    <div id="rpt-title-date" style="font-size:17px;font-weight:600;color:#2563eb;">2026-06-01 ~ 2026-06-30 &nbsp;|&nbsp; 조회일: <span id="rpt-query-date"></span></div>
+  </div>
+  <div class="card-section" style="grid-template-columns:repeat(4,1fr);">
+    <div class="summary-card color-red"><div class="label">가맹점 매출</div><div class="value" id="rpt-sales-fr">₩0</div><div class="sub" id="rpt-sales-fr-cnt">0건</div></div>
+    <div class="summary-card color-blue"><div class="label">가맹점 입금</div><div class="value" id="rpt-in-fr">₩0</div><div class="sub" id="rpt-in-fr-cnt">0건</div></div>
+    <div class="summary-card color-orange"><div class="label">기타 입금</div><div class="value" id="rpt-in-etc">₩0</div><div class="sub" id="rpt-in-etc-cnt">0건</div></div>
+    <div class="summary-card color-green"><div class="label">계좌잔액</div><div class="value" id="rpt-final">₩0</div><div class="sub">예금 기준</div></div>
+  </div>
+  <div class="filter-bar">
+    <input type="date" id="rpt-f-start" value="2026-06-01">
+    <span style="font-size:12px;color:#aaa;">~</span>
+    <input type="date" id="rpt-f-end" value="2026-06-30">
+    <select id="rpt-f-menu">
+      <option value="all">전체</option>
+      <option value="sales">매출관리</option>
+      <option value="deposit">예금관리</option>
+    </select>
+    <button class="search" onclick="applyRptFilter()">조회</button>
+    <button onclick="resetRptFilter()">초기화</button>
+    <button onclick="exportRptExcel()">엑셀 다운로드</button>
+  </div>
+  <div class="table-wrap">
+    <div class="table-header">
+      <span class="title">계정별 합계</span>
+      <span style="font-size:11px;color:#aaa;font-weight:400;">계정과목 클릭 시 상세 펼치기</span>
     </div>
-
+    <div class="tbl-scroll">
+      <table id="rpt-main-table">
+        <thead><tr>
+          <th style="width:28px;"></th>
+          <th>계정과목</th>
+          <th class="num">건수</th>
+          <th class="num">입금합계</th>
+          <th class="num">출금합계</th>
+        </tr></thead>
+        <tbody id="rpt-acc-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="table-wrap" id="rpt-loan-box" style="border-top:3px solid #D42020;">
+    <div class="table-header">
+      <span class="title" style="color:#D42020;">대출 현황</span>
+    </div>
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr style="background:#f9f0f0;">
+          <th>계정과목</th>
+          <th class="num">건수</th>
+          <th class="num">평균 금리</th>
+          <th class="num">대출잔액</th>
+        </tr></thead>
+        <tbody id="rpt-loan-tbody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -1596,66 +1603,192 @@ function resetArFilter(){document.getElementById('ar-f-start').value='2026-06-01
 function exportArExcel(){const rows=[['가맹점코드','가맹점명','대표자','상태','한도금액','초기미수금','기간매출','기간입금','미수금','한도잔여','비고1']];document.querySelectorAll('#ar-tbody tr').forEach(tr=>{rows.push([...tr.querySelectorAll('td')].map(td=>td.textContent.trim()));});const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'미수금현황');XLSX.writeFile(wb,'미수금현황_'+new Date().toLocaleDateString('ko-KR')+'.xlsx');}
 
 // ===== 리포트 =====
-function applyRptFilter(){
-  const start=document.getElementById('rpt-f-start').value, end=document.getElementById('rpt-f-end').value, menu=document.getElementById('rpt-f-menu').value;
-  let rows=[];
-  if(menu==='all'||menu==='sales'){salesData.forEach(r=>{if(r.date>=start&&r.date<=end)rows.push({date:r.date,section:'매출관리',account:r.storeCode?'가맹점 매출':'기타 매출',target:r.storeName||'-',inAmt:r.outTotal||0,outAmt:0,amt:r.outTotal||0,note:r.productName||''});});}
-  if(menu==='all'||menu==='deposit'){depData.forEach(r=>{if(r.date>=start&&r.date<=end)rows.push({date:r.date,section:'예금관리',account:r.noteType||'기타',target:r.storeCode||r.accNo||'-',inAmt:r.inAmt||0,outAmt:r.outAmt||0,amt:(r.inAmt||0)-(r.outAmt||0),note:r.detail||''});});}
-  if(menu==='all'||menu==='account'){accData.forEach(r=>{rows.push({date:'-',section:'계좌관리',account:'계좌잔액',target:r.alias||r.bank,inAmt:r.curAmt||0,outAmt:0,amt:r.curAmt||0,note:r.accNo});});loanData.forEach(r=>{rows.push({date:'-',section:'대출관리',account:'대출잔액',target:r.bank,inAmt:0,outAmt:r.balance||0,amt:-(r.balance||0),note:r.collateral||''});});}
-  rows.sort((a,b)=>a.date.localeCompare(b.date));
-  renderRpt(rows);
+const RPT_EXCLUDE = ['여입(계좌이동)', '편입(계좌이동)'];
+
+function applyRptFilter() {
+  const start = document.getElementById('rpt-f-start').value;
+  const end = document.getElementById('rpt-f-end').value;
+  const menu = document.getElementById('rpt-f-menu').value;
+
+  document.getElementById('rpt-title-date').innerHTML =
+    start + ' ~ ' + end + ' &nbsp;|&nbsp; 조회일: <span id="rpt-query-date">' +
+    new Date().toISOString().slice(0,10) + '</span>';
+
+  // 매출 rows
+  let salesRows = [];
+  if (menu === 'all' || menu === 'sales') {
+    salesRows = salesData.filter(r => r.date >= start && r.date <= end);
+  }
+
+  // 예금 rows (여입·편입 제외)
+  let depRows = [];
+  if (menu === 'all' || menu === 'deposit') {
+    depRows = depData.filter(r =>
+      r.date >= start && r.date <= end &&
+      !RPT_EXCLUDE.includes(r.noteType)
+    );
+  }
+
+  renderRpt(salesRows, depRows, start, end);
 }
 
-function renderRpt(rows){
-  const salesFr=rows.filter(r=>r.account==='가맹점 매출');
-  const inFr=rows.filter(r=>r.section==='예금관리'&&r.account==='가맹점 입금');
-  const inEtc=rows.filter(r=>r.section==='예금관리'&&r.account!=='가맹점 입금');
-  const depFinal=(()=>{
-    const latestMap={};
-    depData.forEach(r=>{ if(!latestMap[r.code]||r.date>latestMap[r.code].date) latestMap[r.code]=r; });
-    return Object.values(latestMap).reduce((s,r)=>s+(r.finalBal||0),0);
-  })();
-  const loanTotal=loanData.reduce((s,r)=>s+(r.balance||0),0);
+function renderRpt(salesRows, depRows, start, end) {
+  const tbody = document.getElementById('rpt-acc-tbody');
+  tbody.innerHTML = '';
 
-  document.getElementById('rpt-sales-fr').textContent='₩'+salesFr.reduce((s,r)=>s+r.amt,0).toLocaleString();
-  document.getElementById('rpt-sales-fr-cnt').textContent=salesFr.length+'건';
-  document.getElementById('rpt-in-fr').textContent='₩'+inFr.reduce((s,r)=>s+r.inAmt,0).toLocaleString();
-  document.getElementById('rpt-in-fr-cnt').textContent=inFr.length+'건';
-  document.getElementById('rpt-in-etc').textContent='₩'+inEtc.reduce((s,r)=>s+r.inAmt,0).toLocaleString();
-  document.getElementById('rpt-in-etc-cnt').textContent=inEtc.length+'건';
-  document.getElementById('rpt-final').textContent='₩'+depFinal.toLocaleString();
-  document.getElementById('rpt-loan').textContent='₩'+loanTotal.toLocaleString();
-  document.getElementById('rpt-loan-cnt').textContent=loanData.length+'건';
+  // ── 상단 카드 ──
+  const frSales = salesRows.reduce((s,r) => s+(r.outTotal||0), 0);
+  const frIncome = depRows.filter(r => r.noteType==='가맹점 입금').reduce((s,r) => s+(r.inAmt||0), 0);
+  const etcIncome = depRows.filter(r => r.noteType!=='가맹점 입금').reduce((s,r) => s+(r.inAmt||0), 0);
+  const latestMap = {};
+  depData.forEach(r => { if (!latestMap[r.code] || r.date > latestMap[r.code].date) latestMap[r.code] = r; });
+  const depFinal = Object.values(latestMap).reduce((s,r) => s+(r.finalBal||0), 0);
 
-  const accMap={};
-  rows.filter(r=>r.section!=='대출관리').forEach(r=>{
-    const key=r.section+'||'+r.account;
-    if(!accMap[key])accMap[key]={section:r.section,account:r.account,cnt:0,inAmt:0,outAmt:0,amt:0};
-    accMap[key].cnt++;accMap[key].inAmt+=r.inAmt;accMap[key].outAmt+=r.outAmt;accMap[key].amt+=r.amt;
-  });
-  const loanMap={};
-  rows.filter(r=>r.section==='대출관리').forEach(r=>{
-    const key=r.section+'||'+r.account;
-    if(!loanMap[key])loanMap[key]={section:r.section,account:r.account,cnt:0,inAmt:0,outAmt:0,amt:0};
-    loanMap[key].cnt++;loanMap[key].inAmt+=r.inAmt;loanMap[key].outAmt+=r.outAmt;loanMap[key].amt+=r.amt;
-  });
+  document.getElementById('rpt-sales-fr').textContent = fmt(frSales);
+  document.getElementById('rpt-sales-fr-cnt').textContent = salesRows.length + '건';
+  document.getElementById('rpt-in-fr').textContent = fmt(frIncome);
+  document.getElementById('rpt-in-fr-cnt').textContent = depRows.filter(r=>r.noteType==='가맹점 입금').length + '건';
+  document.getElementById('rpt-in-etc').textContent = fmt(etcIncome);
+  document.getElementById('rpt-in-etc-cnt').textContent = depRows.filter(r=>r.noteType!=='가맹점 입금').length + '건';
+  document.getElementById('rpt-final').textContent = fmt(depFinal);
 
-  const accTbody=document.getElementById('rpt-acc-tbody');
-  accTbody.innerHTML='';
-  Object.values(accMap).forEach(g=>{
-    accTbody.innerHTML+=`<tr><td style="font-size:13px;font-weight:700;padding:4px 8px;border-radius:4px;background:#f0f0f0;">${g.section}</td><td style="font-weight:500;">${g.account}</td><td class="num">${g.cnt}건</td><td class="num" style="color:#2563eb;">${g.inAmt>0?'₩'+g.inAmt.toLocaleString():'-'}</td><td class="num" style="color:#D42020;">${g.outAmt>0?'₩'+g.outAmt.toLocaleString():'-'}</td><td class="num" style="font-weight:600;">₩${g.amt.toLocaleString()}</td></tr>`;
-  });
-  const tI=Object.values(accMap).reduce((s,g)=>s+g.inAmt,0);
-  const tO=Object.values(accMap).reduce((s,g)=>s+g.outAmt,0);
-  const tA=Object.values(accMap).reduce((s,g)=>s+g.amt,0);
-  const tCnt=Object.values(accMap).reduce((s,g)=>s+g.cnt,0);
-  accTbody.innerHTML+=`<tr style="background:#f9f9f9;font-weight:600;"><td colspan="2" style="padding:10px 12px;">합계</td><td class="num" style="padding:10px 12px;">${tCnt}건</td><td class="num" style="padding:10px 12px;color:#2563eb;">₩${tI.toLocaleString()}</td><td class="num" style="padding:10px 12px;color:#D42020;">₩${tO.toLocaleString()}</td><td class="num" style="padding:10px 12px;">₩${tA.toLocaleString()}</td></tr>`;
-  if(Object.values(loanMap).length>0){
-    accTbody.innerHTML+=`<tr><td colspan="6" style="padding:10px 12px;font-size:12px;color:#888;border-top:2px solid #e0e0e0;">※ 대출 현황 (합계 미포함)</td></tr>`;
-    Object.values(loanMap).forEach(g=>{
-      accTbody.innerHTML+=`<tr style="background:#fff8f8;"><td style="font-size:13px;font-weight:700;padding:4px 8px;border-radius:4px;background:#fde8e8;color:#D42020;">${g.section}</td><td style="font-weight:500;">${g.account}</td><td class="num">${g.cnt}건</td><td class="num" style="color:#2563eb;">${g.inAmt>0?'₩'+g.inAmt.toLocaleString():'-'}</td><td class="num" style="color:#D42020;">${g.outAmt>0?'₩'+g.outAmt.toLocaleString():'-'}</td><td class="num" style="font-weight:600;color:#D42020;">₩${Math.abs(g.amt).toLocaleString()}</td></tr>`;
-    });
+  // ── 매출관리 그룹 ──
+  const addGrpHead = (label, color) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="5" style="background:${color};color:#fff;font-size:12px;font-weight:700;padding:9px 14px;letter-spacing:0.03em;">${label}</td>`;
+    tbody.appendChild(tr);
+  };
+
+  const addAccRow = (name, cnt, inAmt, outAmt, detailRows, detailCols) => {
+    const rowId = 'rpt-det-' + Math.random().toString(36).slice(2,8);
+    const tr = document.createElement('tr');
+    tr.style.cssText = 'border-bottom:0.5px solid #f0f0f0;cursor:pointer;';
+    tr.onmouseenter = () => tr.style.background='#fffbf5';
+    tr.onmouseleave = () => tr.style.background='';
+    tr.innerHTML = `
+      <td style="padding:11px 12px;"><span id="chv-${rowId}" style="font-size:10px;color:#bbb;display:inline-block;transition:transform 0.2s;">▶</span></td>
+      <td style="padding:11px 12px;font-size:13px;font-weight:600;color:#111;">${name}</td>
+      <td class="num" style="padding:11px 12px;">${cnt}건</td>
+      <td class="num" style="padding:11px 12px;color:${inAmt>0?'#2563eb':'#aaa'};font-weight:${inAmt>0?600:400};">${inAmt>0?'₩'+inAmt.toLocaleString():'-'}</td>
+      <td class="num" style="padding:11px 12px;color:${outAmt>0?'#D42020':'#aaa'};font-weight:${outAmt>0?600:400};">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>`;
+    tbody.appendChild(tr);
+
+    // 상세행
+    const dtr = document.createElement('tr');
+    dtr.id = rowId;
+    dtr.style.display = 'none';
+    const inner = buildDetailTable(detailRows, detailCols);
+    dtr.innerHTML = `<td colspan="5" style="padding:0;"><div style="padding:10px 16px 10px 40px;background:#f9fafb;border-left:3px solid #2563eb;">${inner}</div></td>`;
+    tbody.appendChild(dtr);
+
+    tr.onclick = () => {
+      const open = dtr.style.display === 'table-row';
+      dtr.style.display = open ? 'none' : 'table-row';
+      document.getElementById('chv-'+rowId).style.transform = open ? '' : 'rotate(90deg)';
+    };
+  };
+
+  const addSubtotal = (label, cnt, inAmt, outAmt, color) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td colspan="2" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#fff;">${label}</td>
+      <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#fff;">${cnt}건</td>
+      <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#fff;">${inAmt>0?'₩'+inAmt.toLocaleString():'-'}</td>
+      <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#fff;">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>`;
+    tbody.appendChild(tr);
+  };
+
+  // 매출관리
+  if (salesRows.length > 0) {
+    addGrpHead('매출관리', '#1e3a5f');
+    const sIn = salesRows.reduce((s,r)=>s+(r.outTotal||0),0);
+    addAccRow('가맹점 매출', salesRows.length, sIn, 0,
+      salesRows.slice(0,50),
+      ['date:날짜','storeName:매장명','outTotal:금액','taxType:과세구분']);
+    addSubtotal('매출관리 소계', salesRows.length, sIn, 0, '#1e3a5f');
   }
+
+  // 예금관리 — 계정별 그룹화
+  if (depRows.length > 0) {
+    addGrpHead('예금관리', '#063318');
+    const noteMap = {};
+    depRows.forEach(r => {
+      const k = r.noteType || '기타';
+      if (!noteMap[k]) noteMap[k] = [];
+      noteMap[k].push(r);
+    });
+    let totIn=0, totOut=0, totCnt=0;
+    Object.keys(noteMap).forEach(key => {
+      const rows = noteMap[key];
+      const inA = rows.reduce((s,r)=>s+(r.inAmt||0),0);
+      const outA = rows.reduce((s,r)=>s+(r.outAmt||0),0);
+      totIn+=inA; totOut+=outA; totCnt+=rows.length;
+      addAccRow(key, rows.length, inA, outA,
+        rows.slice(0,50),
+        ['date:날짜','code:계좌','inAmt:입금','outAmt:출금','note:비고']);
+    });
+    addSubtotal('예금관리 소계', totCnt, totIn, totOut, '#063318');
+  }
+
+  // 전체 합계행
+  const allIn = salesRows.reduce((s,r)=>s+(r.outTotal||0),0)
+    + depRows.reduce((s,r)=>s+(r.inAmt||0),0);
+  const allOut = depRows.reduce((s,r)=>s+(r.outAmt||0),0);
+  const allCnt = salesRows.length + depRows.length;
+  const sumTr = document.createElement('tr');
+  sumTr.innerHTML = `
+    <td colspan="2" style="padding:11px 12px;background:#444;color:#fff;font-weight:700;font-size:13px;">합계</td>
+    <td class="num" style="padding:11px 12px;background:#444;color:#fff;font-weight:700;font-size:13px;">${allCnt}건</td>
+    <td class="num" style="padding:11px 12px;background:#444;color:#93c5fd;font-weight:700;font-size:13px;">₩${allIn.toLocaleString()}</td>
+    <td class="num" style="padding:11px 12px;background:#444;color:#fca5a5;font-weight:700;font-size:13px;">₩${allOut.toLocaleString()}</td>`;
+  tbody.appendChild(sumTr);
+
+  // ── 대출 현황 ──
+  const loanTbody = document.getElementById('rpt-loan-tbody');
+  loanTbody.innerHTML = '';
+  const avgRate = loanData.length
+    ? (loanData.reduce((s,r)=>s+(r.rate||0),0)/loanData.length).toFixed(2)
+    : '0.00';
+  const loanTotal = loanData.reduce((s,r)=>s+(r.balance||0),0);
+  loanTbody.innerHTML = `<tr>
+    <td style="padding:13px 12px;font-size:13px;font-weight:700;">대출잔액</td>
+    <td class="num" style="padding:13px 12px;">${loanData.length}건</td>
+    <td class="num" style="padding:13px 12px;">${avgRate}%</td>
+    <td class="num" style="padding:13px 12px;color:#D42020;font-weight:700;font-size:14px;">₩${loanTotal.toLocaleString()}</td>
+  </tr>`;
+}
+
+function buildDetailTable(rows, cols) {
+  // cols: ['fieldKey:헤더명', ...]
+  const parsed = cols.map(c => { const [k,h]=c.split(':'); return {k,h}; });
+  let th = parsed.map(c=>`<th style="padding:6px 10px;font-size:10px;font-weight:600;color:#555;text-align:${['inAmt','outAmt','outTotal'].includes(c.k)?'right':'left'};">${c.h}</th>`).join('');
+  let trs = rows.map(r => {
+    let tds = parsed.map(c => {
+      const v = r[c.k] ?? '-';
+      const isAmt = ['inAmt','outAmt','outTotal'].includes(c.k);
+      const color = c.k==='inAmt'||c.k==='outTotal' ? '#2563eb' : c.k==='outAmt' ? '#D42020' : '#444';
+      const disp = isAmt ? (v>0?'₩'+Number(v).toLocaleString():'-') : v;
+      return `<td style="padding:6px 10px;font-size:11px;border-bottom:0.5px solid #eee;text-align:${isAmt?'right':'left'};color:${isAmt&&v>0?color:'#444'};">${disp}</td>`;
+    }).join('');
+    return `<tr>${tds}</tr>`;
+  }).join('');
+  if (rows.length === 50) trs += `<tr><td colspan="${parsed.length}" style="padding:8px;color:#aaa;text-align:center;font-size:11px;">… 50건만 표시 (전체는 엑셀 다운로드)</td></tr>`;
+  return `<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#eef2ff;">${th}</tr></thead><tbody>${trs}</tbody></table>`;
+}
+
+function resetRptFilter() {
+  document.getElementById('rpt-f-start').value = '2026-06-01';
+  document.getElementById('rpt-f-end').value = '2026-06-30';
+  document.getElementById('rpt-f-menu').value = 'all';
+  document.getElementById('rpt-acc-tbody').innerHTML = '';
+  document.getElementById('rpt-loan-tbody').innerHTML = '';
+  ['rpt-sales-fr','rpt-in-fr','rpt-in-etc','rpt-final'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.textContent='₩0';
+  });
+  ['rpt-sales-fr-cnt','rpt-in-fr-cnt','rpt-in-etc-cnt'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.textContent='0건';
+  });
+}
 
   const detailTbody=document.getElementById('rpt-detail-tbody');
   detailTbody.innerHTML=rows.map(r=>`<tr><td>${r.date}</td><td style="font-size:11px;">${r.section}</td><td>${r.account}</td><td>${r.target}</td><td class="num" style="color:#2563eb;">${r.inAmt>0?'₩'+r.inAmt.toLocaleString():'-'}</td><td class="num" style="color:#D42020;">${r.outAmt>0?'₩'+r.outAmt.toLocaleString():'-'}</td><td class="num" style="font-weight:500;">₩${r.amt.toLocaleString()}</td><td style="font-size:11px;">${r.note}</td></tr>`).join('');
@@ -1676,7 +1809,18 @@ function resetRptFilter(){
   });
 }
 
-function exportRptExcel(){const rows=[['일자','구분','계정과목','거래처/매장','입금','출금','금액','비고']];document.querySelectorAll('#rpt-detail-tbody tr').forEach(tr=>{rows.push([...tr.querySelectorAll('td')].map(td=>td.textContent.trim()));});const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'리포트');XLSX.writeFile(wb,'리포트_'+new Date().toLocaleDateString('ko-KR')+'.xlsx');}
+function exportRptExcel() {
+  const start = document.getElementById('rpt-f-start').value;
+  const end = document.getElementById('rpt-f-end').value;
+  const rows = [['구분','계정과목','날짜','거래처/계좌','입금','출금','비고']];
+  salesData.filter(r=>r.date>=start&&r.date<=end).forEach(r=>
+    rows.push(['매출관리','가맹점 매출',r.date,r.storeName,r.outTotal,0,r.productName||'']));
+  depData.filter(r=>r.date>=start&&r.date<=end&&!RPT_EXCLUDE.includes(r.noteType)).forEach(r=>
+    rows.push(['예금관리',r.noteType||'기타',r.date,r.code,r.inAmt,r.outAmt,r.note||'']));
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'리포트');
+  XLSX.writeFile(wb,'월별자금리포트_'+start+'_'+end+'.xlsx');
+}
 
 // ===== 초기화 =====
 initFirebase();
