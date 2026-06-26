@@ -1176,30 +1176,31 @@ function recalcDepBalances(){
         tr.ondblclick=()=>openDepModal(r.id);
         tbody.appendChild(tr);
       });
-    } else {
-      const acc=accData.find(x=>x.code===a.code);
-      const bal=acc?(acc.curAmt||0):0;
-      const htr=document.createElement('tr');
-      htr.innerHTML=`<td colspan="14" style="padding:8px 12px;background:#e8f0fb;color:#1e3a5f;font-weight:700;font-size:12px;border-top:2px solid #2563eb;">
-        ${a.code} &nbsp;·&nbsp; ${a.bank} &nbsp;${a.accNo}
-        <span style="font-size:11px;font-weight:400;color:#2563eb;margin-left:12px;">거래없음 &nbsp;|&nbsp; 잔액: ${bal.toLocaleString()}</span>
-      </td>`;
-      tbody.appendChild(htr);
-      const tr=document.createElement('tr');
-      tr.style.background='#f7f9ff';
-      tr.innerHTML=`
-        <td style="padding:12px 10px;"></td>
-        <td style="padding:12px 10px;font-size:11px;color:#888;">${a.code}</td>
-        <td style="padding:12px 10px;">${a.bank}</td>
-        <td style="padding:12px 10px;font-size:11px;">${a.accNo}</td>
-        <td style="padding:12px 10px;">-</td><td style="padding:12px 10px;">-</td><td style="padding:12px 10px;">-</td>
-        <td class="num" style="padding:12px 10px;color:#bbb;">${bal.toLocaleString()}</td>
-        <td style="padding:12px 10px;">-</td><td style="padding:12px 10px;">-</td>
-        <td class="num" style="padding:12px 10px;color:#0F6E56;font-weight:500;">${bal.toLocaleString()}</td>
-        <td style="padding:12px 10px;"></td><td style="padding:12px 10px;"></td>
-        <td style="padding:12px 10px;font-size:11px;color:#aaa;">거래없음</td>`;
-      tbody.appendChild(tr);
-    }
+  } else {
+  const acc=accData.find(x=>x.code===a.code);
+  const prevRows=depData.filter(r=>r.code===a.code&&r.date<startDate).sort((x,y)=>x.date.localeCompare(y.date)||(x.id||0)-(y.id||0));
+  const bal=prevRows.length>0?prevRows[prevRows.length-1].finalBal:acc?(acc.curAmt||0):0;
+  const htr=document.createElement('tr');
+  htr.innerHTML=`<td colspan="14" style="padding:8px 12px;background:#e8f0fb;color:#1e3a5f;font-weight:700;font-size:12px;border-top:2px solid #2563eb;">
+    ${a.code} &nbsp;·&nbsp; ${a.bank} &nbsp;${a.accNo}
+    <span style="font-size:11px;font-weight:400;color:#2563eb;margin-left:12px;">거래없음 &nbsp;|&nbsp; 잔액: ${bal.toLocaleString()}</span>
+  </td>`;
+  tbody.appendChild(htr);
+  const tr=document.createElement('tr');
+  tr.style.background='#f7f9ff';
+  tr.innerHTML=`
+    <td style="padding:12px 10px;"></td>
+    <td style="padding:12px 10px;font-size:11px;color:#888;">${a.code}</td>
+    <td style="padding:12px 10px;">${a.bank}</td>
+    <td style="padding:12px 10px;font-size:11px;">${a.accNo}</td>
+    <td style="padding:12px 10px;">-</td><td style="padding:12px 10px;">-</td><td style="padding:12px 10px;">-</td>
+    <td class="num" style="padding:12px 10px;color:#bbb;">${bal.toLocaleString()}</td>
+    <td style="padding:12px 10px;">-</td><td style="padding:12px 10px;">-</td>
+    <td class="num" style="padding:12px 10px;color:#0F6E56;font-weight:500;">${bal.toLocaleString()}</td>
+    <td style="padding:12px 10px;"></td><td style="padding:12px 10px;"></td>
+    <td style="padding:12px 10px;font-size:11px;color:#aaa;">거래없음</td>`;
+  tbody.appendChild(tr);
+}
   });
 
   const totIn=data.reduce((s,r)=>s+(r.inAmt||0),0);
