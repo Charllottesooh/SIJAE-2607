@@ -1720,8 +1720,8 @@ const addSubtotal = (label, cnt, inAmt, outAmt, color) => {
  addGrpHead('매출관리', '#dce8f5');
     const sIn = salesRows.reduce((s,r)=>s+(r.outTotal||0),0);
     addAccRow('가맹점 매출', salesRows.length, sIn, 0,
-      salesRows.slice(0,50),
-      ['date:날짜','storeName:매장명','outTotal:금액','taxType:과세구분']);
+  salesRows.slice(0,50),
+  ['date:날짜','storeCode:매장코드','storeName:매장명','productName:상품명','outQty:수량','outPrice:단가','outVat:부가세','outTotal:금액','taxType:과세구분','note:비고']);
     addSubtotal('매출관리 소계', salesRows.length, sIn, 0, '#dce8f5');
   }
 
@@ -1741,8 +1741,8 @@ const addSubtotal = (label, cnt, inAmt, outAmt, color) => {
       const outA = rows.reduce((s,r)=>s+(r.outAmt||0),0);
       totIn+=inA; totOut+=outA; totCnt+=rows.length;
       addAccRow(key, rows.length, inA, outA,
-        rows.slice(0,50),
-        ['date:날짜','code:계좌','inAmt:입금','outAmt:출금','note:비고']);
+  rows.slice(0,50),
+  ['date:날짜','code:계좌','accNo:계좌번호','storeCode:가맹점코드','storeName:가맹점명','inAmt:입금','outAmt:출금','finalBal:잔액','detail:상세내역','note:비고']);
     });
     addSubtotal('예금관리 소계', totCnt, totIn, totOut, '#d4ede5');
   }
@@ -1776,21 +1776,37 @@ const addSubtotal = (label, cnt, inAmt, outAmt, color) => {
 }
 
 function buildDetailTable(rows, cols) {
-  // cols: ['fieldKey:헤더명', ...]
+  const AMT_FIELDS = ['inAmt','outAmt','outTotal','finalBal','outVat','outPrice'];
+  const NUM_FIELDS = ['outQty'];
   const parsed = cols.map(c => { const [k,h]=c.split(':'); return {k,h}; });
-  let th = parsed.map(c=>`<th style="padding:6px 10px;font-size:10px;font-weight:600;color:#555;text-align:${['inAmt','outAmt','outTotal'].includes(c.k)?'right':'left'};">${c.h}</th>`).join('');
+
+  let th = parsed.map(c => {
+    const isR = AMT_FIELDS.includes(c.k) || NUM_FIELDS.includes(c.k);
+    return `<th style="padding:6px 10px;font-size:10px;font-weight:600;color:#555;text-align:${isR?'right':'left'};">${c.h}</th>`;
+  }).join('');
+
   let trs = rows.map(r => {
     let tds = parsed.map(c => {
       const v = r[c.k] ?? '-';
-      const isAmt = ['inAmt','outAmt','outTotal'].includes(c.k);
-      const color = c.k==='inAmt'||c.k==='outTotal' ? '#2563eb' : c.k==='outAmt' ? '#D42020' : '#444';
-      const disp = isAmt ? (v>0?'₩'+Number(v).toLocaleString():'-') : v;
-      return `<td style="padding:6px 10px;font-size:11px;border-bottom:0.5px solid #eee;text-align:${isAmt?'right':'left'};color:${isAmt&&v>0?color:'#444'};">${disp}</td>`;
+      const isAmt = AMT_FIELDS.includes(c.k);
+      const isNum = NUM_FIELDS.includes(c.k);
+      const isR = isAmt || isNum;
+      let color = '#444';
+      if(c.k==='inAmt'||c.k==='outTotal'||c.k==='finalBal') color='#2563eb';
+      if(c.k==='outAmt') color='#D42020';
+      let disp;
+      if(isAmt) disp = (v > 0) ? '₩'+Number(v).toLocaleString() : '-';
+      else if(isNum) disp = Number(v).toLocaleString();
+      else disp = v || '-';
+      return `<td style="padding:6px 10px;font-size:11px;border-bottom:0.5px solid #eee;text-align:${isR?'right':'left'};color:${isAmt&&v>0?color:'#444'};white-space:nowrap;">${disp}</td>`;
     }).join('');
     return `<tr>${tds}</tr>`;
   }).join('');
-  if (rows.length === 50) trs += `<tr><td colspan="${parsed.length}" style="padding:8px;color:#aaa;text-align:center;font-size:11px;">… 50건만 표시 (전체는 엑셀 다운로드)</td></tr>`;
-  return `<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#eef2ff;">${th}</tr></thead><tbody>${trs}</tbody></table>`;
+
+  if (rows.length === 50) {
+    trs += `<tr><td colspan="${parsed.length}" style="padding:8px;color:#aaa;text-align:center;font-size:11px;">… 50건만 표시 (전체는 엑셀 다운로드)</td></tr>`;
+  }
+  return `<table style="width:100%;border-collapse:collapse;min-width:600px;"><thead><tr style="background:#eef2ff;">${th}</tr></thead><tbody>${trs}</tbody></table>`;
 }
 
 function resetRptFilter() {
