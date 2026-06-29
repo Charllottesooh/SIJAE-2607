@@ -1397,7 +1397,7 @@ function saveDepRow(){
   depData.filter(r=>r.code===code).forEach(r=>fbSaveOne('deposit',r));
   saveToLocal('deposit', depData);
   closeAccModal(); applyDepFilter();
-
+  }
 function depToggleAll(chk){document.querySelectorAll('.dep-chk').forEach(c=>c.checked=chk.checked);}
 function getDepChecked(){return [...document.querySelectorAll('.dep-chk:checked')].map(c=>parseInt(c.value));}
 function editDepSelected(){const ids=getDepChecked();if(ids.length!==1){alert('수정할 항목 1건을 선택해주세요.');return;}openDepModal(ids[0]);}
