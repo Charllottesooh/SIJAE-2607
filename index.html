@@ -1296,13 +1296,27 @@ function recalcDepBalances(){
   updateDepCards(data);
 }
 function updateDepCards(data){
-  const totIn=data.reduce((s,r)=>s+(r.inAmt||0),0), totFinal=data.reduce((s,r)=>s+(r.finalBal||0),0);
-  const salesAmt=filteredData.reduce((s,r)=>s+(r.outTotal||0),0);
+  // 1. 월누계매출: 현재 필터 날짜 범위 기준
+  const start=document.getElementById('dep-f-start').value;
+  const end=document.getElementById('dep-f-end').value;
+  const salesAmt=salesData.filter(r=>r.date>=start&&r.date<=end).reduce((s,r)=>s+(r.outTotal||0),0);
+
+  // 2. 월누계입금: 가맹점 입금만
+  const totIn=data.filter(r=>r.noteType==='가맹점 입금').reduce((s,r)=>s+(r.inAmt||0),0);
+
+  // 3. 총예금잔액: 조회 마지막 날짜 기준 각 계좌 최종잔액 합계
+  const totFinal=depAccounts.reduce((s,a)=>{
+    const accRows=depData.filter(r=>r.code===a.code&&r.date<=end)
+      .sort((x,y)=>x.date.localeCompare(y.date)||(x.id||0)-(y.id||0));
+    if(accRows.length>0) return s+(accRows[accRows.length-1].finalBal||0);
+    return s+((accData.find(x=>x.code===a.code)||{}).curAmt||0);
+  },0);
+
   document.getElementById('dep-sales').textContent='₩'+salesAmt.toLocaleString();
   document.getElementById('dep-in').textContent='₩'+totIn.toLocaleString();
   document.getElementById('dep-bal').textContent='₩'+totFinal.toLocaleString();
   const today=new Date().toISOString().slice(0,10);
-  document.getElementById('dep-in-sub').textContent='당일 '+data.filter(r=>r.date===today).reduce((s,r)=>s+(r.inAmt||0),0).toLocaleString()+'원';
+  document.getElementById('dep-in-sub').textContent='당일 '+data.filter(r=>r.date===today&&r.noteType==='가맹점 입금').reduce((s,r)=>s+(r.inAmt||0),0).toLocaleString()+'원';
   document.getElementById('dep-bal-sub').textContent=depAccounts.length+'개 계좌';
 }
 
