@@ -119,6 +119,7 @@ input[type="checkbox"] { cursor: pointer; }
   <div class="menu-group" style="margin-top:auto;border-top:0.5px solid rgba(255,255,255,0.08);padding-top:12px;">
   <div class="menu-group-label">시스템 정보</div>
   <div class="menu-item" onclick="showFirebaseInfo(this)" style="font-size:11px;">🔥 Firebase 자동저장</div>
+<div class="menu-item" onclick="forceSyncToFirebase()" style="font-size:11px;color:#F0921E;margin-top:4px;">☁️ 파이어베이스 동기화저장</div>
 </div>
 </div>
 
@@ -679,6 +680,41 @@ async function initFirebase() {
 }
 
 async function loadFromFirebase() {
+  // localStorage 먼저 로드
+  const lsSales = loadFromLocal('sales');
+  const lsDep = loadFromLocal('deposit');
+  const lsAcc = loadFromLocal('accounts');
+  const lsLoan = loadFromLocal('loans');
+  const lsStore = loadFromLocal('stores');
+  const lsNT = loadFromLocal('noteTypes');
+  const lastSync = loadFromLocal('lastSync');
+
+  if(lsSales && lsSales.length) {
+    salesData = lsSales;
+    nextId = Math.max(...salesData.map(r=>r.id||0)) + 1;
+    filteredData = [...salesData];
+    filteredData.sort((a,b)=>b.date.localeCompare(a.date));
+    renderTable(filteredData);
+  }
+  if(lsDep && lsDep.length) {
+    depData = lsDep;
+    depNextId = Math.max(...depData.map(r=>r.id||0)) + 1;
+    depFiltered = [...depData];
+  }
+  if(lsAcc && lsAcc.length) { accData = lsAcc; accNextId = Math.max(...accData.map(r=>r.id||0)) + 1; }
+  if(lsLoan && lsLoan.length) { loanData = lsLoan; loanNextId = Math.max(...loanData.map(r=>r.id||0)) + 1; }
+  if(lsStore && lsStore.length) { storeData = lsStore; storeNextId = Math.max(...storeData.map(r=>r.id||0)) + 1; }
+  if(lsNT && lsNT.length) depNoteTypes = lsNT;
+
+  // localStorage 데이터 있으면 Firebase 로드 스킵 (오늘 이미 동기화된 경우)
+  const today = new Date().toISOString().slice(0,10);
+  const syncedToday = lastSync && lastSync.slice(0,10) === today;
+  if(lsSales && lsSales.length && syncedToday) {
+    setStatus('fb', true, '로컬 데이터 로드완료');
+    return;
+  }
+
+  // Firebase에서 로드
   if(!fbReady) return;
   const {collection, getDocs} = window._fbFs;
   try {
@@ -701,22 +737,14 @@ async function loadFromFirebase() {
       depNextId = Math.max(...depData.map(r=>r.id||0)) + 1;
       depFiltered = [...depData];
     }
-    if(aSnap.length) {
-      accData = aSnap;
-      accNextId = Math.max(...accData.map(r=>r.id||0)) + 1;
-    }
-    if(lSnap.length) {
-      loanData = lSnap;
-      loanNextId = Math.max(...loanData.map(r=>r.id||0)) + 1;
-    }
-    if(stSnap.length) {
-      storeData = stSnap;
-      storeNextId = Math.max(...storeData.map(r=>r.id||0)) + 1;
-    }
+    if(aSnap.length) { accData = aSnap; accNextId = Math.max(...accData.map(r=>r.id||0)) + 1; }
+    if(lSnap.length) { loanData = lSnap; loanNextId = Math.max(...loanData.map(r=>r.id||0)) + 1; }
+    if(stSnap.length) { storeData = stSnap; storeNextId = Math.max(...storeData.map(r=>r.id||0)) + 1; }
     try {
       const ntSnap = await load('noteTypes');
-if(ntSnap.length) depNoteTypes = ntSnap.map(t=>({name:t.name, color:t.color}));
+      if(ntSnap.length) depNoteTypes = ntSnap.map(t=>({name:t.name, color:t.color}));
     } catch(e) {}
+    saveAllToLocal(); // Firebase 로드 후 localStorage에 캐시
     setStatus('fb', true, 'Firebase 로드완료');
   } catch(e) {
     setStatus('fb', false, 'Firebase 로드오류');
@@ -949,6 +977,7 @@ function saveRow() {
   if(editingId){const i=salesData.findIndex(x=>x.id===editingId);salesData[i]=row;}
   else salesData.unshift(row);
   fbSaveOne('sales', row);
+  saveToLocal('sales', salesData);
   closeModal('modal-form'); applyFilter();
 }
 
@@ -956,7 +985,7 @@ function getChecked(){return [...document.querySelectorAll('.row-chk:checked')].
 function toggleAll(chk){document.querySelectorAll('.row-chk').forEach(c=>c.checked=chk.checked);}
 function editSelected(){const ids=getChecked();if(ids.length!==1){alert('1건 선택해주세요.');return;}openEditModal(ids[0]);}
 function deleteSelected(){const ids=getChecked();if(!ids.length){alert('삭제할 항목을 선택해주세요.');return;}document.getElementById('del-count').textContent=ids.length;document.getElementById('modal-delete').classList.add('open');}
-function confirmDelete(){const ids=getChecked();ids.forEach(id=>fbDeleteOne('sales',id));salesData=salesData.filter(r=>!ids.includes(r.id));closeModal('modal-delete');applyFilter();}
+function confirmDelete(){const ids=getChecked();ids.forEach(id=>fbDeleteOne('sales',id));salesData=salesData.filter(r=>!ids.includes(r.id));saveToLocal('sales',salesData);closeModal('modal-delete');applyFilter();}
 
 function openUploadModal(){document.getElementById('modal-upload').classList.add('open');}
 function previewExcel(input){
@@ -991,6 +1020,7 @@ function importExcel(){
     salesData.unshift(row);
     fbSaveOne('sales', row);
   });
+  saveToLocal('sales', salesData);
   uploadedRows=[];
   document.getElementById('upload-preview').style.display='none';
   document.getElementById('excel-input').value='';
@@ -1365,8 +1395,8 @@ function saveDepRow(){
   recalcDepBalances();
   // 같은 계좌 전체 재저장
   depData.filter(r=>r.code===code).forEach(r=>fbSaveOne('deposit',r));
+  saveToLocal('deposit', depData);
   closeAccModal(); applyDepFilter();
-}
 
 function depToggleAll(chk){document.querySelectorAll('.dep-chk').forEach(c=>c.checked=chk.checked);}
 function getDepChecked(){return [...document.querySelectorAll('.dep-chk:checked')].map(c=>parseInt(c.value));}
@@ -1434,6 +1464,7 @@ function importDepExcel(){
     depData.unshift(row);
     fbSaveOne('deposit', row);
   });
+  saveToLocal('deposit', depData);
   depUploadRows=[];
   closeAccModal(); applyDepFilter();
   alert(cnt+'건 업로드 완료');
@@ -1487,6 +1518,7 @@ function saveAcc(){
   const row={id:editAccId||accNextId++,code,bank,accNo:no,alias:document.getElementById('ma-alias').value,baseAmt:parseFloat(document.getElementById('ma-base').value)||0,curAmt:parseFloat(document.getElementById('ma-cur').value)||0};
   if(editAccId){const i=accData.findIndex(x=>x.id===editAccId);accData[i]=row;}else accData.push(row);
   fbSaveOne('accounts', row);
+  saveToLocal('accounts', accData);
   closeAccModal();renderAcc();
 }
 function deleteAcc(id){if(confirm('삭제하시겠습니까?')){fbDeleteOne('accounts',id);accData=accData.filter(x=>x.id!==id);renderAcc();}}
@@ -1502,6 +1534,7 @@ function saveLoan(){
   const row={id:editLoanId||loanNextId++,code,bank,accNo:document.getElementById('ml-no').value,startDate:document.getElementById('ml-start').value,reDate:document.getElementById('ml-re').value,expDate:document.getElementById('ml-exp').value,principal:parseFloat(document.getElementById('ml-prin').value)||0,rate:parseFloat(document.getElementById('ml-rate').value)||0,rateNote:document.getElementById('ml-ratenote').value,interest:parseFloat(document.getElementById('ml-int').value)||0,balance:parseFloat(document.getElementById('ml-bal').value)||0,collateral:document.getElementById('ml-col').value,note:document.getElementById('ml-note').value};
   if(editLoanId){const i=loanData.findIndex(x=>x.id===editLoanId);loanData[i]=row;}else loanData.push(row);
   fbSaveOne('loans', row);
+  saveToLocal('loans', loanData);
   closeAccModal();renderLoan();
 }
 function deleteLoan(id){if(confirm('삭제하시겠습니까?')){fbDeleteOne('loans',id);loanData=loanData.filter(x=>x.id!==id);renderLoan();}}
@@ -1551,13 +1584,14 @@ function saveStore(id){
   const row={id:id&&id!=='null'?id:storeNextId++,code,name,owner:document.getElementById('sm-owner').value.trim(),bizNo:document.getElementById('sm-bizno').value.trim(),virtualAccNo:document.getElementById('sm-vacc').value.trim(),parentAcc:document.getElementById('sm-pacc').value,limit:parseFloat(document.getElementById('sm-limit').value)||0,initBalance:parseFloat(document.getElementById('sm-init').value)||0,status:document.getElementById('sm-status').value,note1:document.getElementById('sm-note1').value,note2:document.getElementById('sm-note2').value};
   if(id&&id!=='null'){const i=storeData.findIndex(x=>x.id===id);storeData[i]=row;}else storeData.push(row);
   fbSaveOne('stores', row);
+  saveToLocal('stores', storeData);
   closeAccModal();applyStoreFilter();
 }
 function deleteStore(id){if(confirm('삭제하시겠습니까?')){fbDeleteOne('stores',id);storeData=storeData.filter(x=>x.id!==id);applyStoreFilter();}}
 function storeToggleAll(chk){document.querySelectorAll('.store-chk').forEach(c=>c.checked=chk.checked);}
 function getStoreChecked(){return [...document.querySelectorAll('.store-chk:checked')].map(c=>parseInt(c.value));}
 function editStoreSelected(){const ids=getStoreChecked();if(ids.length!==1){alert('수정할 항목 1건을 선택해주세요.');return;}openStoreModal(ids[0]);}
-function deleteStoreSelected(){const ids=getStoreChecked();if(!ids.length){alert('삭제할 항목을 선택해주세요.');return;}if(confirm(ids.length+'건을 삭제하시겠습니까?')){ids.forEach(id=>fbDeleteOne('stores',id));storeData=storeData.filter(r=>!ids.includes(r.id));applyStoreFilter();}}
+function deleteStoreSelected(){const ids=getStoreChecked();if(!ids.length){alert('삭제할 항목을 선택해주세요.');return;}if(confirm(ids.length+'건을 삭제하시겠습니까?')){ids.forEach(id=>fbDeleteOne('deposit',id));depData=depData.filter(r=>!ids.includes(r.id));saveToLocal('deposit',depData);applyDepFilter();}}
 function openStoreUpload(){
   const html=`<div class="modal" style="width:500px;"><h2>거래처 엑셀 업로드</h2><p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>가맹점코드</strong> / 가맹점명 / 대표자명 / 사업자번호 / 가상계좌번호 / 연결모계좌 / 한도금액 / 초기미수금 / 상태 / 비고1 / 비고2</p><div class="upload-area" onclick="document.getElementById('store-xl-input').click()"><div style="font-size:24px;">📂</div><p>클릭하여 엑셀 파일 선택</p><input type="file" id="store-xl-input" accept=".xlsx,.xls,.csv" style="display:none;" onchange="previewStoreExcel(this)"></div><div class="upload-preview" id="store-xl-preview"></div><div class="modal-footer"><button onclick="closeAccModal()">취소</button><button class="primary" onclick="importStoreExcel()">업로드 적용</button></div></div>`;
   showDynModal(html);
@@ -1911,6 +1945,55 @@ function showFirebaseInfo(el) {
     </div>
   </div>`);
 }
+// ===== localStorage 유틸 =====
+const LS_KEYS = {
+  sales: 'sijae_sales',
+  deposit: 'sijae_deposit',
+  accounts: 'sijae_accounts',
+  loans: 'sijae_loans',
+  stores: 'sijae_stores',
+  noteTypes: 'sijae_noteTypes',
+  lastSync: 'sijae_lastSync'
+};
+
+function saveToLocal(key, data) {
+  try { localStorage.setItem(LS_KEYS[key], JSON.stringify(data)); } catch(e) { console.error('localStorage 저장 오류', e); }
+}
+
+function loadFromLocal(key) {
+  try { const d = localStorage.getItem(LS_KEYS[key]); return d ? JSON.parse(d) : null; } catch(e) { return null; }
+}
+
+function saveAllToLocal() {
+  saveToLocal('sales', salesData);
+  saveToLocal('deposit', depData);
+  saveToLocal('accounts', accData);
+  saveToLocal('loans', loanData);
+  saveToLocal('stores', storeData);
+  saveToLocal('noteTypes', depNoteTypes);
+  saveToLocal('lastSync', new Date().toISOString());
+}
+
+async function forceSyncToFirebase() {
+  if(!fbReady) { alert('Firebase 연결이 필요합니다.'); return; }
+  if(!confirm('현재 데이터를 Firebase에 전체 동기화 저장합니다.\n계속하시겠습니까?')) return;
+  setStatus('fb', true, '동기화 중...');
+  try {
+    [...salesData].forEach(r => fbSaveOne('sales', r));
+    [...depData].forEach(r => fbSaveOne('deposit', r));
+    [...accData].forEach(r => fbSaveOne('accounts', r));
+    [...loanData].forEach(r => fbSaveOne('loans', r));
+    [...storeData].forEach(r => fbSaveOne('stores', r));
+    depNoteTypes.forEach((t,i) => fbSaveOne('noteTypes', {id:i+1,...t}));
+    saveAllToLocal();
+    setStatus('fb', true, '동기화 완료');
+    alert('Firebase 동기화 저장 완료!');
+  } catch(e) {
+    setStatus('fb', false, '동기화 오류');
+    alert('오류 발생: ' + e.message);
+  }
+}
+  
 // ===== 초기화 =====
 initFirebase();
 renderTable(filteredData);
