@@ -657,6 +657,46 @@ function setStatus(type, ok, msg) {
   txt.textContent = msg;
 }
 
+// ===== [패치] 저장 실패 재시도 큐 =====
+// fbSaveOne이 실패하면(쿼터초과/네트워크 등) 이 큐에 쌓이고,
+// 5분마다 + 앱 로드 시 자동으로 재전송을 시도합니다.
+// localStorage에 쌓이므로 새로고침해도 유지됩니다.
+const PENDING_KEY = 'sijae_pendingSync';
+
+function queueFailedSync(collectionName, row) {
+  try {
+    const q = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
+    q.push({collectionName, row, ts: Date.now()});
+    localStorage.setItem(PENDING_KEY, JSON.stringify(q));
+  } catch(e) { console.error('동기화 대기열 저장 오류', e); }
+}
+
+async function retryPendingSync() {
+  if(!fbReady) return;
+  let q = [];
+  try { q = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]'); } catch(e) { return; }
+  if(!q.length) return;
+  const {doc, setDoc} = window._fbFs;
+  const remain = [];
+  for(const item of q) {
+    try {
+      const clean = JSON.parse(JSON.stringify(item.row));
+      delete clean._docId;
+      await setDoc(doc(fbDb, item.collectionName, String(item.row.id)), clean);
+    } catch(e) {
+      remain.push(item);
+    }
+  }
+  localStorage.setItem(PENDING_KEY, JSON.stringify(remain));
+  if(remain.length === 0 && q.length > 0) {
+    setStatus('fb', true, '✅ 미동기화 ' + q.length + '건 복구완료');
+  } else if(remain.length > 0) {
+    setStatus('fb', false, '⚠️ 아직 ' + remain.length + '건 동기화 대기중');
+  }
+}
+// 5분마다 자동 재시도
+setInterval(retryPendingSync, 5*60*1000);
+
 async function initFirebase() {
   try {
     const {initializeApp} = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
@@ -705,6 +745,7 @@ async function loadFromFirebase() {
   const syncedToday = lastSync && lastSync.slice(0,10) === today;
   if(lsSales && lsSales.length && syncedToday) {
     setStatus('fb', true, '로컬 데이터 로드완료');
+    retryPendingSync();
     return;
   }
 
@@ -719,27 +760,59 @@ async function loadFromFirebase() {
     const [sSnap, dSnap, aSnap, lSnap, stSnap] = await Promise.all([
       load('sales'), load('deposit'), load('accounts'), load('loans'), load('stores')
     ]);
+
+    // [패치] 안전장치: Firebase 데이터 건수가 로컬보다 적으면
+    // (쓰기 실패로 일부만 저장됐을 가능성) 덮어쓰지 않고 콘솔에 경고만 남김.
     if(sSnap.length) {
-      salesData = sSnap;
-      nextId = Math.max(...salesData.map(r=>r.id||0)) + 1;
-      salesData.sort((a,b)=>b.date.localeCompare(a.date));
-      filteredData = [...salesData];
-      renderTable(filteredData);
+      if(sSnap.length < salesData.length) {
+        console.warn('[안전장치] sales: Firebase('+sSnap.length+') < 로컬('+salesData.length+') → 덮어쓰기 스킵');
+        setStatus('fb', false, '⚠️ sales 동기화 불일치 - 로컬 유지');
+      } else {
+        salesData = sSnap;
+        nextId = Math.max(...salesData.map(r=>r.id||0)) + 1;
+        salesData.sort((a,b)=>b.date.localeCompare(a.date));
+        filteredData = [...salesData];
+        renderTable(filteredData);
+      }
     }
     if(dSnap.length) {
-      depData = dSnap;
-      depNextId = Math.max(...depData.map(r=>r.id||0)) + 1;
-      depFiltered = [...depData];
+      if(dSnap.length < depData.length) {
+        console.warn('[안전장치] deposit: Firebase('+dSnap.length+') < 로컬('+depData.length+') → 덮어쓰기 스킵');
+        setStatus('fb', false, '⚠️ deposit 동기화 불일치 - 로컬 유지');
+      } else {
+        depData = dSnap;
+        depNextId = Math.max(...depData.map(r=>r.id||0)) + 1;
+        depFiltered = [...depData];
+      }
     }
-    if(aSnap.length) { accData = aSnap; accNextId = Math.max(...accData.map(r=>r.id||0)) + 1; }
-    if(lSnap.length) { loanData = lSnap; loanNextId = Math.max(...loanData.map(r=>r.id||0)) + 1; }
-    if(stSnap.length) { storeData = stSnap; storeNextId = Math.max(...storeData.map(r=>r.id||0)) + 1; }
+    if(aSnap.length) {
+      if(aSnap.length < accData.length) {
+        console.warn('[안전장치] accounts: Firebase('+aSnap.length+') < 로컬('+accData.length+') → 덮어쓰기 스킵');
+      } else {
+        accData = aSnap; accNextId = Math.max(...accData.map(r=>r.id||0)) + 1;
+      }
+    }
+    if(lSnap.length) {
+      if(lSnap.length < loanData.length) {
+        console.warn('[안전장치] loans: Firebase('+lSnap.length+') < 로컬('+loanData.length+') → 덮어쓰기 스킵');
+      } else {
+        loanData = lSnap; loanNextId = Math.max(...loanData.map(r=>r.id||0)) + 1;
+      }
+    }
+    if(stSnap.length) {
+      if(stSnap.length < storeData.length) {
+        console.warn('[안전장치] stores: Firebase('+stSnap.length+') < 로컬('+storeData.length+') → 덮어쓰기 스킵');
+      } else {
+        storeData = stSnap; storeNextId = Math.max(...storeData.map(r=>r.id||0)) + 1;
+      }
+    }
     try {
       const ntSnap = await load('noteTypes');
       if(ntSnap.length) depNoteTypes = ntSnap.map(t=>({name:t.name, color:t.color}));
     } catch(e) {}
     saveAllToLocal(); // Firebase 로드 후 localStorage에 캐시
     setStatus('fb', true, 'Firebase 로드완료');
+    retryPendingSync();
   } catch(e) {
     setStatus('fb', false, 'Firebase 로드오류');
     console.error(e);
@@ -780,7 +853,7 @@ async function saveToFirebase(collectionName, data) {
 }
 
 async function fbSaveOne(collectionName, row) {
-  if(!fbReady) return false;
+  if(!fbReady) { queueFailedSync(collectionName, row); return false; }
   const {doc, setDoc} = window._fbFs;
   try {
     const clean = JSON.parse(JSON.stringify(row));
@@ -789,6 +862,9 @@ async function fbSaveOne(collectionName, row) {
     return true;
   } catch(e) {
     console.error('fbSaveOne 오류:', collectionName, row.id, e);
+    // [패치] 실패를 화면에도 표시 + 재시도 큐에 적재 (조용히 사라지지 않게)
+    setStatus('fb', false, '⚠️ 저장실패 (' + collectionName + ' #' + row.id + ') - 재시도 대기중');
+    queueFailedSync(collectionName, row);
     return false;
   }
 }
@@ -1452,8 +1528,12 @@ async function saveDepRow(){
   if(editDepId){const i=depData.findIndex(x=>x.id===editDepId);depData[i]=row;}
   else depData.unshift(row);
   recalcDepBalances();
-  // 같은 계좌 전체 재저장
- await Promise.all(depData.filter(r=>r.code===code).map(r=>fbSaveOne('deposit',r)));
+  // [패치] 변경된 1건만 Firebase에 저장합니다.
+  // 예전엔 같은 계좌의 전체 거래를 다시 저장해서(거래 500건이면 500번 쓰기)
+  // Firestore 일일 쓰기 쿼터를 며칠 만에 초과시키는 원인이었습니다.
+  // 다른 행들의 finalBal은 화면/로컬에서는 recalcDepBalances()로 항상
+  // 최신값으로 다시 계산되므로, Firebase에 있는 옛 finalBal 값은 무방합니다.
+  await fbSaveOne('deposit', row);
   saveToLocal('deposit', depData);
   closeAccModal(); applyDepFilter();
   }
@@ -1964,20 +2044,22 @@ function showFirebaseInfo(el) {
         <table style="width:100%;font-size:12px;border-collapse:collapse;">
           <tr style="background:#e8f0fb;"><th style="padding:5px 8px;text-align:left;">컬렉션명</th><th style="padding:5px 8px;text-align:left;">내용</th><th style="padding:5px 8px;text-align:left;">저장방식</th></tr>
           <tr><td style="padding:5px 8px;font-weight:600;">sales</td><td style="padding:5px 8px;">매출내역</td><td style="padding:5px 8px;color:#0F6E56;">fbSaveOne (건별)</td></tr>
-          <tr style="background:#fafafa;"><td style="padding:5px 8px;font-weight:600;">deposit</td><td style="padding:5px 8px;">입출금내역</td><td style="padding:5px 8px;color:#0F6E56;">fbSaveOne (건별)</td></tr>
+          <tr style="background:#fafafa;"><td style="padding:5px 8px;font-weight:600;">deposit</td><td style="padding:5px 8px;">입출금내역</td><td style="padding:5px 8px;color:#0F6E56;">fbSaveOne (건별, 1건만)</td></tr>
           <tr><td style="padding:5px 8px;font-weight:600;">accounts</td><td style="padding:5px 8px;">계좌 마스터</td><td style="padding:5px 8px;color:#0F6E56;">fbSaveOne (건별)</td></tr>
           <tr style="background:#fafafa;"><td style="padding:5px 8px;font-weight:600;">loans</td><td style="padding:5px 8px;">대출내역</td><td style="padding:5px 8px;color:#0F6E56;">fbSaveOne (건별)</td></tr>
           <tr><td style="padding:5px 8px;font-weight:600;">stores</td><td style="padding:5px 8px;">가맹점 마스터</td><td style="padding:5px 8px;color:#0F6E56;">fbSaveOne (건별)</td></tr>
-          <tr style="background:#fafafa;"><td style="padding:5px 8px;font-weight:600;">noteTypes</td><td style="padding:5px 8px;">비고유형(계정과목)</td><td style="padding:5px 8px;color:#F0921E;">saveToFirebase (전체)</td></tr>
+          <tr style="background:#fafafa;"><td style="padding:5px 8px;font-weight:600;">noteTypes</td><td style="padding:5px 8px;">비고유형(계정과목)</td><td style="padding:5px 8px;color:#F0921E;">fbSaveOne (건별)</td></tr>
         </table>
       </div>
 
       <div style="background:#f9f9f9;border-radius:8px;padding:14px 16px;margin-bottom:14px;border-left:3px solid #0F6E56;">
-        <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:8px;">⚡ 자동저장 방식</div>
+        <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:8px;">⚡ 자동저장 방식 (패치 적용됨)</div>
         <div style="font-size:12px;color:#444;line-height:2;">
           • 데이터 추가/수정/삭제 즉시 <strong>자동으로 Firebase에 저장</strong>됨<br>
-          • 저장방식: <strong>fbSaveOne</strong> — 변경된 1건만 setDoc으로 저장 (데이터 손실 위험 없음)<br>
-          • 앱 새로고침 시 Firebase에서 <strong>자동 로드</strong><br>
+          • 저장방식: <strong>fbSaveOne</strong> — 변경된 1건만 setDoc으로 저장<br>
+          • 입출금 수정 시 더 이상 같은 계좌 전체를 재저장하지 않음 (쓰기 쿼터 보호)<br>
+          • 저장 실패 시 화면 상태표시에 ⚠️ 경고가 뜨고, <strong>대기열에 쌓여 자동 재시도</strong>됨 (5분 간격)<br>
+          • 앱 새로고침 시 Firebase에서 <strong>자동 로드</strong> — 단, Firebase 데이터가 로컬보다 적으면 덮어쓰지 않음<br>
           • 상단 상태표시: <span style="color:#0F6E56;font-weight:600;">● Firebase 로드완료</span> 확인 후 사용
         </div>
       </div>
@@ -1995,7 +2077,7 @@ function showFirebaseInfo(el) {
         <div style="font-size:12px;color:#555;line-height:2;">
           • <strong>계좌 마스터(accounts)의 curAmt</strong> = 2026년 5월 31일 기준잔액 → 절대 수정 금지/본프로그램2026-06-01부터적용됨<br>
           • deposit의 prevBal/finalBal은 <strong>앱에서 자동 재계산</strong>됨 (Firebase 저장값 무시)<br>
-          • noteTypes만 전체 일괄저장 방식 사용 (건수 적어서 안전)<br>
+          • 저장 실패가 5분 내 자동 복구 안 되면 콘솔(F12)에서 sijae_pendingSync 키를 확인할 것<br>
           • GitHub Pages URL: <strong>https://charllottesooh.github.io/SIJAE-2607/</strong>
         </div>
       </div>
