@@ -1433,7 +1433,7 @@ function openDepModal(id){
   });
 }
 
-function saveDepRow(){
+async function saveDepRow(){
   const code=document.getElementById('dp-code').value, date=document.getElementById('dp-date').value;
   if(!code||!date){alert('계좌와 일자를 입력해주세요.');return;}
   const acc=depAccounts.find(a=>a.code===code)||{};
