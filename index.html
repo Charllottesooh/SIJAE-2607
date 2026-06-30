@@ -780,13 +780,17 @@ async function saveToFirebase(collectionName, data) {
 }
 
 async function fbSaveOne(collectionName, row) {
-  if(!fbReady) return;
+  if(!fbReady) return false;
   const {doc, setDoc} = window._fbFs;
   try {
     const clean = JSON.parse(JSON.stringify(row));
     delete clean._docId;
     await setDoc(doc(fbDb, collectionName, String(row.id)), clean);
-  } catch(e) { console.error(e); }
+    return true;
+  } catch(e) {
+    console.error('fbSaveOne 오류:', collectionName, row.id, e);
+    return false;
+  }
 }
 
 async function fbDeleteOne(collectionName, id) {
@@ -1000,9 +1004,10 @@ function previewExcel(input){
   reader.readAsBinaryString(file);
 }
 
-function importExcel(){
+async function importExcel(){
   if(!uploadedRows.length){alert('파일을 먼저 선택해주세요.');return;}
   const cnt=uploadedRows.length;
+  const newRows=[];
   uploadedRows.forEach(r=>{
     const rawDate=r[0];let date=new Date().toISOString().slice(0,10);
     if(rawDate){
@@ -1012,8 +1017,9 @@ function importExcel(){
     const outVat=parseFloat(r[11])||0, outTotal=parseFloat(r[12])||0;
     const row={id:nextId++,date,storeCode:String(r[1]||''),storeName:String(r[2]||''),productCode:String(r[3]||''),productName:String(r[4]||''),unit:String(r[5]||''),inQty:parseFloat(r[6])||0,outCount:parseFloat(r[7])||0,supply:parseFloat(r[8])||0,outQty:parseFloat(r[9])||0,outPrice:parseFloat(r[10])||0,outVat,outTotal,taxType:outVat>0?'과세':'면세',note:String(r[13]||'')};
     salesData.unshift(row);
-    fbSaveOne('sales', row);
+    newRows.push(row);
   });
+  await Promise.all(newRows.map(r=>fbSaveOne('sales',r)));
   saveToLocal('sales', salesData);
   uploadedRows=[];
   document.getElementById('upload-preview').style.display='none';
@@ -1447,7 +1453,7 @@ function saveDepRow(){
   else depData.unshift(row);
   recalcDepBalances();
   // 같은 계좌 전체 재저장
-  depData.filter(r=>r.code===code).forEach(r=>fbSaveOne('deposit',r));
+ await Promise.all(depData.filter(r=>r.code===code).map(r=>fbSaveOne('deposit',r)));
   saveToLocal('deposit', depData);
   closeAccModal(); applyDepFilter();
   }
@@ -1488,9 +1494,10 @@ function previewDepExcel(input){
   };
   reader.readAsBinaryString(file);
 }
-function importDepExcel(){
+async function importDepExcel(){
   if(!depUploadRows.length){alert('파일을 먼저 선택해주세요.');return;}
   const cnt=depUploadRows.length;
+  const newRows=[];
   depUploadRows.forEach(r=>{
     const rawDate=r[2];let date=new Date().toISOString().slice(0,10);
     if(rawDate){
@@ -1515,8 +1522,9 @@ function importDepExcel(){
       modDate:String(r[7]||''),
     };
     depData.unshift(row);
-    fbSaveOne('deposit', row);
+    newRows.push(row);
   });
+  await Promise.all(newRows.map(r=>fbSaveOne('deposit',r)));
   saveToLocal('deposit', depData);
   depUploadRows=[];
   closeAccModal(); applyDepFilter();
