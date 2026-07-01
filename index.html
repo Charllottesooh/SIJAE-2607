@@ -1479,7 +1479,7 @@ function renderDep(data){
   },0);
 
   // [수정] 테이블 하단 합계의 최종잔액도 날짜 필터 무관, 각 계좌 마지막 거래 기준
-  const totFinal=getTotalBalanceAsOf(end);
+  const totFinal=getTotalBalanceAsOf(document.getElementById('dep-f-end').value);
 
   tfoot.innerHTML=`<tr style="background:#444;color:#fff;font-weight:700;font-size:13px;">
     <td colspan="7" style="padding:12px 14px;">최종 합계</td>
