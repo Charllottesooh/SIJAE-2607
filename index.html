@@ -1465,12 +1465,11 @@ function renderDep(data){
     return s+bal;
   },0);
 
+  // [수정] 테이블 하단 합계의 최종잔액도 날짜 필터 무관, 각 계좌 마지막 거래 기준
   const totFinal=depAccounts.reduce((s,a)=>{
-    const inRows=data.filter(r=>r.code===a.code).sort((x,y)=>x.date.localeCompare(y.date)||(x.id||0)-(y.id||0));
-    if(inRows.length>0) return s+(inRows[inRows.length-1].finalBal||0);
-    const prevRows=depData.filter(r=>r.code===a.code&&r.date<startDate).sort((x,y)=>x.date.localeCompare(y.date)||(x.id||0)-(y.id||0));
-    const bal=prevRows.length>0?prevRows[prevRows.length-1].finalBal:(accData.find(x=>x.code===a.code)||{}).curAmt||0;
-    return s+bal;
+    const allRows=depData.filter(r=>r.code===a.code).sort((x,y)=>x.date.localeCompare(y.date)||(x.id||0)-(y.id||0));
+    if(allRows.length>0) return s+(allRows[allRows.length-1].finalBal||0);
+    return s+((accData.find(x=>x.code===a.code)||{}).curAmt||0);
   },0);
 
   tfoot.innerHTML=`<tr style="background:#444;color:#fff;font-weight:700;font-size:13px;">
@@ -1489,9 +1488,15 @@ function updateDepCards(data){
   const end=document.getElementById('dep-f-end').value;
   const salesAmt=salesData.filter(r=>r.date>=start&&r.date<=end).reduce((s,r)=>s+(r.outTotal||0),0);
   const totIn=data.filter(r=>r.noteType==='가맹점 입금').reduce((s,r)=>s+(r.inAmt||0),0);
+
+  // [수정] 총예금잔액: 날짜 필터와 무관하게 각 계좌별 가장 마지막 거래의 finalBal 합산
+  // depData 전체 기준 (필터 종료일로 자르지 않음 — 그래야 진짜 현재 잔액이 나옴)
   const totFinal=depAccounts.reduce((s,a)=>{
-    const accRows=depData.filter(r=>r.code===a.code&&r.date<=end).sort((x,y)=>x.date.localeCompare(y.date)||(x.id||0)-(y.id||0));
+    const accRows=depData
+      .filter(r=>r.code===a.code)
+      .sort((x,y)=>x.date.localeCompare(y.date)||(x.id||0)-(y.id||0));
     if(accRows.length>0) return s+(accRows[accRows.length-1].finalBal||0);
+    // 거래가 없는 계좌는 계좌 마스터의 기초잔액(curAmt)으로 대체
     return s+((accData.find(x=>x.code===a.code)||{}).curAmt||0);
   },0);
   document.getElementById('dep-sales').textContent='₩'+salesAmt.toLocaleString();
