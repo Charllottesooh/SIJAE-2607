@@ -115,6 +115,7 @@ input[type="checkbox"] { cursor: pointer; }
   <div class="menu-group">
     <div class="menu-group-label">분석</div>
     <div class="menu-item" onclick="showPage('report',this)">리포트</div>
+    <div class="menu-item" onclick="showPage('margin',this)">마진관리</div>
   </div>
   <div class="menu-group" style="margin-top:auto;border-top:0.5px solid rgba(255,255,255,0.08);padding-top:12px;">
   <div class="menu-group-label">시스템 정보</div>
@@ -420,7 +421,7 @@ input[type="checkbox"] { cursor: pointer; }
         <input type="date" id="dep-f-end" value="2026-06-30">
         <input type="text" id="dep-f-store" placeholder="가맹점코드/명 검색" style="width:160px;">
         <select id="dep-f-code" style="width:180px;"><option value="">전체 계좌</option></select>
-        <select id="dep-f-type" style="width:120px;"><option value="">비고유형 전체</option></select>
+        <select id="dep-f-type" style="width:160px;"><option value="">비고유형 전체</option></select>
         <button class="search" onclick="applyDepFilter()">조회</button>
         <button onclick="resetDepFilter()">초기화</button>
         <button onclick="openDepAccMgr()">계정관리</button>
@@ -516,7 +517,65 @@ input[type="checkbox"] { cursor: pointer; }
   </div>
 </div>
 
-<!-- 매출 추가/수정 모달 -->
+<!-- ===== 마진관리 ===== -->
+<div id="page-margin" class="page">
+  <div id="margin-title-bar" style="background:#E8F4F8;border-radius:10px;padding:24px;text-align:center;margin-bottom:20px;">
+    <div style="font-size:22px;font-weight:700;color:#111;margin-bottom:8px;">월별 마진 관리</div>
+    <div style="font-size:13px;color:#888;">매입/출고 품목을 직접 입력하면 자동으로 마진이 계산됩니다</div>
+  </div>
+  <div class="card-section" style="grid-template-columns:repeat(3,1fr);">
+    <div class="summary-card color-red"><div class="label">매입 합계금액</div><div class="value" id="margin-purchase-total">₩0</div></div>
+    <div class="summary-card color-blue"><div class="label">생육출고 합계금액</div><div class="value" id="margin-output-total">₩0</div></div>
+    <div class="summary-card color-green"><div class="label">최종 마진액</div><div class="value" id="margin-final">₩0</div><div class="sub">출고합계 − 매입합계</div></div>
+  </div>
+  <div class="filter-bar">
+    <input type="month" id="margin-month" value="2026-06">
+    <button class="search" onclick="loadMarginMonth()">월 불러오기</button>
+    <button class="primary" onclick="saveMarginEntry()">저장</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="table-wrap">
+      <div class="table-header">
+        <span class="title">당월 매입품목</span>
+        <div class="actions"><button onclick="addMarginRow('purchase')">+ 행추가</button></div>
+      </div>
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr><th style="min-width:140px;">품목명</th><th class="num" style="width:80px;">수량</th><th class="num" style="width:100px;">단가</th><th class="num" style="width:110px;">금액</th><th style="width:50px;"></th></tr></thead>
+          <tbody id="margin-purchase-tbody"></tbody>
+          <tfoot id="margin-purchase-tfoot"></tfoot>
+        </table>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <span class="title">당월 생육출고품목</span>
+        <div class="actions"><button onclick="addMarginRow('output')">+ 행추가</button></div>
+      </div>
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr><th style="min-width:140px;">품목명</th><th class="num" style="width:80px;">수량</th><th class="num" style="width:100px;">단가</th><th class="num" style="width:110px;">금액</th><th style="width:50px;"></th></tr></thead>
+          <tbody id="margin-output-tbody"></tbody>
+          <tfoot id="margin-output-tfoot"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-wrap" id="margin-compare-wrap">
+    <div class="table-header">
+      <span class="title">전월 대비 증감</span>
+      <span style="font-size:11px;color:#aaa;font-weight:400;" id="margin-compare-month-label"></span>
+    </div>
+    <div id="margin-compare-body" style="padding:16px 18px;"></div>
+  </div>
+
+  <div style="margin-top:16px;padding:14px 18px;background:#fff8e6;border-radius:10px;border-left:3px solid #F5A800;font-size:12px;color:#555;line-height:1.8;">
+    📌 계산식: <strong>최종마진액 = 생육출고 합계금액 − 매입 합계금액</strong> (기본 공식, 변경이 필요하시면 말씀해주세요)<br>
+    📌 월을 선택하고 "월 불러오기"를 누르면 해당 월 저장 데이터를 불러옵니다. 입력 후 반드시 "저장" 버튼을 눌러야 Firebase에 저장됩니다.
+  </div>
+</div>
+
 <div class="modal-bg" id="modal-form">
   <div class="modal">
     <h2 id="modal-title">매출 추가</h2>
@@ -602,28 +661,56 @@ let depAccounts = [
   {code:'ACC016', bank:'하나', accNo:'581-910058-20904', alias:''},
 ];
 
+// [패치5] 대표계정/하위계정 구조: id, parentId 추가.
+// parentId === null  -> 대표계정 (색상 적용)
+// parentId === 숫자  -> 하위계정 (색상 없음, 해당 대표계정에 속함)
+// 기존에 입력된 거래의 noteType 값(문자열)은 절대 건드리지 않습니다.
 let depNoteTypes = [
-  {name:'가맹점 입금', color:'#2563eb'},
-  {name:'대출이자', color:'#F0921E'},
-  {name:'이체', color:'#888'},
-  {name:'편입(계좌이동)', color:'#888'},
-  {name:'여입(계좌이동)', color:'#888'},
-  {name:'국세', color:'#D42020'},
-  {name:'지방세', color:'#D42020'},
-  {name:'입금', color:'#2563eb'},
-  {name:'환불', color:'#0F6E56'},
-  {name:'환급', color:'#0F6E56'},
-  {name:'기타', color:'#888'},
-  {name:'한마리상품권공제', color:'#7c3aed'},
-  {name:'급여', color:'#D42020'},
-  {name:'결산이자', color:'#0F6E56'},
+  {id:1,  name:'가맹점 입금',     color:'#2563eb', parentId:null},
+  {id:2,  name:'대출이자',        color:'#F0921E', parentId:null},
+  {id:3,  name:'이체',            color:'#888888', parentId:null},
+  {id:4,  name:'편입(계좌이동)',  color:'#888888', parentId:null},
+  {id:5,  name:'여입(계좌이동)',  color:'#888888', parentId:null},
+  {id:6,  name:'국세',            color:'#D42020', parentId:null},
+  {id:7,  name:'지방세',          color:'#D42020', parentId:null},
+  {id:8,  name:'입금',            color:'#2563eb', parentId:null},
+  {id:9,  name:'환불',            color:'#0F6E56', parentId:null},
+  {id:10, name:'환급',            color:'#0F6E56', parentId:null},
+  {id:11, name:'기타',            color:'#888888', parentId:null},
+  {id:12, name:'한마리상품권공제', color:'#7c3aed', parentId:null},
+  {id:13, name:'급여',            color:'#D42020', parentId:null},
+  {id:14, name:'결산이자',        color:'#0F6E56', parentId:null},
 ];
+let noteTypeNextId = 15;
+
+function migrateNoteTypes(list) {
+  if(!Array.isArray(list) || !list.length) return depNoteTypes;
+  let maxId = 0;
+  const migrated = list.map((t, i) => {
+    const id = (t.id !== undefined && t.id !== null) ? t.id : (i + 1);
+    if(id > maxId) maxId = id;
+    return {
+      id,
+      name: t.name,
+      color: t.color || '#888888',
+      parentId: (t.parentId !== undefined) ? t.parentId : null
+    };
+  });
+  noteTypeNextId = maxId + 1;
+  return migrated;
+}
 
 let depData = [], depNextId = 1, editDepId = null, depFiltered = [], depUploadRows = [];
 let accData = [], loanData = [], accNextId = 1, loanNextId = 1, editAccId = null, editLoanId = null;
 let storeData = [], storeNextId = 1, storeFiltered = [], storeUploadRows = [];
 
-// ===== 유틸 =====
+// [패치3] 마진관리: 월별 매입/출고 품목 수기입력
+let marginEntries = []; // [{id:'2026-06', yearMonth, purchaseItems:[], outputItems:[], purchaseTotal, outputTotal, margin, updatedAt}]
+let curMarginMonth = null;
+let curPurchaseItems = [];
+let curOutputItems = [];
+let marginItemNextId = 1;
+
 function fmt(n) { return '₩' + Math.round(n||0).toLocaleString(); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function showDynModal(html) {
@@ -638,7 +725,6 @@ function closeAccModal() {
 }
 function getStoreByCode(code) { return storeData.find(s=>s.code===code)||null; }
 
-// ===== Firebase =====
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCwczMPx-W07iuv3YCLtbymAjoPOb-xpP4",
   authDomain: "sijae-202607.firebaseapp.com",
@@ -657,10 +743,6 @@ function setStatus(type, ok, msg) {
   txt.textContent = msg;
 }
 
-// ===== [패치] 저장 실패 재시도 큐 =====
-// fbSaveOne이 실패하면(쿼터초과/네트워크 등) 이 큐에 쌓이고,
-// 5분마다 + 앱 로드 시 자동으로 재전송을 시도합니다.
-// localStorage에 쌓이므로 새로고침해도 유지됩니다.
 const PENDING_KEY = 'sijae_pendingSync';
 
 function queueFailedSync(collectionName, row) {
@@ -694,7 +776,6 @@ async function retryPendingSync() {
     setStatus('fb', false, '⚠️ 아직 ' + remain.length + '건 동기화 대기중');
   }
 }
-// 5분마다 자동 재시도
 setInterval(retryPendingSync, 5*60*1000);
 
 async function initFirebase() {
@@ -714,13 +795,13 @@ async function initFirebase() {
 }
 
 async function loadFromFirebase() {
-  // localStorage 먼저 로드
   const lsSales = loadFromLocal('sales');
   const lsDep = loadFromLocal('deposit');
   const lsAcc = loadFromLocal('accounts');
   const lsLoan = loadFromLocal('loans');
   const lsStore = loadFromLocal('stores');
   const lsNT = loadFromLocal('noteTypes');
+  const lsMargin = loadFromLocal('marginEntries');
   const lastSync = loadFromLocal('lastSync');
 
   if(lsSales && lsSales.length) {
@@ -738,9 +819,9 @@ async function loadFromFirebase() {
   if(lsAcc && lsAcc.length) { accData = lsAcc; accNextId = Math.max(...accData.map(r=>r.id||0)) + 1; }
   if(lsLoan && lsLoan.length) { loanData = lsLoan; loanNextId = Math.max(...loanData.map(r=>r.id||0)) + 1; }
   if(lsStore && lsStore.length) { storeData = lsStore; storeNextId = Math.max(...storeData.map(r=>r.id||0)) + 1; }
-  if(lsNT && lsNT.length) depNoteTypes = lsNT;
+  if(lsNT && lsNT.length) depNoteTypes = migrateNoteTypes(lsNT);
+  if(lsMargin && lsMargin.length) marginEntries = lsMargin;
 
-  // localStorage 데이터 있으면 Firebase 로드 스킵 (오늘 이미 동기화된 경우)
   const today = new Date().toISOString().slice(0,10);
   const syncedToday = lastSync && lastSync.slice(0,10) === today;
   if(lsSales && lsSales.length && syncedToday) {
@@ -749,7 +830,6 @@ async function loadFromFirebase() {
     return;
   }
 
-  // Firebase에서 로드
   if(!fbReady) return;
   const {collection, getDocs} = window._fbFs;
   try {
@@ -761,11 +841,9 @@ async function loadFromFirebase() {
       load('sales'), load('deposit'), load('accounts'), load('loans'), load('stores')
     ]);
 
-    // [패치] 안전장치: Firebase 데이터 건수가 로컬보다 적으면
-    // (쓰기 실패로 일부만 저장됐을 가능성) 덮어쓰지 않고 콘솔에 경고만 남김.
     if(sSnap.length) {
       if(sSnap.length < salesData.length) {
-        console.warn('[안전장치] sales: Firebase('+sSnap.length+') < 로컬('+salesData.length+') → 덮어쓰기 스킵');
+        console.warn('[안전장치] sales: Firebase('+sSnap.length+') < 로컬('+salesData.length+') - 덮어쓰기 스킵');
         setStatus('fb', false, '⚠️ sales 동기화 불일치 - 로컬 유지');
       } else {
         salesData = sSnap;
@@ -777,7 +855,7 @@ async function loadFromFirebase() {
     }
     if(dSnap.length) {
       if(dSnap.length < depData.length) {
-        console.warn('[안전장치] deposit: Firebase('+dSnap.length+') < 로컬('+depData.length+') → 덮어쓰기 스킵');
+        console.warn('[안전장치] deposit: Firebase('+dSnap.length+') < 로컬('+depData.length+') - 덮어쓰기 스킵');
         setStatus('fb', false, '⚠️ deposit 동기화 불일치 - 로컬 유지');
       } else {
         depData = dSnap;
@@ -787,30 +865,34 @@ async function loadFromFirebase() {
     }
     if(aSnap.length) {
       if(aSnap.length < accData.length) {
-        console.warn('[안전장치] accounts: Firebase('+aSnap.length+') < 로컬('+accData.length+') → 덮어쓰기 스킵');
+        console.warn('[안전장치] accounts: Firebase('+aSnap.length+') < 로컬('+accData.length+') - 덮어쓰기 스킵');
       } else {
         accData = aSnap; accNextId = Math.max(...accData.map(r=>r.id||0)) + 1;
       }
     }
     if(lSnap.length) {
       if(lSnap.length < loanData.length) {
-        console.warn('[안전장치] loans: Firebase('+lSnap.length+') < 로컬('+loanData.length+') → 덮어쓰기 스킵');
+        console.warn('[안전장치] loans: Firebase('+lSnap.length+') < 로컬('+loanData.length+') - 덮어쓰기 스킵');
       } else {
         loanData = lSnap; loanNextId = Math.max(...loanData.map(r=>r.id||0)) + 1;
       }
     }
     if(stSnap.length) {
       if(stSnap.length < storeData.length) {
-        console.warn('[안전장치] stores: Firebase('+stSnap.length+') < 로컬('+storeData.length+') → 덮어쓰기 스킵');
+        console.warn('[안전장치] stores: Firebase('+stSnap.length+') < 로컬('+storeData.length+') - 덮어쓰기 스킵');
       } else {
         storeData = stSnap; storeNextId = Math.max(...storeData.map(r=>r.id||0)) + 1;
       }
     }
     try {
       const ntSnap = await load('noteTypes');
-      if(ntSnap.length) depNoteTypes = ntSnap.map(t=>({name:t.name, color:t.color}));
+      if(ntSnap.length) depNoteTypes = migrateNoteTypes(ntSnap.map(t=>({id:t.id, name:t.name, color:t.color, parentId:t.parentId})));
     } catch(e) {}
-    saveAllToLocal(); // Firebase 로드 후 localStorage에 캐시
+    try {
+      const mgSnap = await load('marginEntries');
+      if(mgSnap.length) marginEntries = mgSnap;
+    } catch(e) {}
+    saveAllToLocal();
     setStatus('fb', true, 'Firebase 로드완료');
     retryPendingSync();
   } catch(e) {
@@ -862,7 +944,6 @@ async function fbSaveOne(collectionName, row) {
     return true;
   } catch(e) {
     console.error('fbSaveOne 오류:', collectionName, row.id, e);
-    // [패치] 실패를 화면에도 표시 + 재시도 큐에 적재 (조용히 사라지지 않게)
     setStatus('fb', false, '⚠️ 저장실패 (' + collectionName + ' #' + row.id + ') - 재시도 대기중');
     queueFailedSync(collectionName, row);
     return false;
@@ -889,22 +970,21 @@ async function saveToSheets(sheetName, data) {
   } catch(e) { console.error(e); }
 }
 
-// ===== 페이지 전환 =====
 function showPage(key, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+key).classList.add('active');
   document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active'));
   el.classList.add('active');
-  const titles = {sales:'매출내역',account:'계좌 및 대출',deposit:'입출금내역',report:'리포트',store:'거래처관리',arpage:'미수금관리'};
+  const titles = {sales:'매출내역',account:'계좌 및 대출',deposit:'입출금내역',report:'리포트',store:'거래처관리',arpage:'미수금관리',margin:'마진관리'};
   document.getElementById('page-title').textContent = titles[key]||key;
   if(key==='account') renderAcc();
   if(key==='deposit') { recalcDepBalances(); initDepSelects(); depFiltered=[...depData]; depFiltered.sort((a,b)=>b.date.localeCompare(a.date)); renderDep(depFiltered); }
   if(key==='report') { resetRptFilter(); }
   if(key==='store') { initStoreAccSelect(); storeFiltered=[...storeData]; renderStore(storeFiltered); }
   if(key==='arpage') { applyArFilter(); }
+  if(key==='margin') { initMarginPage(); }
 }
 
-// ===== 매출내역 =====
 function renderTable(data) {
   const tbody = document.getElementById('sales-tbody');
   tbody.innerHTML = '';
@@ -962,7 +1042,6 @@ function applyFilter() {
   const el=document.getElementById('sales-title-date');
   if(el) el.textContent=document.getElementById('f-start').value+' ~ '+document.getElementById('f-end').value;
 }
-
 
 function resetFilter() {
   document.getElementById('f-start').value = '2026-06-01';
@@ -1115,20 +1194,12 @@ function saveImage(){
   const content = document.getElementById('content');
   const pageTitle = document.getElementById('page-title').textContent;
   const date = new Date().toLocaleDateString('ko-KR');
-
-  // 스크롤 높이 저장
   const scrollTop = content.scrollTop;
   content.scrollTop = 0;
-
   html2canvas(content, {
-    scrollX: 0,
-    scrollY: 0,
-    useCORS: true,
-    allowTaint: true,
-    width: content.scrollWidth,
-    height: content.scrollHeight,
-    windowWidth: content.scrollWidth,
-    windowHeight: content.scrollHeight,
+    scrollX: 0, scrollY: 0, useCORS: true, allowTaint: true,
+    width: content.scrollWidth, height: content.scrollHeight,
+    windowWidth: content.scrollWidth, windowHeight: content.scrollHeight,
     onclone: function(doc) {
       const el = doc.getElementById('content');
       el.style.height = el.scrollHeight + 'px';
@@ -1151,16 +1222,10 @@ function printContent(){
   const pageTitle = document.getElementById('page-title').textContent;
   const scrollTop = content.scrollTop;
   content.scrollTop = 0;
-
   html2canvas(content, {
-    scrollX: 0,
-    scrollY: 0,
-    useCORS: true,
-    allowTaint: true,
-    width: content.scrollWidth,
-    height: content.scrollHeight,
-    windowWidth: content.scrollWidth,
-    windowHeight: content.scrollHeight,
+    scrollX: 0, scrollY: 0, useCORS: true, allowTaint: true,
+    width: content.scrollWidth, height: content.scrollHeight,
+    windowWidth: content.scrollWidth, windowHeight: content.scrollHeight,
     onclone: function(doc) {
       const el = doc.getElementById('content');
       el.style.height = el.scrollHeight + 'px';
@@ -1170,31 +1235,16 @@ function printContent(){
     content.scrollTop = scrollTop;
     const img = canvas.toDataURL('image/png');
     const win = window.open('', '_blank');
-    win.document.write(`<!DOCTYPE html><html><head>
-      <title>${pageTitle}</title>
-      <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { background:#fff; }
-        img { width:100%; display:block; }
-        @media print {
-          body { margin:0; }
-          img { width:100%; page-break-inside:avoid; }
-        }
-      </style>
-    </head><body>
-      <img src="${img}">
-      <script>window.onload=function(){window.print();}<\/script>
-    </body></html>`);
+    win.document.write('<!DOCTYPE html><html><head><title>'+pageTitle+'</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{background:#fff;}img{width:100%;display:block;}@media print{body{margin:0;}img{width:100%;page-break-inside:avoid;}}</style></head><body><img src="'+img+'"><script>window.onload=function(){window.print();}<\/script></body></html>');
     win.document.close();
   }).catch(e => {
     content.scrollTop = scrollTop;
     alert('인쇄 준비 실패: ' + e.message);
   });
 }
-  
+
 function showStoreTip(code){const s=getStoreByCode(code);if(!s)return;alert(`[${s.code}] ${s.name}\n대표자: ${s.owner||'-'}\n사업자: ${s.bizNo||'-'}\n한도: ${s.limit?s.limit.toLocaleString():'미설정'}\n상태: ${s.status}`);}
 
-// ===== 매출계산서 =====
 function switchSalesTab(tab,el){
   ['sales-daily','sales-invoice'].forEach(t=>{document.getElementById(t).style.display=t===tab?'block':'none';});
   document.querySelectorAll('#page-sales .acc-tab').forEach(t=>t.classList.remove('active'));
@@ -1268,17 +1318,36 @@ function exportInvoiceExcel(){
   XLSX.writeFile(wb,'매출계산서_'+new Date().toLocaleDateString('ko-KR')+'.xlsx');
 }
 
-// ===== 입출금내역 =====
+// [패치5] 비고유형 select를 대표계정-하위계정 optgroup 구조로 생성하는 헬퍼
+function buildNoteTypeOptions(selectedName){
+  const parents = depNoteTypes.filter(t=>t.parentId===null);
+  return parents.map(p=>{
+    const children = depNoteTypes.filter(c=>c.parentId===p.id);
+    if(!children.length){
+      return `<option value="${p.name}" ${selectedName===p.name?'selected':''}>${p.name}</option>`;
+    }
+    const selfLabel = p.name + ' (분류없음)';
+    const selfOpt = `<option value="${p.name}" ${selectedName===p.name?'selected':''}>${selfLabel}</option>`;
+    const childOpts = children.map(c=>`<option value="${c.name}" ${selectedName===c.name?'selected':''}>　${c.name}</option>`).join('');
+    return `<optgroup label="${p.name}">${selfOpt}${childOpts}</optgroup>`;
+  }).join('');
+}
+
 function initDepSelects(){
   const codeEl=document.getElementById('dep-f-code'), typeEl=document.getElementById('dep-f-type');
   if(!codeEl||!typeEl)return;
   codeEl.innerHTML='<option value="">전체 계좌</option>'+depAccounts.map(a=>`<option value="${a.code}">${a.code} ${a.accNo}${a.alias?' ('+a.alias+')':''}</option>`).join('');
-  typeEl.innerHTML='<option value="">비고유형 전체</option>'+depNoteTypes.map(t=>`<option value="${t.name}">${t.name}</option>`).join('');
+  typeEl.innerHTML='<option value="">비고유형 전체</option>'+buildNoteTypeOptions('');
 }
 
+// [패치5] 거래의 noteType이 하위계정이면 색상 없이 텍스트로만, 대표계정이면 기존처럼 컬러 배지로 표시
 function getNoteTypeBadge(noteType){
   if(!noteType)return '-';
   const nt=depNoteTypes.find(x=>x.name===noteType);
+  if(nt && nt.parentId !== null){
+    const parent = depNoteTypes.find(p=>p.id===nt.parentId);
+    return `<span style="font-size:11px;color:#666;">${parent?parent.name+' › ':''}${noteType}</span>`;
+  }
   const color=nt?nt.color:'#888', bg=nt?nt.color+'22':'#eee', border=nt?nt.color+'55':'#ddd';
   return `<span class="tax-badge" style="background:${bg};color:${color};border:0.5px solid ${border};">${noteType}</span>`;
 }
@@ -1302,7 +1371,7 @@ function recalcDepBalances(){
     });
   });
 }
- function renderDep(data){
+function renderDep(data){
   const tbody=document.getElementById('dep-tbody'), tfoot=document.getElementById('dep-tfoot');
   if(!tbody)return;
   tbody.innerHTML='';
@@ -1330,7 +1399,6 @@ function recalcDepBalances(){
   }).forEach(a=>{
     if(groups[a.code]){
       const g=groups[a.code];
-      const firstRow=g.rows[0];
       const lastRow=g.rows[g.rows.length-1];
       const prevRows=depData.filter(r=>r.code===a.code&&r.date<startDate).sort((x,y)=>x.date.localeCompare(y.date)||(x.id||0)-(y.id||0));
       const headerPrevBal=prevRows.length>0?prevRows[prevRows.length-1].finalBal:(accData.find(x=>x.code===a.code)||{}).curAmt||0;
@@ -1388,7 +1456,7 @@ function recalcDepBalances(){
 }
   });
 
- const totIn=data.reduce((s,r)=>s+(r.inAmt||0),0);
+  const totIn=data.reduce((s,r)=>s+(r.inAmt||0),0);
   const totOut=data.reduce((s,r)=>s+(r.outAmt||0),0);
 
   const totPrev=depAccounts.reduce((s,a)=>{
@@ -1417,22 +1485,15 @@ function recalcDepBalances(){
   updateDepCards(data);
 }
 function updateDepCards(data){
-  // 1. 월누계매출: 현재 필터 날짜 범위 기준
   const start=document.getElementById('dep-f-start').value;
   const end=document.getElementById('dep-f-end').value;
   const salesAmt=salesData.filter(r=>r.date>=start&&r.date<=end).reduce((s,r)=>s+(r.outTotal||0),0);
-
-  // 2. 월누계입금: 가맹점 입금만
   const totIn=data.filter(r=>r.noteType==='가맹점 입금').reduce((s,r)=>s+(r.inAmt||0),0);
-
-  // 3. 총예금잔액: 조회 마지막 날짜 기준 각 계좌 최종잔액 합계
   const totFinal=depAccounts.reduce((s,a)=>{
-    const accRows=depData.filter(r=>r.code===a.code&&r.date<=end)
-      .sort((x,y)=>x.date.localeCompare(y.date)||(x.id||0)-(y.id||0));
+    const accRows=depData.filter(r=>r.code===a.code&&r.date<=end).sort((x,y)=>x.date.localeCompare(y.date)||(x.id||0)-(y.id||0));
     if(accRows.length>0) return s+(accRows[accRows.length-1].finalBal||0);
     return s+((accData.find(x=>x.code===a.code)||{}).curAmt||0);
   },0);
-
   document.getElementById('dep-sales').textContent='₩'+salesAmt.toLocaleString();
   document.getElementById('dep-in').textContent='₩'+totIn.toLocaleString();
   document.getElementById('dep-bal').textContent='₩'+totFinal.toLocaleString();
@@ -1459,7 +1520,7 @@ function applyDepFilter(){
   const el=document.getElementById('dep-title-date');
   if(el) el.textContent=start+' ~ '+end;
 }
- 
+
 function resetDepFilter(){
   document.getElementById('dep-f-start').value='2026-06-01';
   document.getElementById('dep-f-end').value='2026-06-30';
@@ -1476,7 +1537,7 @@ function openDepModal(id){
   const r=id?depData.find(x=>x.id===id):null;
   const today=new Date().toISOString().slice(0,10);
   const accOpts=depAccounts.map(a=>`<option value="${a.code}" ${r&&r.code===a.code?'selected':''}>${a.code} - ${a.bank} ${a.accNo}</option>`).join('');
-  const typeOpts=depNoteTypes.map(t=>`<option value="${t.name}" ${r&&r.noteType===t.name?'selected':''}>${t.name}</option>`).join('');
+  const typeOpts=buildNoteTypeOptions(r?r.noteType:'');
   const html=`<div class="modal" style="width:560px;">
     <h2>${r?'내역 수정':'내역 추가'}</h2>
     <div class="form-grid">
@@ -1528,35 +1589,100 @@ async function saveDepRow(){
   if(editDepId){const i=depData.findIndex(x=>x.id===editDepId);depData[i]=row;}
   else depData.unshift(row);
   recalcDepBalances();
-  // [패치] 변경된 1건만 Firebase에 저장합니다.
-  // 예전엔 같은 계좌의 전체 거래를 다시 저장해서(거래 500건이면 500번 쓰기)
-  // Firestore 일일 쓰기 쿼터를 며칠 만에 초과시키는 원인이었습니다.
-  // 다른 행들의 finalBal은 화면/로컬에서는 recalcDepBalances()로 항상
-  // 최신값으로 다시 계산되므로, Firebase에 있는 옛 finalBal 값은 무방합니다.
+  // 변경된 1건만 Firebase에 저장 (전체 재저장 X - 쓰기 쿼터 폭증 방지)
   await fbSaveOne('deposit', row);
   saveToLocal('deposit', depData);
   closeAccModal(); applyDepFilter();
-  }
+}
 function depToggleAll(chk){document.querySelectorAll('.dep-chk').forEach(c=>c.checked=chk.checked);}
 function getDepChecked(){return [...document.querySelectorAll('.dep-chk:checked')].map(c=>parseInt(c.value));}
 function editDepSelected(){const ids=getDepChecked();if(ids.length!==1){alert('수정할 항목 1건을 선택해주세요.');return;}openDepModal(ids[0]);}
 function deleteDepSelected(){const ids=getDepChecked();if(!ids.length){alert('삭제할 항목을 선택해주세요.');return;}if(confirm(ids.length+'건을 삭제하시겠습니까?')){ids.forEach(id=>fbDeleteOne('deposit',id));depData=depData.filter(r=>!ids.includes(r.id));applyDepFilter();}}
 
+// [패치5] 계정관리 화면 — 대표계정 + 하위계정 트리 구조로 표시/편집
 function openDepAccMgr(){
-  const items=depNoteTypes.map((t,i)=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><input id="nt-${i}" value="${t.name}" style="flex:1;font-size:12px;border:0.5px solid #ddd;border-radius:6px;padding:6px 10px;"><input type="color" id="ntc-${i}" value="${t.color}" style="width:36px;height:32px;border:0.5px solid #ddd;border-radius:6px;cursor:pointer;padding:2px;"><span style="font-size:11px;padding:3px 10px;border-radius:4px;background:${t.color}22;color:${t.color};border:0.5px solid ${t.color}55;">${t.name}</span><button onclick="deleteNoteType(${i})" style="font-size:11px;padding:5px 10px;border:0.5px solid #D42020;color:#D42020;background:#fff;border-radius:6px;cursor:pointer;">삭제</button></div>`).join('');
-  const html=`<div class="modal" style="width:460px;"><h2>계정(비고유형) 관리</h2><div id="note-type-list" style="margin-bottom:14px;">${items}</div><div style="display:flex;gap:8px;margin-bottom:14px;"><input id="new-note-type" placeholder="새 계정 입력" style="flex:1;font-size:12px;border:0.5px solid #ddd;border-radius:6px;padding:6px 10px;"><input type="color" id="new-note-color" value="#7c3aed" style="width:36px;height:32px;border:0.5px solid #ddd;border-radius:6px;cursor:pointer;padding:2px;"><button onclick="addNoteType()" style="font-size:12px;padding:6px 14px;border:0.5px solid #090909;background:#090909;color:#fff;border-radius:6px;cursor:pointer;">추가</button></div><div class="modal-footer"><button onclick="saveNoteTypes()">저장</button><button class="primary" onclick="closeAccModal()">닫기</button></div></div>`;
+  const parents = depNoteTypes.filter(t=>t.parentId===null);
+  const rows = parents.map(p=>{
+    const children = depNoteTypes.filter(c=>c.parentId===p.id);
+    const childRows = children.map(c=>`
+      <div style="display:flex;align-items:center;gap:8px;margin:4px 0 4px 26px;">
+        <span style="font-size:11px;color:#bbb;">└</span>
+        <input data-ntid="${c.id}" class="nt-name-input" value="${c.name}" style="flex:1;font-size:12px;border:0.5px solid #ddd;border-radius:6px;padding:5px 9px;color:#444;">
+        <span style="font-size:10px;color:#aaa;">하위계정</span>
+        <button onclick="deleteNoteType(${c.id})" style="font-size:11px;padding:4px 9px;border:0.5px solid #D42020;color:#D42020;background:#fff;border-radius:6px;cursor:pointer;">삭제</button>
+      </div>`).join('');
+    return `
+      <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:0.5px solid #eee;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input data-ntid="${p.id}" class="nt-name-input" value="${p.name}" style="flex:1;font-size:12px;border:0.5px solid #ddd;border-radius:6px;padding:6px 10px;font-weight:600;">
+          <input type="color" data-ntcolor="${p.id}" value="${p.color}" style="width:36px;height:32px;border:0.5px solid #ddd;border-radius:6px;cursor:pointer;padding:2px;">
+          <span style="font-size:11px;padding:3px 10px;border-radius:4px;background:${p.color}22;color:${p.color};border:0.5px solid ${p.color}55;white-space:nowrap;">${p.name}</span>
+          <button onclick="deleteNoteType(${p.id})" style="font-size:11px;padding:5px 10px;border:0.5px solid #D42020;color:#D42020;background:#fff;border-radius:6px;cursor:pointer;">삭제</button>
+        </div>
+        ${childRows}
+        <div style="display:flex;gap:8px;margin:8px 0 0 26px;">
+          <input id="new-sub-${p.id}" placeholder="하위계정 이름 입력 (예: 매입대금)" style="flex:1;font-size:12px;border:0.5px solid #ddd;border-radius:6px;padding:5px 9px;">
+          <button onclick="addSubNoteType(${p.id})" style="font-size:11px;padding:5px 12px;border:0.5px solid #090909;background:#fff;color:#090909;border-radius:6px;cursor:pointer;white-space:nowrap;">+ 하위계정</button>
+        </div>
+      </div>`;
+  }).join('');
+  const html=`<div class="modal" style="width:540px;max-height:80vh;overflow-y:auto;">
+    <h2>계정 관리</h2>
+    <p style="font-size:11px;color:#888;margin-bottom:14px;">대표계정 아래에 하위계정을 추가할 수 있습니다. 하위계정은 색상이 적용되지 않고 대표계정 분류 안에서만 구분됩니다.</p>
+    <div id="note-type-list">${rows}</div>
+    <div style="display:flex;gap:8px;margin:14px 0;padding-top:14px;border-top:1px solid #eee;">
+      <input id="new-note-type" placeholder="새 대표계정 입력" style="flex:1;font-size:12px;border:0.5px solid #ddd;border-radius:6px;padding:6px 10px;">
+      <input type="color" id="new-note-color" value="#7c3aed" style="width:36px;height:32px;border:0.5px solid #ddd;border-radius:6px;cursor:pointer;padding:2px;">
+      <button onclick="addNoteType()" style="font-size:12px;padding:6px 14px;border:0.5px solid #090909;background:#090909;color:#fff;border-radius:6px;cursor:pointer;white-space:nowrap;">+ 대표계정</button>
+    </div>
+    <div class="modal-footer"><button onclick="saveNoteTypes()">저장</button><button class="primary" onclick="closeAccModal()">닫기</button></div>
+  </div>`;
   showDynModal(html);
 }
-function addNoteType(){const val=document.getElementById('new-note-type').value.trim(),col=document.getElementById('new-note-color').value;if(!val)return;depNoteTypes.push({name:val,color:col});openDepAccMgr();}
-function deleteNoteType(i){depNoteTypes.splice(i,1);openDepAccMgr();}
+function addNoteType(){
+  const val=document.getElementById('new-note-type').value.trim(), col=document.getElementById('new-note-color').value;
+  if(!val)return;
+  if(depNoteTypes.some(t=>t.name===val)){ alert('이미 같은 이름의 계정이 있습니다.'); return; }
+  depNoteTypes.push({id:noteTypeNextId++, name:val, color:col, parentId:null});
+  openDepAccMgr();
+}
+function addSubNoteType(parentId){
+  const input=document.getElementById('new-sub-'+parentId);
+  const val=input.value.trim();
+  if(!val)return;
+  if(depNoteTypes.some(t=>t.name===val)){ alert('이미 같은 이름의 계정이 있습니다.'); return; }
+  depNoteTypes.push({id:noteTypeNextId++, name:val, color:null, parentId});
+  openDepAccMgr();
+}
+function deleteNoteType(id){
+  const t=depNoteTypes.find(x=>x.id===id);
+  if(!t)return;
+  const isParent = t.parentId===null;
+  const children = isParent ? depNoteTypes.filter(c=>c.parentId===id) : [];
+  if(children.length){
+    if(!confirm(`"${t.name}" 대표계정과 하위계정 ${children.length}개가 함께 삭제됩니다.\n이미 이 계정으로 분류된 거래는 영향받지 않지만, 더 이상 선택 목록에 나타나지 않습니다.\n계속하시겠습니까?`)) return;
+  } else {
+    if(!confirm(`"${t.name}" 계정을 삭제하시겠습니까?`)) return;
+  }
+  depNoteTypes = depNoteTypes.filter(x=>x.id!==id && x.parentId!==id);
+  openDepAccMgr();
+}
 function saveNoteTypes(){
-  depNoteTypes=depNoteTypes.map((_,i)=>({
-    name:document.getElementById('nt-'+i).value.trim(),
-    color:document.getElementById('ntc-'+i).value
-  })).filter(x=>x.name);
+  document.querySelectorAll('.nt-name-input').forEach(inp=>{
+    const id=parseInt(inp.dataset.ntid);
+    const t=depNoteTypes.find(x=>x.id===id);
+    const v=inp.value.trim();
+    if(t && v) t.name=v;
+  });
+  document.querySelectorAll('[data-ntcolor]').forEach(inp=>{
+    const id=parseInt(inp.dataset.ntcolor);
+    const t=depNoteTypes.find(x=>x.id===id);
+    if(t) t.color=inp.value;
+  });
   closeAccModal();
   initDepSelects();
-  depNoteTypes.forEach((t,i)=>fbSaveOne('noteTypes',{id:i+1,...t}));
+  saveToLocal('noteTypes', depNoteTypes);
+  depNoteTypes.forEach(t=>fbSaveOne('noteTypes', t));
 }
 
 function openDepUpload(){
@@ -1610,7 +1736,7 @@ async function importDepExcel(){
   closeAccModal(); applyDepFilter();
   alert(cnt+'건 업로드 완료');
 }
-  function saveDepBalances(){
+function saveDepBalances(){
   if(!confirm('재계산된 잔액을 Firebase에 저장하시겠습니까?')) return;
   recalcDepBalances();
   depData.forEach(r=>fbSaveOne('deposit', r));
@@ -1623,7 +1749,6 @@ function exportDepExcel(){
   XLSX.writeFile(wb,'예금내역.xlsx');
 }
 
-// ===== 계좌/대출 =====
 function switchAccTab(tab,el){
   ['account-tab','loan-tab'].forEach(t=>document.getElementById(t).style.display='none');
   document.getElementById(tab).style.display='block';
@@ -1682,7 +1807,6 @@ function deleteLoan(id){if(confirm('삭제하시겠습니까?')){fbDeleteOne('lo
 function exportAccExcel(){const rows=[['코드','은행명','계좌번호','계좌별명','기초잔액','현재잔액']];accData.forEach(r=>rows.push([r.code,r.bank,r.accNo,r.alias||'',r.baseAmt,r.curAmt]));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'계좌내역');XLSX.writeFile(wb,'계좌내역.xlsx');}
 function exportLoanExcel(){const rows=[['코드','은행명','계좌번호','최초실행일','재실행일','만기일','대출원금','금리','금리비고','이자금액','대출잔액','담보내역','비고']];loanData.forEach(r=>rows.push([r.code,r.bank,r.accNo||'',r.startDate||'',r.reDate||'',r.expDate||'',r.principal,r.rate,r.rateNote||'',r.interest,r.balance,r.collateral||'',r.note||'']));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'대출내역');XLSX.writeFile(wb,'대출내역.xlsx');}
 
-// ===== 거래처관리 =====
 function initStoreAccSelect(){
   const el=document.getElementById('store-f-acc');if(!el)return;
   el.innerHTML='<option value="">전체 모계좌</option>'+depAccounts.map(a=>`<option value="${a.code}">${a.code} ${a.accNo}</option>`).join('');
@@ -1752,7 +1876,6 @@ function importStoreExcel(){
 }
 function exportStoreExcel(){const rows=[['가맹점코드','가맹점명','대표자명','사업자번호','가상계좌번호','연결모계좌','한도금액','초기미수금','상태','비고1','비고2']];storeFiltered.forEach(r=>rows.push([r.code,r.name,r.owner||'',r.bizNo||'',r.virtualAccNo||'',r.parentAcc||'',r.limit,r.initBalance,r.status,r.note1||'',r.note2||'']));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'거래처');XLSX.writeFile(wb,'거래처목록.xlsx');}
 
-// ===== 미수금관리 =====
 function applyArFilter(){
   const start=document.getElementById('ar-f-start').value, end=document.getElementById('ar-f-end').value;
   const keyword=document.getElementById('ar-f-keyword').value.trim().toLowerCase();
@@ -1804,7 +1927,190 @@ function renderAr(data){
 function resetArFilter(){document.getElementById('ar-f-start').value='2026-06-01';document.getElementById('ar-f-end').value='2026-06-30';document.getElementById('ar-f-keyword').value='';document.getElementById('ar-f-status').value='';document.getElementById('ar-f-ar').value='';applyArFilter();}
 function exportArExcel(){const rows=[['가맹점코드','가맹점명','대표자','상태','한도금액','초기미수금','기간매출','기간입금','미수금','한도잔여','비고1']];document.querySelectorAll('#ar-tbody tr').forEach(tr=>{rows.push([...tr.querySelectorAll('td')].map(td=>td.textContent.trim()));});const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'미수금현황');XLSX.writeFile(wb,'미수금현황_'+new Date().toLocaleDateString('ko-KR')+'.xlsx');}
 
-// ===== 리포트 =====
+// ===== [패치3] 마진관리 =====
+function curYearMonth() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+
+function initMarginPage() {
+  const el = document.getElementById('margin-month');
+  if (el && !el.value) el.value = curYearMonth();
+  if (el && !curMarginMonth) el.value = el.value || curYearMonth();
+  loadMarginMonth();
+}
+
+function loadMarginMonth() {
+  const ym = document.getElementById('margin-month').value || curYearMonth();
+  curMarginMonth = ym;
+  const existing = marginEntries.find(m => m.yearMonth === ym);
+  if (existing) {
+    curPurchaseItems = (existing.purchaseItems || []).map(it => ({...it}));
+    curOutputItems = (existing.outputItems || []).map(it => ({...it}));
+  } else {
+    curPurchaseItems = [];
+    curOutputItems = [];
+  }
+  marginItemNextId = 1;
+  [...curPurchaseItems, ...curOutputItems].forEach(it => {
+    if (it.id >= marginItemNextId) marginItemNextId = it.id + 1;
+  });
+  renderMarginPage();
+  renderMarginComparison();
+}
+
+function addMarginRow(type) {
+  const item = { id: marginItemNextId++, name: '', qty: 0, unitPrice: 0 };
+  if (type === 'purchase') curPurchaseItems.push(item);
+  else curOutputItems.push(item);
+  renderMarginPage();
+}
+
+function deleteMarginRow(type, id) {
+  if (type === 'purchase') curPurchaseItems = curPurchaseItems.filter(it => it.id !== id);
+  else curOutputItems = curOutputItems.filter(it => it.id !== id);
+  renderMarginPage();
+}
+
+function updateMarginField(type, id, field, value) {
+  const list = type === 'purchase' ? curPurchaseItems : curOutputItems;
+  const item = list.find(it => it.id === id);
+  if (!item) return;
+  if (field === 'name') item.name = value;
+  else item[field] = parseFloat(value) || 0;
+  renderMarginPage(true); // 입력 중 포커스 유지를 위해 입력칸은 다시 그리지 않고 금액만 갱신
+}
+
+function renderMarginTable(type) {
+  const list = type === 'purchase' ? curPurchaseItems : curOutputItems;
+  const tbody = document.getElementById('margin-'+type+'-tbody');
+  const tfoot = document.getElementById('margin-'+type+'-tfoot');
+  tbody.innerHTML = list.map(it => {
+    const total = (it.qty||0) * (it.unitPrice||0);
+    return `<tr>
+      <td><input value="${it.name||''}" oninput="updateMarginField('${type}',${it.id},'name',this.value)" style="width:100%;font-size:12px;border:0.5px solid #ddd;border-radius:4px;padding:5px 7px;"></td>
+      <td><input type="number" value="${it.qty||0}" oninput="updateMarginField('${type}',${it.id},'qty',this.value)" style="width:100%;font-size:12px;border:0.5px solid #ddd;border-radius:4px;padding:5px 7px;text-align:right;"></td>
+      <td><input type="number" value="${it.unitPrice||0}" oninput="updateMarginField('${type}',${it.id},'unitPrice',this.value)" style="width:100%;font-size:12px;border:0.5px solid #ddd;border-radius:4px;padding:5px 7px;text-align:right;"></td>
+      <td class="num" style="font-weight:600;">${total.toLocaleString()}</td>
+      <td style="text-align:center;"><a href="#" onclick="deleteMarginRow('${type}',${it.id});return false;" style="font-size:11px;color:#D42020;">삭제</a></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="5" style="text-align:center;color:#aaa;padding:16px;font-size:12px;">"+ 행추가"를 눌러 품목을 입력하세요</td></tr>`;
+  const total = list.reduce((s,it)=>s+(it.qty||0)*(it.unitPrice||0),0);
+  tfoot.innerHTML = `<tr style="background:#f9f9f9;font-weight:700;"><td colspan="3" style="padding:8px 10px;font-size:12px;">합계</td><td class="num" style="padding:8px 10px;font-size:12px;">${total.toLocaleString()}</td><td></td></tr>`;
+  return total;
+}
+
+function renderMarginPage() {
+  const activeEl = document.activeElement;
+  const activeInfo = (activeEl && activeEl.tagName==='INPUT' && activeEl.closest('#page-margin'))
+    ? {parentId: activeEl.closest('tr').querySelector('td:first-child input')?.dataset?.rowid, html: activeEl.outerHTML, selStart: activeEl.selectionStart, cellIndex: activeEl.closest('td')?.cellIndex, rowIndex: [...activeEl.closest('tbody').children].indexOf(activeEl.closest('tr'))}
+    : null;
+  const activeTbodyId = activeEl && activeEl.closest('tbody') ? activeEl.closest('tbody').id : null;
+
+  const purchaseTotal = renderMarginTable('purchase');
+  const outputTotal = renderMarginTable('output');
+  const margin = outputTotal - purchaseTotal;
+
+  document.getElementById('margin-purchase-total').textContent = '₩'+purchaseTotal.toLocaleString();
+  document.getElementById('margin-output-total').textContent = '₩'+outputTotal.toLocaleString();
+  const finalEl = document.getElementById('margin-final');
+  finalEl.textContent = (margin>=0?'':'-') + '₩'+Math.abs(margin).toLocaleString();
+  finalEl.style.color = margin >= 0 ? '#0F6E56' : '#D42020';
+
+  // 입력 중이던 칸에 포커스/커서 위치 복원 (같은 행/칸 위치 기준)
+  if (activeInfo && activeTbodyId) {
+    const tbody = document.getElementById(activeTbodyId);
+    const row = tbody && tbody.children[activeInfo.rowIndex];
+    const cell = row && row.children[activeInfo.cellIndex];
+    const input = cell && cell.querySelector('input');
+    if (input) {
+      input.focus();
+      try { input.setSelectionRange(activeInfo.selStart, activeInfo.selStart); } catch(e) {}
+    }
+  }
+  renderMarginComparison();
+}
+
+function saveMarginEntry() {
+  const ym = document.getElementById('margin-month').value || curYearMonth();
+  curMarginMonth = ym;
+  const purchaseTotal = curPurchaseItems.reduce((s,it)=>s+(it.qty||0)*(it.unitPrice||0),0);
+  const outputTotal = curOutputItems.reduce((s,it)=>s+(it.qty||0)*(it.unitPrice||0),0);
+  const margin = outputTotal - purchaseTotal;
+  const row = {
+    id: ym, yearMonth: ym,
+    purchaseItems: curPurchaseItems.map(it=>({id:it.id,name:it.name,qty:it.qty,unitPrice:it.unitPrice})),
+    outputItems: curOutputItems.map(it=>({id:it.id,name:it.name,qty:it.qty,unitPrice:it.unitPrice})),
+    purchaseTotal, outputTotal, margin,
+    updatedAt: new Date().toISOString()
+  };
+  const i = marginEntries.findIndex(m => m.yearMonth === ym);
+  if (i >= 0) marginEntries[i] = row; else marginEntries.push(row);
+  fbSaveOne('marginEntries', row);
+  saveToLocal('marginEntries', marginEntries);
+  alert(ym + ' 마진 데이터가 저장되었습니다.');
+  renderMarginComparison();
+}
+
+// [패치4] 전월 대비 증감 비교
+function getPrevYearMonth(ym) {
+  const [y, m] = ym.split('-').map(Number);
+  const prevM = m === 1 ? 12 : m - 1;
+  const prevY = m === 1 ? y - 1 : y;
+  return prevY + '-' + String(prevM).padStart(2,'0');
+}
+
+function compareRowHtml(label, curVal, prevVal) {
+  const diff = curVal - prevVal;
+  const pct = prevVal !== 0 ? (diff / Math.abs(prevVal) * 100) : (curVal !== 0 ? 100 : 0);
+  const up = diff > 0, down = diff < 0;
+  const arrow = up ? '▲' : (down ? '▼' : '–');
+  const color = up ? '#D42020' : (down ? '#2563eb' : '#888');
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid #f0f0f0;">
+      <span style="font-size:13px;color:#333;font-weight:500;width:140px;">${label}</span>
+      <span style="font-size:12px;color:#888;width:120px;">전월 ₩${prevVal.toLocaleString()}</span>
+      <span style="font-size:13px;font-weight:600;color:#111;width:120px;">당월 ₩${curVal.toLocaleString()}</span>
+      <span style="font-size:13px;font-weight:700;color:${color};min-width:160px;text-align:right;">
+        ${arrow} ${diff>=0?'+':'-'}₩${Math.abs(diff).toLocaleString()}
+        <span style="font-size:11px;font-weight:400;color:#aaa;">(${pct>=0?'+':''}${pct.toFixed(1)}%)</span>
+      </span>
+    </div>`;
+}
+
+function renderMarginComparison() {
+  const ym = curMarginMonth || document.getElementById('margin-month').value || curYearMonth();
+  const prevYM = getPrevYearMonth(ym);
+  const prevEntry = marginEntries.find(m => m.yearMonth === prevYM);
+  const body = document.getElementById('margin-compare-body');
+  const label = document.getElementById('margin-compare-month-label');
+  if (!body) return;
+  label.textContent = prevYM + ' → ' + ym;
+
+  if (!prevEntry) {
+    body.innerHTML = `
+      <div style="text-align:center;padding:20px 0;color:#aaa;font-size:13px;">
+        ${prevYM} 전월 데이터가 없습니다.<br>
+        <button onclick="openPrevMonthEntry('${prevYM}')" style="margin-top:10px;font-size:12px;padding:7px 16px;border-radius:6px;border:0.5px solid #090909;background:#fff;color:#090909;cursor:pointer;">${prevYM} 데이터 입력하기</button>
+      </div>`;
+    return;
+  }
+
+  const curPurchaseTotal = curPurchaseItems.reduce((s,it)=>s+(it.qty||0)*(it.unitPrice||0),0);
+  const curOutputTotal = curOutputItems.reduce((s,it)=>s+(it.qty||0)*(it.unitPrice||0),0);
+  const curMargin = curOutputTotal - curPurchaseTotal;
+
+  body.innerHTML =
+    compareRowHtml('매입 합계금액', curPurchaseTotal, prevEntry.purchaseTotal||0) +
+    compareRowHtml('생육출고 합계금액', curOutputTotal, prevEntry.outputTotal||0) +
+    compareRowHtml('최종 마진액', curMargin, prevEntry.margin||0);
+}
+
+function openPrevMonthEntry(ym) {
+  document.getElementById('margin-month').value = ym;
+  loadMarginMonth();
+}
+
 const RPT_EXCLUDE = ['여입(계좌이동)', '편입(계좌이동)'];
 
 function applyRptFilter() {
@@ -1816,21 +2122,14 @@ function applyRptFilter() {
     start + ' ~ ' + end + ' &nbsp;|&nbsp; 조회일: <span id="rpt-query-date">' +
     new Date().toISOString().slice(0,10) + '</span>';
 
-  // 매출 rows
   let salesRows = [];
   if (menu === 'all' || menu === 'sales') {
     salesRows = salesData.filter(r => r.date >= start && r.date <= end);
   }
-
-  // 예금 rows (여입·편입 제외)
   let depRows = [];
   if (menu === 'all' || menu === 'deposit') {
-    depRows = depData.filter(r =>
-      r.date >= start && r.date <= end &&
-      !RPT_EXCLUDE.includes(r.noteType)
-    );
+    depRows = depData.filter(r => r.date >= start && r.date <= end && !RPT_EXCLUDE.includes(r.noteType));
   }
-
   renderRpt(salesRows, depRows, start, end);
 }
 
@@ -1838,7 +2137,6 @@ function renderRpt(salesRows, depRows, start, end) {
   const tbody = document.getElementById('rpt-acc-tbody');
   tbody.innerHTML = '';
 
-  // ── 상단 카드 ──
   const frSales = salesRows.reduce((s,r) => s+(r.outTotal||0), 0);
   const frIncome = depRows.filter(r => r.noteType==='가맹점 입금').reduce((s,r) => s+(r.inAmt||0), 0);
   const etcIncome = depRows.filter(r => r.noteType!=='가맹점 입금').reduce((s,r) => s+(r.inAmt||0), 0);
@@ -1854,12 +2152,11 @@ function renderRpt(salesRows, depRows, start, end) {
   document.getElementById('rpt-in-etc-cnt').textContent = depRows.filter(r=>r.noteType!=='가맹점 입금').length + '건';
   document.getElementById('rpt-final').textContent = fmt(depFinal);
 
-  // ── 매출관리 그룹 ──
- const addGrpHead = (label, color) => {
+  const addGrpHead = (label, color) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `<td colspan="5" style="background:${color};color:#1e3a5f;font-size:12px;font-weight:700;padding:9px 14px;letter-spacing:0.03em;">${label}</td>`;
     tbody.appendChild(tr);
-};
+  };
 
   const addAccRow = (name, cnt, inAmt, outAmt, detailRows, detailCols) => {
     const rowId = 'rpt-det-' + Math.random().toString(36).slice(2,8);
@@ -1875,7 +2172,6 @@ function renderRpt(salesRows, depRows, start, end) {
       <td class="num" style="padding:11px 12px;color:${outAmt>0?'#D42020':'#aaa'};font-weight:${outAmt>0?600:400};">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>`;
     tbody.appendChild(tr);
 
-    // 상세행
     const dtr = document.createElement('tr');
     dtr.id = rowId;
     dtr.style.display = 'none';
@@ -1890,7 +2186,54 @@ function renderRpt(salesRows, depRows, start, end) {
     };
   };
 
-const addSubtotal = (label, cnt, inAmt, outAmt, color) => {
+  // [패치2-B] 대표계정 행을 펼치면 하위계정별 소계 목록이 나오고,
+  // 그 하위계정 행을 다시 펼치면 실제 거래 상세가 나오는 2단계 구조.
+  // subGroups: [{label, cnt, inAmt, outAmt, rows}]  (label이 '(분류없음)'이면 대표계정 자체 직접거래)
+  const addAccRowNested = (name, cnt, inAmt, outAmt, subGroups, detailCols) => {
+    const rowId = 'rpt-det-' + Math.random().toString(36).slice(2,8);
+    const tr = document.createElement('tr');
+    tr.style.cssText = 'border-bottom:0.5px solid #f0f0f0;cursor:pointer;';
+    tr.onmouseenter = () => tr.style.background='#fffbf5';
+    tr.onmouseleave = () => tr.style.background='';
+    tr.innerHTML = `
+      <td style="padding:11px 12px;"><span id="chv-${rowId}" style="font-size:10px;color:#bbb;display:inline-block;transition:transform 0.2s;">▶</span></td>
+      <td style="padding:11px 12px;font-size:13px;font-weight:600;color:#111;">${name}</td>
+      <td class="num" style="padding:11px 12px;">${cnt}건</td>
+      <td class="num" style="padding:11px 12px;color:${inAmt>0?'#2563eb':'#aaa'};font-weight:${inAmt>0?600:400};">${inAmt>0?'₩'+inAmt.toLocaleString():'-'}</td>
+      <td class="num" style="padding:11px 12px;color:${outAmt>0?'#D42020':'#aaa'};font-weight:${outAmt>0?600:400};">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>`;
+    tbody.appendChild(tr);
+
+    const dtr = document.createElement('tr');
+    dtr.id = rowId;
+    dtr.style.display = 'none';
+    const subRowsHtml = subGroups.map(sg => {
+      const subId = 'rpt-sub-' + Math.random().toString(36).slice(2,8);
+      const detailHtml = buildDetailTable(sg.rows.slice(0,50), detailCols);
+      return `
+        <div style="border-bottom:0.5px solid #eee;">
+          <div onclick="document.getElementById('${subId}').style.display=document.getElementById('${subId}').style.display==='block'?'none':'block';document.getElementById('chv-${subId}').style.transform=document.getElementById('chv-${subId}').style.transform?'':'rotate(90deg)';" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px 8px 0;cursor:pointer;">
+            <span style="font-size:12px;color:#444;"><span id="chv-${subId}" style="font-size:9px;color:#bbb;display:inline-block;margin-right:6px;transition:transform 0.2s;">▶</span>${sg.label}</span>
+            <span style="font-size:11px;color:#888;">
+              ${sg.cnt}건
+              <span style="color:${sg.inAmt>0?'#2563eb':'#bbb'};margin-left:10px;">${sg.inAmt>0?'입금 ₩'+sg.inAmt.toLocaleString():''}</span>
+              <span style="color:${sg.outAmt>0?'#D42020':'#bbb'};margin-left:10px;">${sg.outAmt>0?'출금 ₩'+sg.outAmt.toLocaleString():''}</span>
+            </span>
+          </div>
+          <div id="${subId}" style="display:none;padding:4px 0 8px 18px;">${detailHtml}</div>
+        </div>`;
+    }).join('');
+    const inner = `<div style="background:#f9fafb;border-left:3px solid #2563eb;padding:6px 16px 6px 40px;">${subRowsHtml}</div>`;
+    dtr.innerHTML = `<td colspan="5" style="padding:0;">${inner}</td>`;
+    tbody.appendChild(dtr);
+
+    tr.onclick = () => {
+      const open = dtr.style.display === 'table-row';
+      dtr.style.display = open ? 'none' : 'table-row';
+      document.getElementById('chv-'+rowId).style.transform = open ? '' : 'rotate(90deg)';
+    };
+  };
+
+  const addSubtotal = (label, cnt, inAmt, outAmt, color) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td colspan="2" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#333;">${label}</td>
@@ -1898,19 +2241,22 @@ const addSubtotal = (label, cnt, inAmt, outAmt, color) => {
       <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#333;">${inAmt>0?'₩'+inAmt.toLocaleString():'-'}</td>
       <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#333;">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>`;
     tbody.appendChild(tr);
-};
+  };
 
-  // 매출관리
   if (salesRows.length > 0) {
- addGrpHead('매출관리', '#dce8f5');
+    addGrpHead('매출관리', '#dce8f5');
     const sIn = salesRows.reduce((s,r)=>s+(r.outTotal||0),0);
     addAccRow('가맹점 매출', salesRows.length, sIn, 0,
-  salesRows.slice(0,50),
-  ['date:날짜','storeCode:매장코드','storeName:매장명','productName:상품명','outQty:수량','outPrice:단가','outVat:부가세','outTotal:금액','taxType:과세구분','note:비고']);
+      salesRows.slice(0,50),
+      ['date:날짜','storeCode:매장코드','storeName:매장명','productName:상품명','outQty:수량','outPrice:단가','outVat:부가세','outTotal:금액','taxType:과세구분','note:비고']);
     addSubtotal('매출관리 소계', salesRows.length, sIn, 0, '#dce8f5');
   }
 
-  // 예금관리 — 계정별 그룹화
+  // [패치2-B] 대표계정 산하로 하위계정을 묶어서 2단계로 표시.
+  // 1) noteType 값으로 전체 평면 그룹핑 (기존과 동일)
+  // 2) depNoteTypes의 parentId 관계를 이용해, 하위계정 그룹은 그 대표계정 산하로 합산
+  // 3) depNoteTypes에 등록되지 않은 noteType(예: 과거 직접 입력값)은 기존처럼 단독 행 처리
+  const depDetailCols = ['date:날짜','code:계좌','accNo:계좌번호','storeCode:가맹점코드','storeName:가맹점명','inAmt:입금','outAmt:출금','finalBal:잔액','detail:상세내역','note:비고'];
   if (depRows.length > 0) {
     addGrpHead('예금관리', '#d4ede5');
     const noteMap = {};
@@ -1919,22 +2265,69 @@ const addSubtotal = (label, cnt, inAmt, outAmt, color) => {
       if (!noteMap[k]) noteMap[k] = [];
       noteMap[k].push(r);
     });
+
     let totIn=0, totOut=0, totCnt=0;
+    const consumedKeys = new Set();
+
+    // 대표계정 순서대로 먼저 처리 (depNoteTypes 등록 순서 유지)
+    depNoteTypes.filter(t => t.parentId === null).forEach(parent => {
+      const ownRows = noteMap[parent.name] || [];
+      const children = depNoteTypes.filter(c => c.parentId === parent.id);
+      const childGroups = children
+        .map(c => ({ label: c.name, rows: noteMap[c.name] || [] }))
+        .filter(cg => cg.rows.length > 0);
+
+      if (ownRows.length) consumedKeys.add(parent.name);
+      childGroups.forEach(cg => consumedKeys.add(cg.label));
+
+      const allRows = ownRows.concat(...childGroups.map(cg => cg.rows));
+      if (allRows.length === 0) return; // 이 대표계정으로 분류된 거래가 기간 내 없음
+
+      const inA = allRows.reduce((s,r)=>s+(r.inAmt||0),0);
+      const outA = allRows.reduce((s,r)=>s+(r.outAmt||0),0);
+      totIn += inA; totOut += outA; totCnt += allRows.length;
+
+      if (childGroups.length === 0) {
+        // 하위계정 없이 대표계정으로만 입력된 경우 → 기존처럼 단일 행
+        addAccRow(parent.name, allRows.length, inA, outA, allRows.slice(0,50), depDetailCols);
+      } else {
+        const subGroups = [];
+        if (ownRows.length) {
+          subGroups.push({
+            label: parent.name + ' (분류없음)',
+            cnt: ownRows.length,
+            inAmt: ownRows.reduce((s,r)=>s+(r.inAmt||0),0),
+            outAmt: ownRows.reduce((s,r)=>s+(r.outAmt||0),0),
+            rows: ownRows
+          });
+        }
+        childGroups.forEach(cg => {
+          subGroups.push({
+            label: cg.label,
+            cnt: cg.rows.length,
+            inAmt: cg.rows.reduce((s,r)=>s+(r.inAmt||0),0),
+            outAmt: cg.rows.reduce((s,r)=>s+(r.outAmt||0),0),
+            rows: cg.rows
+          });
+        });
+        addAccRowNested(parent.name, allRows.length, inA, outA, subGroups, depDetailCols);
+      }
+    });
+
+    // depNoteTypes에 등록되지 않은(예: 구버전 자유입력) noteType은 기존 방식대로 단독 행
     Object.keys(noteMap).forEach(key => {
+      if (consumedKeys.has(key)) return;
       const rows = noteMap[key];
       const inA = rows.reduce((s,r)=>s+(r.inAmt||0),0);
       const outA = rows.reduce((s,r)=>s+(r.outAmt||0),0);
-      totIn+=inA; totOut+=outA; totCnt+=rows.length;
-      addAccRow(key, rows.length, inA, outA,
-  rows.slice(0,50),
-  ['date:날짜','code:계좌','accNo:계좌번호','storeCode:가맹점코드','storeName:가맹점명','inAmt:입금','outAmt:출금','finalBal:잔액','detail:상세내역','note:비고']);
+      totIn += inA; totOut += outA; totCnt += rows.length;
+      addAccRow(key, rows.length, inA, outA, rows.slice(0,50), depDetailCols);
     });
+
     addSubtotal('예금관리 소계', totCnt, totIn, totOut, '#d4ede5');
   }
 
-  // 전체 합계행
-  const allIn = salesRows.reduce((s,r)=>s+(r.outTotal||0),0)
-    + depRows.reduce((s,r)=>s+(r.inAmt||0),0);
+  const allIn = salesRows.reduce((s,r)=>s+(r.outTotal||0),0) + depRows.reduce((s,r)=>s+(r.inAmt||0),0);
   const allOut = depRows.reduce((s,r)=>s+(r.outAmt||0),0);
   const allCnt = salesRows.length + depRows.length;
   const sumTr = document.createElement('tr');
@@ -1945,12 +2338,9 @@ const addSubtotal = (label, cnt, inAmt, outAmt, color) => {
     <td class="num" style="padding:11px 12px;background:#444;color:#fca5a5;font-weight:700;font-size:13px;">₩${allOut.toLocaleString()}</td>`;
   tbody.appendChild(sumTr);
 
-  // ── 대출 현황 ──
   const loanTbody = document.getElementById('rpt-loan-tbody');
   loanTbody.innerHTML = '';
-  const avgRate = loanData.length
-    ? (loanData.reduce((s,r)=>s+(r.rate||0),0)/loanData.length).toFixed(2)
-    : '0.00';
+  const avgRate = loanData.length ? (loanData.reduce((s,r)=>s+(r.rate||0),0)/loanData.length).toFixed(2) : '0.00';
   const loanTotal = loanData.reduce((s,r)=>s+(r.balance||0),0);
   loanTbody.innerHTML = `<tr>
     <td style="padding:13px 12px;font-size:13px;font-weight:700;">대출잔액</td>
@@ -2020,14 +2410,13 @@ function exportRptExcel() {
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'리포트');
   XLSX.writeFile(wb,'월별자금리포트_'+start+'_'+end+'.xlsx');
 }
+
 function showFirebaseInfo(el) {
   document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active'));
   el.classList.add('active');
   showDynModal(`<div class="modal" style="width:580px;max-height:80vh;overflow-y:auto;">
     <h2 style="color:#F0921E;margin-bottom:16px;">🔥 Firebase 자동저장 정보</h2>
-
     <div style="font-size:12px;line-height:1.9;color:#333;">
-
       <div style="background:#f9f9f9;border-radius:8px;padding:14px 16px;margin-bottom:14px;border-left:3px solid #F0921E;">
         <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:8px;">📌 프로젝트 기본정보</div>
         <table style="width:100%;font-size:12px;border-collapse:collapse;">
@@ -2038,7 +2427,6 @@ function showFirebaseInfo(el) {
           <tr><td style="padding:4px 0;color:#888;">API Key</td><td style="font-weight:600;font-size:11px;">AIzaSyCwczMPx-W07iuv3YCLtbymAjoPOb-xpP4</td></tr>
         </table>
       </div>
-
       <div style="background:#f9f9f9;border-radius:8px;padding:14px 16px;margin-bottom:14px;border-left:3px solid #2563eb;">
         <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:8px;">🗄️ Firestore 컬렉션 구조</div>
         <table style="width:100%;font-size:12px;border-collapse:collapse;">
@@ -2048,22 +2436,28 @@ function showFirebaseInfo(el) {
           <tr><td style="padding:5px 8px;font-weight:600;">accounts</td><td style="padding:5px 8px;">계좌 마스터</td><td style="padding:5px 8px;color:#0F6E56;">fbSaveOne (건별)</td></tr>
           <tr style="background:#fafafa;"><td style="padding:5px 8px;font-weight:600;">loans</td><td style="padding:5px 8px;">대출내역</td><td style="padding:5px 8px;color:#0F6E56;">fbSaveOne (건별)</td></tr>
           <tr><td style="padding:5px 8px;font-weight:600;">stores</td><td style="padding:5px 8px;">가맹점 마스터</td><td style="padding:5px 8px;color:#0F6E56;">fbSaveOne (건별)</td></tr>
-          <tr style="background:#fafafa;"><td style="padding:5px 8px;font-weight:600;">noteTypes</td><td style="padding:5px 8px;">비고유형(계정과목)</td><td style="padding:5px 8px;color:#F0921E;">fbSaveOne (건별)</td></tr>
+          <tr style="background:#fafafa;"><td style="padding:5px 8px;font-weight:600;">noteTypes</td><td style="padding:5px 8px;">계정(대표/하위)</td><td style="padding:5px 8px;color:#F0921E;">fbSaveOne (건별)</td></tr>
         </table>
       </div>
-
       <div style="background:#f9f9f9;border-radius:8px;padding:14px 16px;margin-bottom:14px;border-left:3px solid #0F6E56;">
-        <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:8px;">⚡ 자동저장 방식 (패치 적용됨)</div>
+        <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:8px;">⚡ 자동저장 방식</div>
         <div style="font-size:12px;color:#444;line-height:2;">
           • 데이터 추가/수정/삭제 즉시 <strong>자동으로 Firebase에 저장</strong>됨<br>
           • 저장방식: <strong>fbSaveOne</strong> — 변경된 1건만 setDoc으로 저장<br>
-          • 입출금 수정 시 더 이상 같은 계좌 전체를 재저장하지 않음 (쓰기 쿼터 보호)<br>
-          • 저장 실패 시 화면 상태표시에 ⚠️ 경고가 뜨고, <strong>대기열에 쌓여 자동 재시도</strong>됨 (5분 간격)<br>
-          • 앱 새로고침 시 Firebase에서 <strong>자동 로드</strong> — 단, Firebase 데이터가 로컬보다 적으면 덮어쓰지 않음<br>
-          • 상단 상태표시: <span style="color:#0F6E56;font-weight:600;">● Firebase 로드완료</span> 확인 후 사용
+          • 입출금 수정 시 같은 계좌 전체를 재저장하지 않음 (쓰기 쿼터 보호)<br>
+          • 저장 실패 시 화면 상태표시에 ⚠️ 경고가 뜨고, 대기열에 쌓여 자동 재시도됨 (5분 간격)<br>
+          • 앱 새로고침 시 Firebase에서 자동 로드 — Firebase 데이터가 로컬보다 적으면 덮어쓰지 않음
         </div>
       </div>
-
+      <div style="background:#f9f9f9;border-radius:8px;padding:14px 16px;margin-bottom:14px;border-left:3px solid #7c3aed;">
+        <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:8px;">📂 계정 구조 (대표계정 / 하위계정)</div>
+        <div style="font-size:12px;color:#444;line-height:2;">
+          • "계정관리" 메뉴에서 대표계정 아래에 하위계정을 추가할 수 있습니다<br>
+          • 하위계정은 색상이 없고 대표계정 분류 안에서만 텍스트로 구분됩니다<br>
+          • 거래 입력 시 비고유형 드롭다운에서 대표계정/하위계정을 모두 선택 가능합니다<br>
+          • 기존에 입력된 거래는 자동으로 재분류되지 않으며, 필요 시 건별로 직접 수정해야 합니다
+        </div>
+      </div>
       <div style="background:#f9f9f9;border-radius:8px;padding:14px 16px;margin-bottom:14px;border-left:3px solid #7c3aed;">
         <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:8px;">📋 Google Apps Script (Sheets 연동)</div>
         <div style="font-size:11px;color:#555;word-break:break-all;line-height:1.8;">
@@ -2071,24 +2465,21 @@ function showFirebaseInfo(el) {
           용도: 시트 데이터 replace 방식으로 Google Sheets 백업
         </div>
       </div>
-
       <div style="background:#fff8e6;border-radius:8px;padding:14px 16px;border-left:3px solid #F5A800;">
         <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:8px;">⚠️ 주의사항</div>
         <div style="font-size:12px;color:#555;line-height:2;">
           • <strong>계좌 마스터(accounts)의 curAmt</strong> = 2026년 5월 31일 기준잔액 → 절대 수정 금지/본프로그램2026-06-01부터적용됨<br>
           • deposit의 prevBal/finalBal은 <strong>앱에서 자동 재계산</strong>됨 (Firebase 저장값 무시)<br>
-          • 저장 실패가 5분 내 자동 복구 안 되면 콘솔(F12)에서 sijae_pendingSync 키를 확인할 것<br>
           • GitHub Pages URL: <strong>https://charllottesooh.github.io/SIJAE-2607/</strong>
         </div>
       </div>
     </div>
-
     <div style="display:flex;justify-content:flex-end;margin-top:16px;">
       <button onclick="closeAccModal()" style="font-size:12px;padding:8px 18px;border-radius:6px;border:0.5px solid #ddd;background:#090909;color:#fff;cursor:pointer;">닫기</button>
     </div>
   </div>`);
 }
-// ===== localStorage 유틸 =====
+
 const LS_KEYS = {
   sales: 'sijae_sales',
   deposit: 'sijae_deposit',
@@ -2096,17 +2487,16 @@ const LS_KEYS = {
   loans: 'sijae_loans',
   stores: 'sijae_stores',
   noteTypes: 'sijae_noteTypes',
+  marginEntries: 'sijae_marginEntries',
   lastSync: 'sijae_lastSync'
 };
 
 function saveToLocal(key, data) {
   try { localStorage.setItem(LS_KEYS[key], JSON.stringify(data)); } catch(e) { console.error('localStorage 저장 오류', e); }
 }
-
 function loadFromLocal(key) {
   try { const d = localStorage.getItem(LS_KEYS[key]); return d ? JSON.parse(d) : null; } catch(e) { return null; }
 }
-
 function saveAllToLocal() {
   saveToLocal('sales', salesData);
   saveToLocal('deposit', depData);
@@ -2114,6 +2504,7 @@ function saveAllToLocal() {
   saveToLocal('loans', loanData);
   saveToLocal('stores', storeData);
   saveToLocal('noteTypes', depNoteTypes);
+  saveToLocal('marginEntries', marginEntries);
   saveToLocal('lastSync', new Date().toISOString());
 }
 
@@ -2127,7 +2518,8 @@ async function forceSyncToFirebase() {
     [...accData].forEach(r => fbSaveOne('accounts', r));
     [...loanData].forEach(r => fbSaveOne('loans', r));
     [...storeData].forEach(r => fbSaveOne('stores', r));
-    depNoteTypes.forEach((t,i) => fbSaveOne('noteTypes', {id:i+1,...t}));
+    depNoteTypes.forEach(t => fbSaveOne('noteTypes', t));
+    marginEntries.forEach(m => fbSaveOne('marginEntries', m));
     saveAllToLocal();
     setStatus('fb', true, '동기화 완료');
     alert('Firebase 동기화 저장 완료!');
@@ -2136,8 +2528,7 @@ async function forceSyncToFirebase() {
     alert('오류 발생: ' + e.message);
   }
 }
-  
-// ===== 초기화 =====
+
 initFirebase();
 renderTable(filteredData);
 </script>
