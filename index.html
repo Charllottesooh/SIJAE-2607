@@ -1220,27 +1220,38 @@ function saveImage(){
 function printContent(){
   const content = document.getElementById('content');
   const pageTitle = document.getElementById('page-title').textContent;
-  const scrollTop = content.scrollTop;
-  content.scrollTop = 0;
-  html2canvas(content, {
-    scrollX: 0, scrollY: 0, useCORS: true, allowTaint: true,
-    width: content.scrollWidth, height: content.scrollHeight,
-    windowWidth: content.scrollWidth, windowHeight: content.scrollHeight,
-    onclone: function(doc) {
-      const el = doc.getElementById('content');
-      el.style.height = el.scrollHeight + 'px';
-      el.style.overflow = 'visible';
+  const date = new Date().toLocaleDateString('ko-KR');
+  const printHtml = content.innerHTML;
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>${pageTitle}</title>
+  <style>
+    * { box-sizing:border-box; }
+    body { font-family:'Pretendard','Apple SD Gothic Neo',sans-serif; margin:20px; color:#111; }
+    .print-header { font-size:18px; font-weight:700; margin-bottom:4px; }
+    .print-date { font-size:12px; color:#888; margin-bottom:16px; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    thead th { background:#e8e8e8; padding:8px 10px; border-bottom:1px solid #ccc; text-align:left; white-space:nowrap; }
+    tbody td { padding:7px 10px; border-bottom:0.5px solid #eee; white-space:nowrap; }
+    .num { text-align:right; }
+    .tax-badge { font-size:11px; padding:2px 7px; border-radius:4px; }
+    .tax-y { background:#E6F1FB; color:#185FA5; }
+    .tax-n { background:#EAF3DE; color:#3B6D11; }
+    .card-section, .filter-bar, .table-header .actions, input[type=checkbox] { display:none !important; }
+    .summary-card { display:none !important; }
+    .table-wrap { border:none !important; margin-bottom:20px; }
+    @page { size: A4 landscape; margin: 10mm; }
+    @media print {
+      thead { display: table-header-group; }
+      tr { page-break-inside: avoid; }
     }
-  }).then(canvas => {
-    content.scrollTop = scrollTop;
-    const img = canvas.toDataURL('image/png');
-    const win = window.open('', '_blank');
-    win.document.write('<!DOCTYPE html><html><head><title>'+pageTitle+'</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{background:#fff;}img{width:100%;display:block;}@media print{body{margin:0;}img{width:100%;page-break-inside:avoid;}}</style></head><body><img src="'+img+'"><script>window.onload=function(){window.print();}<\/script></body></html>');
-    win.document.close();
-  }).catch(e => {
-    content.scrollTop = scrollTop;
-    alert('인쇄 준비 실패: ' + e.message);
-  });
+  </style></head>
+  <body>
+    <div class="print-header">${pageTitle}</div>
+    <div class="print-date">인쇄일: ${date}</div>
+    ${printHtml}
+    <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`);
+  win.document.close();
 }
 
 function showStoreTip(code){const s=getStoreByCode(code);if(!s)return;alert(`[${s.code}] ${s.name}\n대표자: ${s.owner||'-'}\n사업자: ${s.bizNo||'-'}\n한도: ${s.limit?s.limit.toLocaleString():'미설정'}\n상태: ${s.status}`);}
