@@ -1218,10 +1218,10 @@ function saveImage(){
   });
 }
 function printContent(){
-  const content = document.getElementById('content');
+  const activePage = document.querySelector('.page.active');
   const pageTitle = document.getElementById('page-title').textContent;
   const date = new Date().toLocaleDateString('ko-KR');
-  const printHtml = content.innerHTML;
+  const printHtml = activePage.innerHTML;
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html><html><head><title>${pageTitle}</title>
   <style>
