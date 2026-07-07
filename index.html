@@ -1170,9 +1170,11 @@ async function importExcel(){
       else date=String(rawDate).replace(/\./g,'-').replace(/(\d{4})-(\d{1,2})-(\d{1,2})/,(_,y,m,d)=>`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
     }
     const outVat=parseFloat(r[11])||0, outTotal=parseFloat(r[12])||0;
-const pCode=String(r[3]||'');
-const knownTax = (salesData.find(s=>s.productCode===pCode) || newRows.find(s=>s.productCode===pCode) || {}).taxType;
-const row={id:nextId++,date,storeCode:String(r[1]||''),storeName:String(r[2]||''),productCode:pCode,productName:String(r[4]||''),unit:String(r[5]||''),inQty:parseFloat(r[6])||0,outCount:parseFloat(r[7])||0,supply:parseFloat(r[8])||0,outQty:parseFloat(r[9])||0,outPrice:parseFloat(r[10])||0,outVat,outTotal,taxType:knownTax||(outVat>0?'과세':'면세'),note:String(r[13]||'')};
+    const pCode=String(r[3]||'');
+    const knownTax = (salesData.find(s=>s.productCode===pCode) || newRows.find(s=>s.productCode===pCode) || {}).taxType;
+    const row={id:nextId++,date,storeCode:String(r[1]||''),storeName:String(r[2]||''),productCode:pCode,productName:String(r[4]||''),unit:String(r[5]||''),inQty:parseFloat(r[6])||0,outCount:parseFloat(r[7])||0,supply:parseFloat(r[8])||0,outQty:parseFloat(r[9])||0,outPrice:parseFloat(r[10])||0,outVat,outTotal,taxType:knownTax||(outVat>0?'과세':'면세'),note:String(r[13]||'')};
+    salesData.unshift(row);
+    newRows.push(row);
   });
   await Promise.all(newRows.map(r=>fbSaveOne('sales',r)));
   saveToLocal('sales', salesData);
@@ -1182,7 +1184,6 @@ const row={id:nextId++,date,storeCode:String(r[1]||''),storeName:String(r[2]||''
   closeModal('modal-upload'); applyFilter();
   alert(cnt+'건 업로드 완료');
 }
-
 function exportExcel(){
   const rows=[['날짜','매장코드','매장명','상품코드','상품명','단위','입수','출고횟수','공급가','출고수량','출고단가','출고부가세','출고합계금액','과세구분','비고']];
   filteredData.forEach(r=>rows.push([r.date,r.storeCode,r.storeName,r.productCode,r.productName,r.unit,r.inQty,r.outCount,r.supply,r.outQty,r.outPrice,r.outVat,r.outTotal,r.taxType,r.note]));
@@ -1615,8 +1616,7 @@ async function saveDepRow(){
 function depToggleAll(chk){document.querySelectorAll('.dep-chk').forEach(c=>c.checked=chk.checked);}
 function getDepChecked(){return [...document.querySelectorAll('.dep-chk:checked')].map(c=>parseInt(c.value));}
 function editDepSelected(){const ids=getDepChecked();if(ids.length!==1){alert('수정할 항목 1건을 선택해주세요.');return;}openDepModal(ids[0]);}
-function deleteDepSelected(){const ids=getDepChecked();if(!ids.length){alert('삭제할 항목을 선택해주세요.');return;}if(confirm(ids.length+'건을 삭제하시겠습니까?')){ids.forEach(id=>fbDeleteOne('deposit',id));depData=depData.filter(r=>!ids.includes(r.id));applyDepFilter();}}
-
+function deleteDepSelected(){const ids=getDepChecked();if(!ids.length){alert('삭제할 항목을 선택해주세요.');return;}if(confirm(ids.length+'건을 삭제하시겠습니까?')){ids.forEach(id=>fbDeleteOne('deposit',id));depData=depData.filter(r=>!ids.includes(r.id));saveToLocal('deposit',depData);applyDepFilter();}}
 // [패치5] 계정관리 화면 — 대표계정 + 하위계정 트리 구조로 표시/편집
 function openDepAccMgr(){
   const parents = depNoteTypes.filter(t=>t.parentId===null);
@@ -1874,7 +1874,7 @@ function deleteStore(id){if(confirm('삭제하시겠습니까?')){fbDeleteOne('s
 function storeToggleAll(chk){document.querySelectorAll('.store-chk').forEach(c=>c.checked=chk.checked);}
 function getStoreChecked(){return [...document.querySelectorAll('.store-chk:checked')].map(c=>parseInt(c.value));}
 function editStoreSelected(){const ids=getStoreChecked();if(ids.length!==1){alert('수정할 항목 1건을 선택해주세요.');return;}openStoreModal(ids[0]);}
-function deleteStoreSelected(){const ids=getStoreChecked();if(!ids.length){alert('삭제할 항목을 선택해주세요.');return;}if(confirm(ids.length+'건을 삭제하시겠습니까?')){ids.forEach(id=>fbDeleteOne('deposit',id));depData=depData.filter(r=>!ids.includes(r.id));saveToLocal('deposit',depData);applyDepFilter();}}
+function deleteStoreSelected(){const ids=getStoreChecked();if(!ids.length){alert('삭제할 항목을 선택해주세요.');return;}if(confirm(ids.length+'건을 삭제하시겠습니까?')){ids.forEach(id=>fbDeleteOne('stores',id));storeData=storeData.filter(r=>!ids.includes(r.id));saveToLocal('stores',storeData);applyStoreFilter();}}
 function openStoreUpload(){
   const html=`<div class="modal" style="width:500px;"><h2>거래처 엑셀 업로드</h2><p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>가맹점코드</strong> / 가맹점명 / 대표자명 / 사업자번호 / 가상계좌번호 / 연결모계좌 / 한도금액 / 초기미수금 / 상태 / 비고1 / 비고2</p><div class="upload-area" onclick="document.getElementById('store-xl-input').click()"><div style="font-size:24px;">📂</div><p>클릭하여 엑셀 파일 선택</p><input type="file" id="store-xl-input" accept=".xlsx,.xls,.csv" style="display:none;" onchange="previewStoreExcel(this)"></div><div class="upload-preview" id="store-xl-preview"></div><div class="modal-footer"><button onclick="closeAccModal()">취소</button><button class="primary" onclick="importStoreExcel()">업로드 적용</button></div></div>`;
   showDynModal(html);
@@ -2012,7 +2012,7 @@ function renderMarginTable(type) {
       <td class="num" style="font-weight:600;">${total.toLocaleString()}</td>
       <td style="text-align:center;"><a href="#" onclick="deleteMarginRow('${type}',${it.id});return false;" style="font-size:11px;color:#D42020;">삭제</a></td>
     </tr>`;
-  }).join('') || `<tr><td colspan="5" style="text-align:center;color:#aaa;padding:16px;font-size:12px;">"+ 행추가"를 눌러 품목을 입력하세요</td></tr>`;
+  }).join('') || `<tr><td colspan="5" style="text-align:center;color:#aaa;padding:16px;font-size:12px;">'+ 행추가'를 눌러 품목을 입력하세요</td></tr>`;
   const total = list.reduce((s,it)=>s+(it.qty||0)*(it.unitPrice||0),0);
   tfoot.innerHTML = `<tr style="background:#f9f9f9;font-weight:700;"><td colspan="3" style="padding:8px 10px;font-size:12px;">합계</td><td class="num" style="padding:8px 10px;font-size:12px;">${total.toLocaleString()}</td><td></td></tr>`;
   return total;
