@@ -1100,12 +1100,12 @@ function calcVat() {
   const qty = parseFloat(document.getElementById('f-outqty').value)||0;
   const price = parseFloat(document.getElementById('f-outprice').value)||0;
   const supply = parseFloat(document.getElementById('f-supply').value)||0;
-  const base = qty*price || supply;
+  // 수량·단가 중 하나라도 입력되면 그 곱을 사용(음수 반품 포함), 둘 다 비었을 때만 공급가 사용
+  const base = (qty !== 0 || price !== 0) ? qty*price : supply;
   const vat = tax==='과세' ? Math.round(base*0.1) : 0;
   document.getElementById('f-outvat').value = vat;
   document.getElementById('f-outtotal').value = base+vat;
 }
-
 function saveRow() {
   const d=document.getElementById('f-date').value;
   const sc=document.getElementById('f-storecode').value.trim();
