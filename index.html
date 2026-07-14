@@ -1658,31 +1658,85 @@ function saveImage(){
     scrollX: 0, scrollY: 0, useCORS: true, allowTaint: true,
     width: content.scrollWidth, height: content.scrollHeight,
     windowWidth: content.scrollWidth, windowHeight: content.scrollHeight,
-    onclone: function(doc) {
+onclone: function(doc) {
       const el = doc.getElementById('content');
       el.style.height = el.scrollHeight + 'px';
       el.style.overflow = 'visible';
+
+      // 마진관리 페이지 한정: 입력칸을 텍스트처럼 보이게
+      const style = doc.createElement('style');
+      style.textContent = `
+        #page-margin .margin-combined-table input {
+          border: 0 !important;
+          outline: 0 !important;
+          box-shadow: none !important;
+          background: transparent !important;
+          border-radius: 0 !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          height: auto !important;
+          line-height: 1.6 !important;
+        }
+        #page-margin .margin-combined-table td.qty-cell input.margin-num-input {
+          width: 100% !important;
+          display: block !important;
+        }
+        #page-margin .margin-combined-table td {
+          padding: 13px 12px !important;
+          line-height: 1.6 !important;
+        }
+      `;
+      doc.head.appendChild(style);
     }
-  }).then(canvas => {
-    content.scrollTop = scrollTop;
-    const a = document.createElement('a');
-    a.download = '시재보고_' + pageTitle + '_' + date + '.png';
-    a.href = canvas.toDataURL('image/png');
-    a.click();
-  }).catch(e => {
-    content.scrollTop = scrollTop;
-    console.error(e);
-    alert('이미지 저장 실패: ' + e.message);
-  });
-}
 function printContent(){
   const activePage = document.querySelector('.page.active');
   const pageTitle = document.getElementById('page-title').textContent;
   const date = new Date().toLocaleDateString('ko-KR');
   const printHtml = activePage.outerHTML;
+
+  // ▼ A4 세로 1장 자동 맞춤: 마진관리일 때 행 수에 따라 폰트/패딩 스케일 계산
+  let fitVars = '';
+  if (activePage.id === 'page-margin') {
+    const rowCnt = document.querySelectorAll('#margin-combined-tbody tr').length || 1;
+    // A4세로(297mm) - 여백/헤더/KPI/합계 등 고정영역 제외 ≈ 표 본문 가용높이 약 175mm
+    const availMM = 175;
+    const rowMM = availMM / rowCnt;          // 행당 허용 높이(mm)
+    // 행 높이(mm) → 폰트/패딩 환산 (1mm ≈ 3.78px)
+    let font = Math.min(10, Math.max(5.5, rowMM * 1.35));
+    let pad  = Math.min(7,  Math.max(1,   (rowMM * 3.78 - font * 1.35 * 1.33) / 2 / 1.33));
+    fitVars = `
+      #page-margin {
+        --mrow-font: ${font.toFixed(1)}px;
+        --mrow-pad: ${pad.toFixed(1)}px;
+        --mrow-name-font: ${(font * 1.2).toFixed(1)}px;
+        --mrow-head-font: ${Math.max(6, font * 0.95).toFixed(1)}px;
+      }`;
+  }
+
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html><html><head><title>${pageTitle}</title>
   <style>
+/* A4 세로 1장 자동 맞춤 (행 개수에 따라 JS가 --mrow-* 값 주입) */
+    #page-margin .margin-combined-table tbody td,
+    #page-margin .margin-combined-table tfoot td {
+      font-size: var(--mrow-font, 9px) !important;
+      padding: var(--mrow-pad, 6px) 4px !important;
+      line-height: 1.35 !important;
+    }
+    #page-margin .margin-combined-table input {
+      font-size: var(--mrow-font, 9px) !important;
+      line-height: 1.35 !important;
+      height: auto !important;
+    }
+    #page-margin .margin-combined-table input[data-margin-name="true"] {
+      font-size: var(--mrow-name-font, 11px) !important;
+      font-weight: 700 !important;
+    }
+    #page-margin .margin-combined-table thead th {
+      font-size: var(--mrow-head-font, 9px) !important;
+      padding: 5px 4px !important;
+    }
+  
     * { box-sizing:border-box; }
     body { font-family:'Pretendard','Apple SD Gothic Neo',sans-serif; margin:20px; color:#111; }
     .print-header { font-size:18px; font-weight:700; margin-bottom:4px; }
@@ -2071,13 +2125,14 @@ function printContent(){
       width:22% !important;
     }
 
-    @page { size: A4 landscape; margin: 6mm; }
+    @page { size: A4 portrait; margin: 5mm; }
     @media print {
       thead { display: table-header-group; }
-      tr { page-break-inside: avoid; }
       #page-margin .table-wrap,
       #page-margin .summary-card { break-inside: avoid; }
     }
+
+    ${fitVars}
 
   </style></head>
     
