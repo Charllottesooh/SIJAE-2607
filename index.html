@@ -2560,7 +2560,16 @@ function curYearMonth() {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
 }
+function escapeMarginHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
 
+  
 function initMarginPage() {
   const el = document.getElementById('margin-month');
   if (el && !el.value) el.value = curYearMonth();
