@@ -90,8 +90,137 @@ input[type="checkbox"] { cursor: pointer; }
 .upload-area p { font-size: 13px; color: #aaa; margin-top: 8px; }
 .upload-preview { font-size: 12px; color: #333; background: #f9f9f9; border-radius: 6px; padding: 10px 14px; margin-top: 8px; display: none; }
 
+
 .page { display: none; }
 .page.active { display: block; }
+
+/* ===== 마진관리 보고서형 UI ===== */
+#page-margin .margin-kpi-section {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+#page-margin .margin-entry-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+#page-margin .margin-table-scroll {
+  overflow-x: hidden;
+}
+#page-margin .margin-entry-table {
+  min-width: 0;
+  width: 100%;
+  table-layout: fixed;
+}
+#page-margin .margin-entry-table th,
+#page-margin .margin-entry-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#page-margin .margin-entry-table input {
+  min-width: 0;
+}
+#page-margin .margin-chart-wrap {
+  padding: 18px;
+}
+#page-margin .margin-chart-legend {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 14px;
+  font-size: 11px;
+  color: #666;
+}
+#page-margin .margin-chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+#page-margin .margin-chart-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  display: inline-block;
+}
+#page-margin .margin-product-chart {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 14px;
+  align-items: end;
+}
+#page-margin .margin-chart-item {
+  background: #fafafa;
+  border: 0.5px solid #eeeeee;
+  border-radius: 10px;
+  padding: 12px 10px 10px;
+  min-width: 0;
+}
+#page-margin .margin-chart-bars {
+  height: 170px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 8px 4px 0;
+  border-bottom: 1px solid #dddddd;
+}
+#page-margin .margin-chart-bar {
+  width: 30px;
+  min-height: 2px;
+  border-radius: 5px 5px 0 0;
+  position: relative;
+}
+#page-margin .margin-chart-bar.purchase {
+  background: #D42020;
+}
+#page-margin .margin-chart-bar.output {
+  background: #2563eb;
+}
+#page-margin .margin-chart-value {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: -18px;
+  white-space: nowrap;
+  font-size: 9px;
+  font-weight: 600;
+  color: #555;
+}
+#page-margin .margin-chart-name {
+  margin-top: 9px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #222;
+  line-height: 1.35;
+  word-break: keep-all;
+}
+#page-margin .margin-chart-diff {
+  margin-top: 5px;
+  text-align: center;
+  font-size: 10px;
+  color: #888;
+}
+#page-margin .margin-report-note {
+  margin-top: 16px;
+  padding: 13px 16px;
+  background: #fff8e6;
+  border-radius: 10px;
+  border-left: 3px solid #F5A800;
+  font-size: 11px;
+  color: #666;
+  line-height: 1.7;
+}
+
+@media (max-width: 1100px) {
+  #page-margin .margin-kpi-section {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #page-margin .margin-entry-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -522,42 +651,82 @@ input[type="checkbox"] { cursor: pointer; }
 
 <!-- ===== 마진관리 ===== -->
 <div id="page-margin" class="page">
-  <div id="margin-title-bar" style="background:#E8F4F8;border-radius:10px;padding:24px;text-align:center;margin-bottom:20px;">
-    <div style="font-size:22px;font-weight:700;color:#111;margin-bottom:8px;">월별 마진 관리</div>
-    <div style="font-size:13px;color:#888;">매입/출고 품목을 직접 입력하면 자동으로 마진이 계산됩니다</div>
+  <div id="margin-title-bar" style="background:linear-gradient(135deg,#E8F4F8 0%,#F5FAFC 100%);border-radius:12px;padding:24px;text-align:center;margin-bottom:20px;border:0.5px solid #dcecf2;">
+    <div style="font-size:22px;font-weight:700;color:#111;margin-bottom:7px;">월별 마진 관리</div>
+    <div id="margin-title-month" style="font-size:13px;font-weight:600;color:#2563eb;margin-bottom:5px;">2026년 06월</div>
+    <div style="font-size:12px;color:#888;">매입과 출고를 품목별로 비교하여 당월 마진 구조를 한눈에 확인합니다</div>
   </div>
-  <div class="card-section" style="grid-template-columns:repeat(3,1fr);">
-    <div class="summary-card color-red"><div class="label">매입 합계금액</div><div class="value" id="margin-purchase-total">₩0</div></div>
-    <div class="summary-card color-blue"><div class="label">생육출고 합계금액</div><div class="value" id="margin-output-total">₩0</div></div>
-    <div class="summary-card color-green"><div class="label">최종 마진액</div><div class="value" id="margin-final">₩0</div><div class="sub">출고합계 − 매입합계</div></div>
+
+  <div class="card-section margin-kpi-section">
+    <div class="summary-card color-red">
+      <div class="label">매입 합계금액</div>
+      <div class="value" id="margin-purchase-total">₩0</div>
+      <div class="sub">당월 매입원가 합계</div>
+    </div>
+    <div class="summary-card color-blue">
+      <div class="label">출고 합계금액</div>
+      <div class="value" id="margin-output-total">₩0</div>
+      <div class="sub">당월 출고금액 합계</div>
+    </div>
+    <div class="summary-card color-green">
+      <div class="label">최종 마진액</div>
+      <div class="value" id="margin-final">₩0</div>
+      <div class="sub">출고합계 − 매입합계</div>
+    </div>
+    <div class="summary-card color-purple">
+      <div class="label">마진율</div>
+      <div class="value" id="margin-rate">0.0%</div>
+      <div class="sub">최종마진액 ÷ 출고합계</div>
+    </div>
   </div>
-  <div class="filter-bar">
+
+  <div class="filter-bar margin-screen-controls">
     <input type="month" id="margin-month" value="2026-06">
     <button class="search" onclick="loadMarginMonth()">월 불러오기</button>
     <button class="primary" onclick="saveMarginEntry()">저장</button>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-    <div class="table-wrap">
+
+  <div class="margin-entry-grid">
+    <div class="table-wrap margin-entry-wrap">
       <div class="table-header">
         <span class="title">당월 매입품목</span>
         <div class="actions"><button onclick="addMarginRow('purchase')">+ 행추가</button></div>
       </div>
-      <div class="tbl-scroll">
-        <table>
-          <thead><tr><th style="min-width:140px;">품목명</th><th class="num" style="width:80px;">수량</th><th class="num" style="width:100px;">단가</th><th class="num" style="width:110px;">금액</th><th style="width:50px;"></th></tr></thead>
+      <div class="tbl-scroll margin-table-scroll">
+        <table class="margin-entry-table">
+          <colgroup>
+            <col style="width:34%;">
+            <col style="width:16%;">
+            <col style="width:20%;">
+            <col style="width:22%;">
+            <col style="width:8%;">
+          </colgroup>
+          <thead><tr>
+            <th>품목명</th><th class="num">수량</th><th class="num">단가</th><th class="num">금액</th><th class="margin-action-col"></th>
+          </tr></thead>
           <tbody id="margin-purchase-tbody"></tbody>
           <tfoot id="margin-purchase-tfoot"></tfoot>
         </table>
       </div>
     </div>
-    <div class="table-wrap">
+
+    <div class="table-wrap margin-entry-wrap">
       <div class="table-header">
-        <span class="title">당월 생육출고품목</span>
+        <span class="title">당월 출고품목</span>
         <div class="actions"><button onclick="addMarginRow('output')">+ 행추가</button></div>
       </div>
-      <div class="tbl-scroll">
-        <table>
-          <thead><tr><th style="min-width:140px;">품목명</th><th class="num" style="width:80px;">수량</th><th class="num" style="width:100px;">단가</th><th class="num" style="width:110px;">금액</th><th style="width:50px;"></th></tr></thead>
+      <div class="tbl-scroll margin-table-scroll">
+        <table class="margin-entry-table">
+          <colgroup>
+            <col style="width:34%;">
+            <col style="width:16%;">
+            <col style="width:20%;">
+            <col style="width:22%;">
+            <col style="width:8%;">
+          </colgroup>
+          <thead><tr>
+            <th>품목명</th><th class="num">수량</th><th class="num">단가</th><th class="num">금액</th><th class="margin-action-col"></th>
+          </tr></thead>
           <tbody id="margin-output-tbody"></tbody>
           <tfoot id="margin-output-tfoot"></tfoot>
         </table>
@@ -565,17 +734,16 @@ input[type="checkbox"] { cursor: pointer; }
     </div>
   </div>
 
-  <div class="table-wrap" id="margin-compare-wrap">
+  <div class="table-wrap" id="margin-compare-wrap" style="margin-top:2px;">
     <div class="table-header">
-      <span class="title">전월 대비 증감</span>
+      <span class="title">품목별 매입 · 출고 비교</span>
       <span style="font-size:11px;color:#aaa;font-weight:400;" id="margin-compare-month-label"></span>
     </div>
-    <div id="margin-compare-body" style="padding:16px 18px;"></div>
+    <div id="margin-compare-body" class="margin-chart-wrap"></div>
   </div>
 
-  <div style="margin-top:16px;padding:14px 18px;background:#fff8e6;border-radius:10px;border-left:3px solid #F5A800;font-size:12px;color:#555;line-height:1.8;">
-    📌 계산식: <strong>최종마진액 = 생육출고 합계금액 − 매입 합계금액</strong> (기본 공식, 변경이 필요하시면 말씀해주세요)<br>
-    📌 월을 선택하고 "월 불러오기"를 누르면 해당 월 저장 데이터를 불러옵니다. 입력 후 반드시 "저장" 버튼을 눌러야 Firebase에 저장됩니다.
+  <div class="margin-report-note">
+    <strong>계산 기준</strong> · 최종마진액 = 출고 합계금액 − 매입 합계금액 / 마진율 = 최종마진액 ÷ 출고 합계금액 × 100
   </div>
 </div>
 
@@ -1243,10 +1411,93 @@ function printContent(){
     .card-section, .filter-bar, .table-header .actions, input[type=checkbox] { display:none !important; }
     .summary-card { display:none !important; }
     .table-wrap { border:none !important; margin-bottom:20px; }
-    @page { size: A4 landscape; margin: 10mm; }
+
+    /* 마진관리 인쇄 전용 */
+    #page-margin .margin-kpi-section {
+      display:grid !important;
+      grid-template-columns:repeat(4,1fr) !important;
+      gap:8px !important;
+      margin-bottom:14px !important;
+    }
+    #page-margin .summary-card {
+      display:block !important;
+      border:1px solid #e5e5e5 !important;
+      border-radius:8px !important;
+      padding:12px 14px !important;
+      break-inside:avoid;
+    }
+    #page-margin .summary-card .label { font-size:10px !important; color:#777 !important; margin-bottom:5px !important; }
+    #page-margin .summary-card .value { font-size:17px !important; font-weight:700 !important; }
+    #page-margin .summary-card .sub { font-size:9px !important; color:#999 !important; margin-top:3px !important; }
+    #page-margin .margin-entry-grid {
+      display:grid !important;
+      grid-template-columns:1fr 1fr !important;
+      gap:10px !important;
+    }
+    #page-margin .margin-table-scroll {
+      overflow:visible !important;
+    }
+    #page-margin .margin-entry-table {
+      min-width:0 !important;
+      width:100% !important;
+      table-layout:fixed !important;
+      font-size:10px !important;
+    }
+    #page-margin .margin-entry-table input {
+      border:none !important;
+      outline:none !important;
+      box-shadow:none !important;
+      background:transparent !important;
+      padding:0 !important;
+      width:100% !important;
+      font:inherit !important;
+      color:#111 !important;
+      appearance:textfield !important;
+      -webkit-appearance:none !important;
+    }
+    #page-margin .margin-entry-table input::-webkit-outer-spin-button,
+    #page-margin .margin-entry-table input::-webkit-inner-spin-button {
+      -webkit-appearance:none !important;
+      margin:0 !important;
+    }
+    #page-margin .margin-action-col,
+    #page-margin .margin-entry-table td:last-child {
+      display:none !important;
+    }
+    #page-margin .margin-entry-table th,
+    #page-margin .margin-entry-table td {
+      white-space:normal !important;
+      overflow:visible !important;
+      padding:6px 7px !important;
+    }
+    #page-margin .margin-chart-wrap { padding:12px !important; }
+    #page-margin .margin-product-chart {
+      display:grid !important;
+      grid-template-columns:repeat(5,1fr) !important;
+      gap:8px !important;
+    }
+    #page-margin .margin-chart-item {
+      break-inside:avoid;
+      padding:8px 6px !important;
+      border:1px solid #eee !important;
+      border-radius:7px !important;
+    }
+    #page-margin .margin-chart-bars { height:125px !important; gap:7px !important; }
+    #page-margin .margin-chart-bar { width:24px !important; }
+    #page-margin .margin-chart-value { font-size:7px !important; top:-14px !important; }
+    #page-margin .margin-chart-name { font-size:9px !important; }
+    #page-margin .margin-chart-diff { font-size:8px !important; }
+    #page-margin .margin-report-note { display:none !important; }
+    #page-margin #margin-title-bar { padding:14px !important; margin-bottom:12px !important; }
+    #page-margin #margin-title-bar > div:first-child { font-size:18px !important; }
+
+    @page { size: A4 landscape; margin: 8mm; }
     @media print {
       thead { display: table-header-group; }
       tr { page-break-inside: avoid; }
+      #page-margin .table-wrap,
+      #page-margin .summary-card,
+      #page-margin .margin-chart-item { break-inside:avoid; }
     }
   </style></head>
   <body>
@@ -1998,196 +2249,198 @@ function updateMarginField(type, id, field, value) {
   const item = list.find(it => it.id === id);
   if (!item) return;
 
-  // 데이터만 갱신
   if (field === 'name') {
     item.name = value;
-    return; // 한글 입력 중에는 절대 테이블 재렌더링하지 않음
-  }
+  } else {
+    item[field] = parseFloat(value) || 0;
 
-  item[field] = parseFloat(value) || 0;
-
-  // 현재 행의 금액만 갱신
-  const input = document.activeElement;
-  const row = input && input.closest('tr');
-
-  if (row) {
-    const total = (item.qty || 0) * (item.unitPrice || 0);
-    const totalCell = row.querySelector('td:nth-child(4)');
+    // 입력 중인 행의 금액만 갱신하여 한글 IME/포커스를 깨지 않음
+    const activeInput = document.activeElement;
+    const row = activeInput && activeInput.closest('tr');
+    const totalCell = row && row.querySelector('.margin-row-total');
     if (totalCell) {
-      totalCell.textContent = total.toLocaleString();
+      totalCell.textContent = ((item.qty || 0) * (item.unitPrice || 0)).toLocaleString();
     }
+
+    const listTotal = list.reduce((s, it) => s + (it.qty || 0) * (it.unitPrice || 0), 0);
+    const totalCellEl = document.getElementById('margin-' + type + '-total-cell');
+    if (totalCellEl) totalCellEl.textContent = listTotal.toLocaleString();
   }
 
-  // 전체 합계만 갱신
-  const purchaseTotal = curPurchaseItems.reduce(
-    (sum, it) => sum + (it.qty || 0) * (it.unitPrice || 0),
-    0
-  );
-
-  const outputTotal = curOutputItems.reduce(
-    (sum, it) => sum + (it.qty || 0) * (it.unitPrice || 0),
-    0
-  );
-
-  const margin = outputTotal - purchaseTotal;
-
-  // 각 표 하단 합계 갱신
-  const purchaseTfoot = document.getElementById('margin-purchase-tfoot');
-  const outputTfoot = document.getElementById('margin-output-tfoot');
-
-  if (purchaseTfoot) {
-    const cell = purchaseTfoot.querySelector('td:nth-child(2)');
-    if (cell) cell.textContent = purchaseTotal.toLocaleString();
-  }
-
-  if (outputTfoot) {
-    const cell = outputTfoot.querySelector('td:nth-child(2)');
-    if (cell) cell.textContent = outputTotal.toLocaleString();
-  }
-
-  // 상단 카드 갱신
-  document.getElementById('margin-purchase-total').textContent =
-    '₩' + purchaseTotal.toLocaleString();
-
-  document.getElementById('margin-output-total').textContent =
-    '₩' + outputTotal.toLocaleString();
-
-  const finalEl = document.getElementById('margin-final');
-
-  if (finalEl) {
-    finalEl.textContent =
-      (margin >= 0 ? '' : '-') +
-      '₩' +
-      Math.abs(margin).toLocaleString();
-
-    finalEl.style.color =
-      margin >= 0 ? '#0F6E56' : '#D42020';
-  }
+  updateMarginSummary();
+  renderMarginComparison();
 }
 
 function renderMarginTable(type) {
   const list = type === 'purchase' ? curPurchaseItems : curOutputItems;
-  const tbody = document.getElementById('margin-'+type+'-tbody');
-  const tfoot = document.getElementById('margin-'+type+'-tfoot');
+  const tbody = document.getElementById('margin-' + type + '-tbody');
+  const tfoot = document.getElementById('margin-' + type + '-tfoot');
+
   tbody.innerHTML = list.map(it => {
-    const total = (it.qty||0) * (it.unitPrice||0);
+    const total = (it.qty || 0) * (it.unitPrice || 0);
     return `<tr>
-      <td><input value="${it.name||''}" oninput="updateMarginField('${type}',${it.id},'name',this.value)" style="width:100%;font-size:12px;border:0.5px solid #ddd;border-radius:4px;padding:5px 7px;"></td>
-      <td><input type="number" value="${it.qty||0}" oninput="updateMarginField('${type}',${it.id},'qty',this.value)" style="width:100%;font-size:12px;border:0.5px solid #ddd;border-radius:4px;padding:5px 7px;text-align:right;"></td>
-      <td><input type="number" value="${it.unitPrice||0}" oninput="updateMarginField('${type}',${it.id},'unitPrice',this.value)" style="width:100%;font-size:12px;border:0.5px solid #ddd;border-radius:4px;padding:5px 7px;text-align:right;"></td>
-      <td class="num" style="font-weight:600;">${total.toLocaleString()}</td>
+      <td><input value="${escapeMarginHtml(it.name || '')}" oninput="updateMarginField('${type}',${it.id},'name',this.value)" aria-label="품목명"></td>
+      <td><input type="number" value="${it.qty || 0}" oninput="updateMarginField('${type}',${it.id},'qty',this.value)" style="text-align:right;" aria-label="수량"></td>
+      <td><input type="number" value="${it.unitPrice || 0}" oninput="updateMarginField('${type}',${it.id},'unitPrice',this.value)" style="text-align:right;" aria-label="단가"></td>
+      <td class="num margin-row-total" style="font-weight:600;">${total.toLocaleString()}</td>
       <td style="text-align:center;"><a href="#" onclick="deleteMarginRow('${type}',${it.id});return false;" style="font-size:11px;color:#D42020;">삭제</a></td>
     </tr>`;
   }).join('') || `<tr><td colspan="5" style="text-align:center;color:#aaa;padding:16px;font-size:12px;">'+ 행추가'를 눌러 품목을 입력하세요</td></tr>`;
-  const total = list.reduce((s,it)=>s+(it.qty||0)*(it.unitPrice||0),0);
-  tfoot.innerHTML = `<tr style="background:#f9f9f9;font-weight:700;"><td colspan="3" style="padding:8px 10px;font-size:12px;">합계</td><td class="num" style="padding:8px 10px;font-size:12px;">${total.toLocaleString()}</td><td></td></tr>`;
+
+  const total = list.reduce((s, it) => s + (it.qty || 0) * (it.unitPrice || 0), 0);
+  tfoot.innerHTML = `<tr style="background:#f9f9f9;font-weight:700;">
+    <td colspan="3" style="padding:8px 10px;font-size:12px;">합계</td>
+    <td id="margin-${type}-total-cell" class="num" style="padding:8px 10px;font-size:12px;">${total.toLocaleString()}</td>
+    <td></td>
+  </tr>`;
   return total;
 }
 
-function renderMarginPage() {
-  const activeEl = document.activeElement;
-  const activeInfo = (activeEl && activeEl.tagName==='INPUT' && activeEl.closest('#page-margin'))
-    ? {parentId: activeEl.closest('tr').querySelector('td:first-child input')?.dataset?.rowid, html: activeEl.outerHTML, selStart: activeEl.selectionStart, cellIndex: activeEl.closest('td')?.cellIndex, rowIndex: [...activeEl.closest('tbody').children].indexOf(activeEl.closest('tr'))}
-    : null;
-  const activeTbodyId = activeEl && activeEl.closest('tbody') ? activeEl.closest('tbody').id : null;
+function escapeMarginHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
 
-  const purchaseTotal = renderMarginTable('purchase');
-  const outputTotal = renderMarginTable('output');
+function getMarginTotals() {
+  const purchaseTotal = curPurchaseItems.reduce((s, it) => s + (it.qty || 0) * (it.unitPrice || 0), 0);
+  const outputTotal = curOutputItems.reduce((s, it) => s + (it.qty || 0) * (it.unitPrice || 0), 0);
   const margin = outputTotal - purchaseTotal;
+  const rate = outputTotal !== 0 ? (margin / outputTotal) * 100 : 0;
+  return { purchaseTotal, outputTotal, margin, rate };
+}
 
-  document.getElementById('margin-purchase-total').textContent = '₩'+purchaseTotal.toLocaleString();
-  document.getElementById('margin-output-total').textContent = '₩'+outputTotal.toLocaleString();
+function updateMarginSummary() {
+  const { purchaseTotal, outputTotal, margin, rate } = getMarginTotals();
+
+  document.getElementById('margin-purchase-total').textContent = '₩' + purchaseTotal.toLocaleString();
+  document.getElementById('margin-output-total').textContent = '₩' + outputTotal.toLocaleString();
+
   const finalEl = document.getElementById('margin-final');
-  finalEl.textContent = (margin>=0?'':'-') + '₩'+Math.abs(margin).toLocaleString();
+  finalEl.textContent = (margin >= 0 ? '' : '-') + '₩' + Math.abs(margin).toLocaleString();
   finalEl.style.color = margin >= 0 ? '#0F6E56' : '#D42020';
 
-  // 입력 중이던 칸에 포커스/커서 위치 복원 (같은 행/칸 위치 기준)
-  if (activeInfo && activeTbodyId) {
-    const tbody = document.getElementById(activeTbodyId);
-    const row = tbody && tbody.children[activeInfo.rowIndex];
-    const cell = row && row.children[activeInfo.cellIndex];
-    const input = cell && cell.querySelector('input');
-    if (input) {
-      input.focus();
-      try { input.setSelectionRange(activeInfo.selStart, activeInfo.selStart); } catch(e) {}
-    }
+  const rateEl = document.getElementById('margin-rate');
+  if (rateEl) {
+    rateEl.textContent = rate.toFixed(1) + '%';
+    rateEl.style.color = rate >= 0 ? '#0F6E56' : '#D42020';
   }
+
+  const ym = curMarginMonth || document.getElementById('margin-month').value || curYearMonth();
+  const [year, month] = ym.split('-');
+  const titleMonth = document.getElementById('margin-title-month');
+  if (titleMonth) titleMonth.textContent = year + '년 ' + month + '월';
+}
+
+function renderMarginPage() {
+  renderMarginTable('purchase');
+  renderMarginTable('output');
+  updateMarginSummary();
   renderMarginComparison();
 }
 
 function saveMarginEntry() {
   const ym = document.getElementById('margin-month').value || curYearMonth();
   curMarginMonth = ym;
-  const purchaseTotal = curPurchaseItems.reduce((s,it)=>s+(it.qty||0)*(it.unitPrice||0),0);
-  const outputTotal = curOutputItems.reduce((s,it)=>s+(it.qty||0)*(it.unitPrice||0),0);
-  const margin = outputTotal - purchaseTotal;
+  const { purchaseTotal, outputTotal, margin } = getMarginTotals();
+
   const row = {
-    id: ym, yearMonth: ym,
-    purchaseItems: curPurchaseItems.map(it=>({id:it.id,name:it.name,qty:it.qty,unitPrice:it.unitPrice})),
-    outputItems: curOutputItems.map(it=>({id:it.id,name:it.name,qty:it.qty,unitPrice:it.unitPrice})),
-    purchaseTotal, outputTotal, margin,
+    id: ym,
+    yearMonth: ym,
+    purchaseItems: curPurchaseItems.map(it => ({id:it.id, name:it.name, qty:it.qty, unitPrice:it.unitPrice})),
+    outputItems: curOutputItems.map(it => ({id:it.id, name:it.name, qty:it.qty, unitPrice:it.unitPrice})),
+    purchaseTotal,
+    outputTotal,
+    margin,
     updatedAt: new Date().toISOString()
   };
+
   const i = marginEntries.findIndex(m => m.yearMonth === ym);
-  if (i >= 0) marginEntries[i] = row; else marginEntries.push(row);
+  if (i >= 0) marginEntries[i] = row;
+  else marginEntries.push(row);
+
   fbSaveOne('marginEntries', row);
   saveToLocal('marginEntries', marginEntries);
   alert(ym + ' 마진 데이터가 저장되었습니다.');
   renderMarginComparison();
 }
 
-// [패치4] 전월 대비 증감 비교
-function getPrevYearMonth(ym) {
-  const [y, m] = ym.split('-').map(Number);
-  const prevM = m === 1 ? 12 : m - 1;
-  const prevY = m === 1 ? y - 1 : y;
-  return prevY + '-' + String(prevM).padStart(2,'0');
-}
-
-function compareRowHtml(label, curVal, prevVal) {
-  const diff = curVal - prevVal;
-  const pct = prevVal !== 0 ? (diff / Math.abs(prevVal) * 100) : (curVal !== 0 ? 100 : 0);
-  const up = diff > 0, down = diff < 0;
-  const arrow = up ? '▲' : (down ? '▼' : '–');
-  const color = up ? '#D42020' : (down ? '#2563eb' : '#888');
-  return `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid #f0f0f0;">
-      <span style="font-size:13px;color:#333;font-weight:500;width:140px;">${label}</span>
-      <span style="font-size:12px;color:#888;width:120px;">전월 ₩${prevVal.toLocaleString()}</span>
-      <span style="font-size:13px;font-weight:600;color:#111;width:120px;">당월 ₩${curVal.toLocaleString()}</span>
-      <span style="font-size:13px;font-weight:700;color:${color};min-width:160px;text-align:right;">
-        ${arrow} ${diff>=0?'+':'-'}₩${Math.abs(diff).toLocaleString()}
-        <span style="font-size:11px;font-weight:400;color:#aaa;">(${pct>=0?'+':''}${pct.toFixed(1)}%)</span>
-      </span>
-    </div>`;
+function compactMarginNumber(value) {
+  const n = Math.abs(value || 0);
+  if (n >= 100000000) return (value / 100000000).toFixed(n >= 1000000000 ? 0 : 1) + '억';
+  if (n >= 10000) return (value / 10000).toFixed(n >= 100000 ? 0 : 1) + '만';
+  return Math.round(value || 0).toLocaleString();
 }
 
 function renderMarginComparison() {
   const ym = curMarginMonth || document.getElementById('margin-month').value || curYearMonth();
-  const prevYM = getPrevYearMonth(ym);
-  const prevEntry = marginEntries.find(m => m.yearMonth === prevYM);
   const body = document.getElementById('margin-compare-body');
   const label = document.getElementById('margin-compare-month-label');
   if (!body) return;
-  label.textContent = prevYM + ' → ' + ym;
 
-  if (!prevEntry) {
+  label.textContent = ym + ' 기준 · 금액 비교';
+
+  // 같은 품목명을 기준으로 매입과 출고를 한 그룹으로 묶음
+  const map = new Map();
+
+  curPurchaseItems.forEach(it => {
+    const name = (it.name || '').trim();
+    if (!name) return;
+    if (!map.has(name)) map.set(name, { name, purchase: 0, output: 0 });
+    map.get(name).purchase += (it.qty || 0) * (it.unitPrice || 0);
+  });
+
+  curOutputItems.forEach(it => {
+    const name = (it.name || '').trim();
+    if (!name) return;
+    if (!map.has(name)) map.set(name, { name, purchase: 0, output: 0 });
+    map.get(name).output += (it.qty || 0) * (it.unitPrice || 0);
+  });
+
+  const items = [...map.values()].sort((a, b) => Math.max(b.purchase, b.output) - Math.max(a.purchase, a.output));
+
+  if (!items.length) {
     body.innerHTML = `
-      <div style="text-align:center;padding:20px 0;color:#aaa;font-size:13px;">
-        ${prevYM} 전월 데이터가 없습니다.<br>
-        <button onclick="openPrevMonthEntry('${prevYM}')" style="margin-top:10px;font-size:12px;padding:7px 16px;border-radius:6px;border:0.5px solid #090909;background:#fff;color:#090909;cursor:pointer;">${prevYM} 데이터 입력하기</button>
+      <div style="text-align:center;padding:34px 0;color:#aaa;font-size:13px;">
+        매입품목과 출고품목을 입력하면 품목별 비교 그래프가 자동으로 표시됩니다.
       </div>`;
     return;
   }
 
-  const curPurchaseTotal = curPurchaseItems.reduce((s,it)=>s+(it.qty||0)*(it.unitPrice||0),0);
-  const curOutputTotal = curOutputItems.reduce((s,it)=>s+(it.qty||0)*(it.unitPrice||0),0);
-  const curMargin = curOutputTotal - curPurchaseTotal;
+  const maxValue = Math.max(...items.flatMap(it => [it.purchase, it.output]), 1);
 
-  body.innerHTML =
-    compareRowHtml('매입 합계금액', curPurchaseTotal, prevEntry.purchaseTotal||0) +
-    compareRowHtml('생육출고 합계금액', curOutputTotal, prevEntry.outputTotal||0) +
-    compareRowHtml('최종 마진액', curMargin, prevEntry.margin||0);
+  const chartItems = items.map(it => {
+    const purchaseHeight = Math.max(it.purchase > 0 ? 3 : 0, (it.purchase / maxValue) * 100);
+    const outputHeight = Math.max(it.output > 0 ? 3 : 0, (it.output / maxValue) * 100);
+    const diff = it.output - it.purchase;
+    const diffText = diff === 0
+      ? '차이 없음'
+      : (diff > 0 ? '출고 +' : '매입 +') + '₩' + Math.abs(diff).toLocaleString();
+    const diffColor = diff > 0 ? '#0F6E56' : (diff < 0 ? '#D42020' : '#888');
+
+    return `
+      <div class="margin-chart-item">
+        <div class="margin-chart-bars">
+          <div class="margin-chart-bar purchase" style="height:${purchaseHeight}%;">
+            <span class="margin-chart-value">${compactMarginNumber(it.purchase)}</span>
+          </div>
+          <div class="margin-chart-bar output" style="height:${outputHeight}%;">
+            <span class="margin-chart-value">${compactMarginNumber(it.output)}</span>
+          </div>
+        </div>
+        <div class="margin-chart-name">${escapeMarginHtml(it.name)}</div>
+        <div class="margin-chart-diff" style="color:${diffColor};">${diffText}</div>
+      </div>`;
+  }).join('');
+
+  body.innerHTML = `
+    <div class="margin-chart-legend">
+      <span><i class="margin-chart-dot" style="background:#D42020;"></i>매입</span>
+      <span><i class="margin-chart-dot" style="background:#2563eb;"></i>출고</span>
+    </div>
+    <div class="margin-product-chart">${chartItems}</div>`;
 }
 
 function openPrevMonthEntry(ym) {
