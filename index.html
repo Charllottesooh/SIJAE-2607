@@ -494,7 +494,8 @@ input[type="checkbox"] { cursor: pointer; }
           <th class="num">건수</th>
           <th class="num">입금합계</th>
           <th class="num">출금합계</th>
-        </tr></thead>
+<th class="num">순액</th>
+</tr></thead>
         <tbody id="rpt-acc-tbody"></tbody>
       </table>
     </div>
@@ -2170,9 +2171,16 @@ function renderRpt(salesRows, depRows, start, end) {
 
   const addGrpHead = (label, color) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td colspan="5" style="background:${color};color:#1e3a5f;font-size:12px;font-weight:700;padding:9px 14px;letter-spacing:0.03em;">${label}</td>`;
+    tr.innerHTML = `<td colspan="6" style="background:${color};color:#1e3a5f;font-size:12px;font-weight:700;padding:9px 14px;letter-spacing:0.03em;">${label}</td>`;
     tbody.appendChild(tr);
   };
+
+  const addSpacer = (h=14) => {
+  const tr = document.createElement('tr');
+  tr.style.borderBottom = 'none';
+  tr.innerHTML = `<td colspan="6" style="padding:${h}px 0;background:transparent;"></td>`;
+  tbody.appendChild(tr);
+};
 
   const addAccRow = (name, cnt, inAmt, outAmt, detailRows, detailCols) => {
     const rowId = 'rpt-det-' + Math.random().toString(36).slice(2,8);
@@ -2185,14 +2193,16 @@ function renderRpt(salesRows, depRows, start, end) {
       <td style="padding:11px 12px;font-size:13px;font-weight:600;color:#111;">${name}</td>
       <td class="num" style="padding:11px 12px;">${cnt}건</td>
       <td class="num" style="padding:11px 12px;color:${inAmt>0?'#2563eb':'#aaa'};font-weight:${inAmt>0?600:400};">${inAmt>0?'₩'+inAmt.toLocaleString():'-'}</td>
-      <td class="num" style="padding:11px 12px;color:${outAmt>0?'#D42020':'#aaa'};font-weight:${outAmt>0?600:400};">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>`;
+      <td class="num" style="padding:11px 12px;color:${outAmt>0?'#D42020':'#aaa'};font-weight:${outAmt>0?600:400};">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>
+      <td class="num" style="padding:11px 12px;color:${outAmt>0?'#D42020':'#aaa'};font-weight:${outAmt>0?600:400};">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>
+      ${showNet ? `<td class="num" style="padding:11px 12px;font-weight:600;color:${(inAmt-outAmt)>=0?'#2563eb':'#D42020'};">${(inAmt-outAmt)>=0?'+':'−'}₩${Math.abs(inAmt-outAmt).toLocaleString()}</td>` : '<td></td>'}`;
     tbody.appendChild(tr);
 
     const dtr = document.createElement('tr');
     dtr.id = rowId;
     dtr.style.display = 'none';
     const inner = buildDetailTable(detailRows, detailCols);
-    dtr.innerHTML = `<td colspan="5" style="padding:0;"><div style="padding:10px 16px 10px 40px;background:#f9fafb;border-left:3px solid #2563eb;">${inner}</div></td>`;
+    dtr.innerHTML = `<td colspan="6" style="padding:0;"><div style="padding:10px 16px 10px 40px;background:#f9fafb;border-left:3px solid #2563eb;">${inner}</div></td>`;
     tbody.appendChild(dtr);
 
     tr.onclick = () => {
@@ -2216,7 +2226,8 @@ function renderRpt(salesRows, depRows, start, end) {
       <td style="padding:11px 12px;font-size:13px;font-weight:600;color:#111;">${name}</td>
       <td class="num" style="padding:11px 12px;">${cnt}건</td>
       <td class="num" style="padding:11px 12px;color:${inAmt>0?'#2563eb':'#aaa'};font-weight:${inAmt>0?600:400};">${inAmt>0?'₩'+inAmt.toLocaleString():'-'}</td>
-      <td class="num" style="padding:11px 12px;color:${outAmt>0?'#D42020':'#aaa'};font-weight:${outAmt>0?600:400};">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>`;
+      <td class="num" style="padding:11px 12px;color:${outAmt>0?'#D42020':'#aaa'};font-weight:${outAmt>0?600:400};">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>
+      <td class="num" style="padding:11px 12px;font-weight:600;color:${(inAmt-outAmt)>=0?'#2563eb':'#D42020'};">${(inAmt-outAmt)>=0?'+':'−'}₩${Math.abs(inAmt-outAmt).toLocaleString()}</td>`;
     tbody.appendChild(tr);
 
     const dtr = document.createElement('tr');
@@ -2239,7 +2250,7 @@ function renderRpt(salesRows, depRows, start, end) {
         </div>`;
     }).join('');
     const inner = `<div style="background:#f9fafb;border-left:3px solid #2563eb;padding:6px 16px 6px 40px;">${subRowsHtml}</div>`;
-    dtr.innerHTML = `<td colspan="5" style="padding:0;">${inner}</td>`;
+    dtr.innerHTML = `<td colspan="6" style="padding:0;">${inner}</td>`;
     tbody.appendChild(dtr);
 
     tr.onclick = () => {
@@ -2249,23 +2260,25 @@ function renderRpt(salesRows, depRows, start, end) {
     };
   };
 
-  const addSubtotal = (label, cnt, inAmt, outAmt, color) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td colspan="2" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#333;">${label}</td>
-      <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#333;">${cnt}건</td>
-      <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#333;">${inAmt>0?'₩'+inAmt.toLocaleString():'-'}</td>
-      <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#333;">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>`;
-    tbody.appendChild(tr);
-  };
-
+  const addSubtotal = (label, cnt, inAmt, outAmt, color, showNet=true) => {
+  const net = inAmt - outAmt;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td colspan="2" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#333;">${label}</td>
+    <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#333;">${cnt}건</td>
+    <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#333;">${inAmt>0?'₩'+inAmt.toLocaleString():'-'}</td>
+    <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:#333;">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>
+    <td class="num" style="padding:8px 12px;background:${color};font-size:11px;font-weight:700;color:${net>=0?'#185FA5':'#A32D2D'};">${showNet?((net>=0?'+':'−')+'₩'+Math.abs(net).toLocaleString()):''}</td>`;
+  tbody.appendChild(tr);
+};
   if (salesRows.length > 0) {
     addGrpHead('매출관리', '#dce8f5');
     const sIn = salesRows.reduce((s,r)=>s+(r.outTotal||0),0);
     addAccRow('가맹점 매출', salesRows.length, sIn, 0,
       salesRows.slice(0,50),
-      ['date:날짜','storeCode:매장코드','storeName:매장명','productName:상품명','outQty:수량','outPrice:단가','outVat:부가세','outTotal:금액','taxType:과세구분','note:비고']);
-    addSubtotal('매출관리 소계', salesRows.length, sIn, 0, '#dce8f5');
+      ['date:날짜','storeCode:매장코드','storeName:매장명','productName:상품명','outQty:수량','outPrice:단가','outVat:부가세','outTotal:금액','taxType:과세구분','note:비고'],false);
+    addSubtotal('매출관리 소계', salesRows.length, sIn, 0, '#dce8f5', false);
+    addSpacer();
   }
 
   // [패치2-B] 대표계정 산하로 하위계정을 묶어서 2단계로 표시.
@@ -2343,15 +2356,18 @@ function renderRpt(salesRows, depRows, start, end) {
     addSubtotal('예금관리 소계', totCnt, totIn, totOut, '#d4ede5');
   }
 
-  const allIn = salesRows.reduce((s,r)=>s+(r.outTotal||0),0) + depRows.reduce((s,r)=>s+(r.inAmt||0),0);
+  addSpacer(8);
+  const allIn = depRows.reduce((s,r)=>s+(r.inAmt||0),0);
   const allOut = depRows.reduce((s,r)=>s+(r.outAmt||0),0);
-  const allCnt = salesRows.length + depRows.length;
+  const allCnt = depRows.length;
+  const allNet = allIn - allOut;
   const sumTr = document.createElement('tr');
   sumTr.innerHTML = `
-    <td colspan="2" style="padding:11px 12px;background:#444;color:#fff;font-weight:700;font-size:13px;">합계</td>
+    <td colspan="2" style="padding:11px 12px;background:#444;color:#fff;font-weight:700;font-size:13px;">합계 (예금관리 기준)</td>
     <td class="num" style="padding:11px 12px;background:#444;color:#fff;font-weight:700;font-size:13px;">${allCnt}건</td>
     <td class="num" style="padding:11px 12px;background:#444;color:#93c5fd;font-weight:700;font-size:13px;">₩${allIn.toLocaleString()}</td>
-    <td class="num" style="padding:11px 12px;background:#444;color:#fca5a5;font-weight:700;font-size:13px;">₩${allOut.toLocaleString()}</td>`;
+    <td class="num" style="padding:11px 12px;background:#444;color:#fca5a5;font-weight:700;font-size:13px;">₩${allOut.toLocaleString()}</td>
+    <td class="num" style="padding:11px 12px;background:#444;color:${allNet>=0?'#93c5fd':'#fca5a5'};font-weight:700;font-size:13px;">${allNet>=0?'+':'−'}₩${Math.abs(allNet).toLocaleString()}</td>`;
   tbody.appendChild(sumTr);
 
   const loanTbody = document.getElementById('rpt-loan-tbody');
