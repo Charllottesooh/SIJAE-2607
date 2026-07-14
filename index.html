@@ -1691,7 +1691,7 @@ onclone: function(doc) {
           font-weight: 700 !important;
           border-top: 1.5px solid #ccd2d8 !important;
         }
-      `;
+     `;
       doc.head.appendChild(style);
     }
   }).then(canvas => {
@@ -3198,7 +3198,6 @@ function renderMarginCombinedTable() {
           <a href="#" onclick="deleteMarginCombinedRow('${row.key}');return false;"
              style="font-size:11px;color:#D42020;">삭제</a>
         </td>
-        
       </tr>`;
   }).join('');
 
@@ -3234,7 +3233,7 @@ function updateMarginCombinedFooter() {
   const { purchaseTotal, outputTotal, purchaseQty, outputQty, margin, rate } = getMarginTotals();
   const marginColor = margin >= 0 ? '#0F6E56' : '#D42020';
 
-  tfoot.innerHTML = `
+ tfoot.innerHTML = `
     <tr>
       <td>합계</td>
       <td class="num group-divider-left" style="color:#2563eb;">${purchaseQty.toLocaleString()}</td>
@@ -3247,11 +3246,9 @@ function updateMarginCombinedFooter() {
         ${(margin < 0 ? '-' : '') + Math.abs(margin).toLocaleString()}
       </td>
       <td class="num margin-rate-value">${rate.toFixed(1)}%</td>
-      <td></td>
-      <td class="num margin-rate-value">${rate.toFixed(1)}%</td>
       <td class="margin-action-col"></td>
     </tr>`;
-   
+}
 
 function updateMarginSummary() {
   const { purchaseTotal, outputTotal, margin, rate } = getMarginTotals();
