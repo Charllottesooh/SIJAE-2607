@@ -2720,9 +2720,21 @@ function ensureMarginPair(rowKey) {
 }
 
 function addMarginCombinedRow() {
-  const sharedName = '';
-  const purchase = { id: marginItemNextId++, name: sharedName, qty: 0, unitPrice: 0 };
-  const output = { id: marginItemNextId++, name: sharedName, qty: 0, unitPrice: 0 };
+  const sharedId = marginItemNextId++;
+
+  const purchase = {
+    id: sharedId,
+    name: '',
+    qty: 0,
+    unitPrice: 0
+  };
+
+  const output = {
+    id: sharedId,
+    name: '',
+    qty: 0,
+    unitPrice: 0
+  };
 
   curPurchaseItems.push(purchase);
   curOutputItems.push(output);
@@ -2730,7 +2742,10 @@ function addMarginCombinedRow() {
   renderMarginPage();
 
   setTimeout(() => {
-    const firstEmpty = document.querySelector('#margin-combined-tbody input[data-margin-name="true"][value=""]');
+    const firstEmpty = document.querySelector(
+      '#margin-combined-tbody input[data-margin-name="true"][value=""]'
+    );
+
     if (firstEmpty) firstEmpty.focus();
   }, 0);
 }
