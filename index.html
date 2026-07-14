@@ -1997,9 +1997,72 @@ function updateMarginField(type, id, field, value) {
   const list = type === 'purchase' ? curPurchaseItems : curOutputItems;
   const item = list.find(it => it.id === id);
   if (!item) return;
-  if (field === 'name') item.name = value;
-  else item[field] = parseFloat(value) || 0;
-  renderMarginPage(true); // 입력 중 포커스 유지를 위해 입력칸은 다시 그리지 않고 금액만 갱신
+
+  // 데이터만 갱신
+  if (field === 'name') {
+    item.name = value;
+    return; // 한글 입력 중에는 절대 테이블 재렌더링하지 않음
+  }
+
+  item[field] = parseFloat(value) || 0;
+
+  // 현재 행의 금액만 갱신
+  const input = document.activeElement;
+  const row = input && input.closest('tr');
+
+  if (row) {
+    const total = (item.qty || 0) * (item.unitPrice || 0);
+    const totalCell = row.querySelector('td:nth-child(4)');
+    if (totalCell) {
+      totalCell.textContent = total.toLocaleString();
+    }
+  }
+
+  // 전체 합계만 갱신
+  const purchaseTotal = curPurchaseItems.reduce(
+    (sum, it) => sum + (it.qty || 0) * (it.unitPrice || 0),
+    0
+  );
+
+  const outputTotal = curOutputItems.reduce(
+    (sum, it) => sum + (it.qty || 0) * (it.unitPrice || 0),
+    0
+  );
+
+  const margin = outputTotal - purchaseTotal;
+
+  // 각 표 하단 합계 갱신
+  const purchaseTfoot = document.getElementById('margin-purchase-tfoot');
+  const outputTfoot = document.getElementById('margin-output-tfoot');
+
+  if (purchaseTfoot) {
+    const cell = purchaseTfoot.querySelector('td:nth-child(2)');
+    if (cell) cell.textContent = purchaseTotal.toLocaleString();
+  }
+
+  if (outputTfoot) {
+    const cell = outputTfoot.querySelector('td:nth-child(2)');
+    if (cell) cell.textContent = outputTotal.toLocaleString();
+  }
+
+  // 상단 카드 갱신
+  document.getElementById('margin-purchase-total').textContent =
+    '₩' + purchaseTotal.toLocaleString();
+
+  document.getElementById('margin-output-total').textContent =
+    '₩' + outputTotal.toLocaleString();
+
+  const finalEl = document.getElementById('margin-final');
+
+  if (finalEl) {
+    finalEl.textContent =
+      (margin >= 0 ? '' : '-') +
+      '₩' +
+      Math.abs(margin).toLocaleString();
+
+    finalEl.style.color =
+      margin >= 0 ? '#0F6E56' : '#D42020';
+  }
 }
 
 function renderMarginTable(type) {
