@@ -1685,9 +1685,22 @@ onclone: function(doc) {
           padding: 13px 12px !important;
           line-height: 1.6 !important;
         }
-      `;
+    `;
       doc.head.appendChild(style);
     }
+  }).then(canvas => {
+    content.scrollTop = scrollTop;
+    const a = document.createElement('a');
+    a.download = '시재보고_' + pageTitle + '_' + date + '.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  }).catch(e => {
+    content.scrollTop = scrollTop;
+    console.error(e);
+    alert('이미지 저장 실패: ' + e.message);
+  });
+}
+
 function printContent(){
   const activePage = document.querySelector('.page.active');
   const pageTitle = document.getElementById('page-title').textContent;
