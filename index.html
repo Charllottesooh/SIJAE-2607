@@ -221,6 +221,42 @@ input[type="checkbox"] { cursor: pointer; }
   }
 }
 
+
+
+/* ===== 마진관리 최종 화면 수정 ===== */
+#page-margin .margin-entry-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  width: 100%;
+  align-items: start;
+}
+
+#page-margin .margin-entry-wrap {
+  width: 100%;
+  min-width: 0;
+}
+
+/* 당월 매입품목 제목 */
+#page-margin .margin-purchase-header {
+  background: #2563eb;
+  border-bottom: none;
+}
+
+#page-margin .margin-purchase-header .title {
+  color: #fff;
+}
+
+/* 당월 출고품목 제목 */
+#page-margin .margin-output-header {
+  background: #3f3f46;
+  border-bottom: none;
+}
+
+#page-margin .margin-output-header .title {
+  color: #fff;
+}
+
 </style>
 </head>
 <body>
@@ -652,7 +688,7 @@ input[type="checkbox"] { cursor: pointer; }
 <!-- ===== 마진관리 ===== -->
 <div id="page-margin" class="page">
   <div id="margin-title-bar" style="background:linear-gradient(135deg,#E8F4F8 0%,#F5FAFC 100%);border-radius:12px;padding:24px;text-align:center;margin-bottom:20px;border:0.5px solid #dcecf2;">
-    <div style="font-size:22px;font-weight:700;color:#111;margin-bottom:7px;">월별 마진 관리</div>
+    <div style="font-size:22px;font-weight:700;color:#111;margin-bottom:7px;">월별 마진</div>
     <div id="margin-title-month" style="font-size:13px;font-weight:600;color:#2563eb;margin-bottom:5px;">2026년 06월</div>
     <div style="font-size:12px;color:#888;">매입과 출고를 품목별로 비교하여 당월 마진 구조를 한눈에 확인합니다</div>
   </div>
@@ -688,7 +724,7 @@ input[type="checkbox"] { cursor: pointer; }
 
   <div class="margin-entry-grid">
     <div class="table-wrap margin-entry-wrap">
-      <div class="table-header">
+      <div class="table-header margin-purchase-header">
         <span class="title">당월 매입품목</span>
         <div class="actions"><button onclick="addMarginRow('purchase')">+ 행추가</button></div>
       </div>
@@ -711,7 +747,7 @@ input[type="checkbox"] { cursor: pointer; }
     </div>
 
     <div class="table-wrap margin-entry-wrap">
-      <div class="table-header">
+      <div class="table-header margin-output-header">
         <span class="title">당월 출고품목</span>
         <div class="actions"><button onclick="addMarginRow('output')">+ 행추가</button></div>
       </div>
@@ -1393,7 +1429,7 @@ function printContent(){
   const activePage = document.querySelector('.page.active');
   const pageTitle = document.getElementById('page-title').textContent;
   const date = new Date().toLocaleDateString('ko-KR');
-  const printHtml = activePage.innerHTML;
+  const printHtml = activePage.outerHTML;
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html><html><head><title>${pageTitle}</title>
   <style>
@@ -1490,6 +1526,110 @@ function printContent(){
     #page-margin .margin-report-note { display:none !important; }
     #page-margin #margin-title-bar { padding:14px !important; margin-bottom:12px !important; }
     #page-margin #margin-title-bar > div:first-child { font-size:18px !important; }
+
+    /* 매입 / 출고 제목 색상 */
+    #page-margin .margin-purchase-header {
+      background:#2563eb !important;
+      color:#fff !important;
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+    }
+    #page-margin .margin-purchase-header .title {
+      color:#fff !important;
+    }
+
+    #page-margin .margin-output-header {
+      background:#3f3f46 !important;
+      color:#fff !important;
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+    }
+    #page-margin .margin-output-header .title {
+      color:#fff !important;
+    }
+
+    /* 하단 그래프 영역 반드시 출력 */
+    #page-margin #margin-compare-wrap,
+    #page-margin #margin-compare-body,
+    #page-margin .margin-chart-wrap,
+    #page-margin .margin-product-chart,
+    #page-margin .margin-chart-item,
+    #page-margin .margin-chart-bars,
+    #page-margin .margin-chart-bar {
+      visibility:visible !important;
+    }
+
+    #page-margin #margin-compare-wrap {
+      display:block !important;
+      width:100% !important;
+      margin-top:16px !important;
+      border:1px solid #e5e5e5 !important;
+      border-radius:8px !important;
+      overflow:visible !important;
+    }
+
+    #page-margin #margin-compare-body,
+    #page-margin .margin-chart-wrap {
+      display:block !important;
+    }
+
+    #page-margin .margin-chart-legend {
+      display:flex !important;
+      justify-content:flex-end !important;
+      align-items:center !important;
+      gap:16px !important;
+      margin-bottom:12px !important;
+      font-size:10px !important;
+    }
+
+    #page-margin .margin-chart-legend span {
+      display:inline-flex !important;
+      align-items:center !important;
+      gap:5px !important;
+    }
+
+    #page-margin .margin-chart-dot {
+      display:inline-block !important;
+      width:8px !important;
+      height:8px !important;
+      border-radius:2px !important;
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+    }
+
+    #page-margin .margin-chart-bar.purchase {
+      background:#D42020 !important;
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+    }
+
+    #page-margin .margin-chart-bar.output {
+      background:#2563eb !important;
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+    }
+
+    /* 입력칸은 값만 보이도록 */
+    #page-margin .margin-entry-table input {
+      border:0 !important;
+      outline:0 !important;
+      box-shadow:none !important;
+      background:transparent !important;
+      border-radius:0 !important;
+      padding:0 !important;
+      margin:0 !important;
+      width:100% !important;
+      color:#111 !important;
+      font:inherit !important;
+      appearance:none !important;
+      -webkit-appearance:none !important;
+    }
+
+    /* 인쇄 색상 유지 */
+    #page-margin * {
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
 
     @page { size: A4 landscape; margin: 8mm; }
     @media print {
