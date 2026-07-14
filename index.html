@@ -1677,15 +1677,16 @@ onclone: function(doc) {
           height: auto !important;
           line-height: 1.6 !important;
         }
-        #page-margin .margin-combined-table td.qty-cell input.margin-num-input {
-          width: 100% !important;
-          display: block !important;
-        }
         #page-margin .margin-combined-table td {
           padding: 13px 12px !important;
           line-height: 1.6 !important;
         }
-    `;
+        #page-margin .margin-combined-table tfoot td {
+          background: #f1f3f5 !important;
+          font-weight: 700 !important;
+          border-top: 1.5px solid #ccd2d8 !important;
+        }
+      `;
       doc.head.appendChild(style);
     }
   }).then(canvas => {
@@ -2143,6 +2144,14 @@ function printContent(){
       thead { display: table-header-group; }
       #page-margin .table-wrap,
       #page-margin .summary-card { break-inside: avoid; }
+    }
+
+#page-margin .margin-combined-table tfoot td {
+      background: #f1f3f5 !important;
+      font-weight: 700 !important;
+      border-top: 1.5px solid #ccd2d8 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
 
     ${fitVars}
