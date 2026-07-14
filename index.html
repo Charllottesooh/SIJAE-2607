@@ -1,10 +1,12 @@
 
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>매출및시재보고2607</title>
+<link rel="icon" href="data:,">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif; background: #f4f4f4; display: flex; height: 100vh; overflow: hidden; }
@@ -2182,7 +2184,9 @@ function renderRpt(salesRows, depRows, start, end) {
   tbody.appendChild(tr);
 };
 
-  const addAccRow = (name, cnt, inAmt, outAmt, detailRows, detailCols) => {
+  const addAccRow = (name, cnt, inAmt, outAmt, detailRows, detailCols, showNetFlag = true) => {
+    // showNet 관련 ReferenceError를 원천 차단하기 위해 명시적 지역 변수로 변환
+    const shouldShowNet = showNetFlag !== false;
     const rowId = 'rpt-det-' + Math.random().toString(36).slice(2,8);
     const tr = document.createElement('tr');
     tr.style.cssText = 'border-bottom:0.5px solid #f0f0f0;cursor:pointer;';
@@ -2194,8 +2198,7 @@ function renderRpt(salesRows, depRows, start, end) {
       <td class="num" style="padding:11px 12px;">${cnt}건</td>
       <td class="num" style="padding:11px 12px;color:${inAmt>0?'#2563eb':'#aaa'};font-weight:${inAmt>0?600:400};">${inAmt>0?'₩'+inAmt.toLocaleString():'-'}</td>
       <td class="num" style="padding:11px 12px;color:${outAmt>0?'#D42020':'#aaa'};font-weight:${outAmt>0?600:400};">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>
-      <td class="num" style="padding:11px 12px;color:${outAmt>0?'#D42020':'#aaa'};font-weight:${outAmt>0?600:400};">${outAmt>0?'₩'+outAmt.toLocaleString():'-'}</td>
-      ${showNet ? `<td class="num" style="padding:11px 12px;font-weight:600;color:${(inAmt-outAmt)>=0?'#2563eb':'#D42020'};">${(inAmt-outAmt)>=0?'+':'−'}₩${Math.abs(inAmt-outAmt).toLocaleString()}</td>` : '<td></td>'}`;
+      ${shouldShowNet ? `<td class="num" style="padding:11px 12px;font-weight:600;color:${(inAmt-outAmt)>=0?'#2563eb':'#D42020'};">${(inAmt-outAmt)>=0?'+':'−'}₩${Math.abs(inAmt-outAmt).toLocaleString()}</td>` : '<td></td>'}`;
     tbody.appendChild(tr);
 
     const dtr = document.createElement('tr');
