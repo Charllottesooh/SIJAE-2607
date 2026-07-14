@@ -1666,6 +1666,11 @@ onclone: function(doc) {
       // 마진관리 페이지 한정: 입력칸을 텍스트처럼 보이게
       const style = doc.createElement('style');
       style.textContent = `
+        #page-margin .margin-combined-table th:last-child,
+        #page-margin .margin-combined-table td:last-child {
+          display: none !important;
+        }
+      
         #page-margin .margin-combined-table input {
           border: 0 !important;
           outline: 0 !important;
@@ -1768,17 +1773,7 @@ function printContent(){
 
     /* 마진관리 인쇄 전용 */
 /* ===== 인쇄: 품목명 크게 + 줄여백 + A4 맞춤 ===== */
-    #page-margin .margin-combined-table input[data-margin-name="true"] {
-      font-size: 11px !important;
-      font-weight: 700 !important;
-      color: #111 !important;
-    }
-
-    #page-margin .margin-combined-table tbody td {
-      padding: 9px 5px !important;
-      line-height: 1.5 !important;
-    }
-
+ 
     #page-margin .margin-combined-table tbody tr {
       border-bottom: 0.5px solid #eee !important;
     }
@@ -1865,11 +1860,7 @@ function printContent(){
       -webkit-appearance:none !important;
       margin:0 !important;
     }
-    #page-margin .margin-action-col,
-    #page-margin .margin-entry-table td:last-child {
-      display:none !important;
-    }
-    #page-margin .margin-entry-table th,
+       #page-margin .margin-entry-table th,
     #page-margin .margin-entry-table td {
       white-space:normal !important;
       overflow:visible !important;
@@ -2004,7 +1995,7 @@ function printContent(){
       border-radius:8px !important;
     }
 
-    #page-margin .margin-combined-table {
+   #page-margin .margin-combined-table {
       min-width:0 !important;
       width:100% !important;
       table-layout:fixed !important;
@@ -2013,9 +2004,7 @@ function printContent(){
 
     #page-margin .margin-combined-table th,
     #page-margin .margin-combined-table td {
-      font-size:9px !important;
-      padding:6px 5px !important;
-      white-space:nowrap !important;
+      white-space: nowrap !important;
     }
 
     /* 2단 그룹 헤더 */
@@ -2111,12 +2100,21 @@ function printContent(){
       padding-left: 5px !important;
     }
 
-    /* 삭제 컬럼 인쇄 제외 */
+    /* 삭제 컬럼 인쇄 제외 + colgroup 폭 재배분 (9개 컬럼) */
     #page-margin .margin-combined-table th:last-child,
-    #page-margin .margin-combined-table td:last-child,
-    #page-margin .margin-combined-table tfoot td:last-child {
-      display:none !important;
+    #page-margin .margin-combined-table td:last-child {
+      display: none !important;
     }
+    #page-margin .margin-combined-table colgroup col:nth-child(1) { width: 22% !important; }
+    #page-margin .margin-combined-table colgroup col:nth-child(2) { width: 9%  !important; }
+    #page-margin .margin-combined-table colgroup col:nth-child(3) { width: 9%  !important; }
+    #page-margin .margin-combined-table colgroup col:nth-child(4) { width: 12% !important; }
+    #page-margin .margin-combined-table colgroup col:nth-child(5) { width: 9%  !important; }
+    #page-margin .margin-combined-table colgroup col:nth-child(6) { width: 9%  !important; }
+    #page-margin .margin-combined-table colgroup col:nth-child(7) { width: 12% !important; }
+    #page-margin .margin-combined-table colgroup col:nth-child(8) { width: 11% !important; }
+    #page-margin .margin-combined-table colgroup col:nth-child(9) { width: 7%  !important; }
+    #page-margin .margin-combined-table colgroup col:nth-child(10) { width: 0 !important; }
 
     /* KPI 카드 인쇄 */
     #page-margin .margin-kpi-section {
@@ -2132,12 +2130,6 @@ function printContent(){
       print-color-adjust:exact;
     }
 
-    #page-margin .margin-combined-table colgroup col:last-child {
-      width:0 !important;
-    }
-   #page-margin .margin-combined-table colgroup col:first-child {
-      width:22% !important;
-    }
 
     @page { size: A4 portrait; margin: 5mm; }
     @media print {
