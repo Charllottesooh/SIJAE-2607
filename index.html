@@ -1666,8 +1666,8 @@ onclone: function(doc) {
       // 마진관리 페이지 한정: 입력칸을 텍스트처럼 보이게
       const style = doc.createElement('style');
       style.textContent = `
-        #page-margin .margin-combined-table th:last-child,
-        #page-margin .margin-combined-table td:last-child {
+        #page-margin .margin-combined-table th.margin-action-col,
+        #page-margin .margin-combined-table td.margin-action-col {
           display: none !important;
         }
       
@@ -2100,9 +2100,9 @@ function printContent(){
       padding-left: 5px !important;
     }
 
-    /* 삭제 컬럼 인쇄 제외 + colgroup 폭 재배분 (9개 컬럼) */
-    #page-margin .margin-combined-table th:last-child,
-    #page-margin .margin-combined-table td:last-child {
+   /* 삭제 컬럼 인쇄 제외 */
+    #page-margin .margin-combined-table th.margin-action-col,
+    #page-margin .margin-combined-table td.margin-action-col {
       display: none !important;
     }
     #page-margin .margin-combined-table colgroup col:nth-child(1) { width: 22% !important; }
@@ -3194,6 +3194,11 @@ function renderMarginCombinedTable() {
           <a href="#" onclick="deleteMarginCombinedRow('${row.key}');return false;"
              style="font-size:11px;color:#D42020;">삭제</a>
         </td>
+<td class="margin-action-col" style="text-align:center;">
+          <a href="#" onclick="deleteMarginCombinedRow('${row.key}');return false;"
+             style="font-size:11px;color:#D42020;">삭제</a>
+        </td>
+        
       </tr>`;
   }).join('');
 
@@ -3243,8 +3248,10 @@ function updateMarginCombinedFooter() {
       </td>
       <td class="num margin-rate-value">${rate.toFixed(1)}%</td>
       <td></td>
+      <td class="num margin-rate-value">${rate.toFixed(1)}%</td>
+      <td class="margin-action-col"></td>
     </tr>`;
-}
+   
 
 function updateMarginSummary() {
   const { purchaseTotal, outputTotal, margin, rate } = getMarginTotals();
