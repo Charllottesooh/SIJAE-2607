@@ -464,7 +464,23 @@ input[type="checkbox"] { cursor: pointer; }
 #page-margin .margin-kpi-section .summary-card .sub {
   font-weight: 500;
 }
-
+/* 마진관리 합계행 정렬 보정 (입력칸 padding+border 만큼 보정) */
+#page-margin .margin-combined-table tfoot td {
+  padding: 12px 12px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+#page-margin .margin-combined-table tfoot td.num {
+  padding-right: 20px;   /* 10px(td) + 7px(input padding) + 0.5px(border) 보정 */
+}
+#page-margin .margin-combined-table tfoot td:first-child {
+  padding-left: 20px;
+}
+/* 합계행 색상 통일 */
+#page-margin .margin-combined-table tfoot td.purchase-total { color:#2563eb; }
+#page-margin .margin-combined-table tfoot td.sales-total    { color:#D42020; }
+#page-margin .margin-combined-table tfoot td.margin-rate-value { color:#7c3aed; }
+  
 </style>
 </head>
 <body>
@@ -1929,12 +1945,12 @@ function printContent(){
     }
 
     /* 합계행 */
-    #page-margin .margin-combined-table tfoot td {
-      background:#f1f3f5 !important;
-      font-weight:700 !important;
-      border-top:1.5px solid #ccd2d8 !important;
-      -webkit-print-color-adjust:exact !important;
-      print-color-adjust:exact !important;
+   #page-margin .margin-combined-table tfoot td.num {
+      padding-right: 5px !important;
+      text-align: right !important;
+    }
+    #page-margin .margin-combined-table tfoot td:first-child {
+      padding-left: 5px !important;
     }
 
     /* 삭제 컬럼 인쇄 제외 */
@@ -3048,11 +3064,11 @@ function updateMarginCombinedFooter() {
   tfoot.innerHTML = `
     <tr>
       <td>합계</td>
-      <td class="num group-divider-left">${purchaseQty.toLocaleString()}</td>
-      <td class="num">-</td>
+      <td class="num group-divider-left" style="color:#2563eb;">${purchaseQty.toLocaleString()}</td>
+      <td class="num" style="color:#bbb;">-</td>
       <td class="num purchase-total">${purchaseTotal.toLocaleString()}</td>
-      <td class="num group-divider-left">${outputQty.toLocaleString()}</td>
-      <td class="num">-</td>
+      <td class="num group-divider-left" style="color:#D42020;">${outputQty.toLocaleString()}</td>
+      <td class="num" style="color:#bbb;">-</td>
       <td class="num sales-total">${outputTotal.toLocaleString()}</td>
       <td class="num margin-profit-value group-divider-left" style="color:${marginColor};">
         ${(margin < 0 ? '-' : '') + Math.abs(margin).toLocaleString()}
