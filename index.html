@@ -336,8 +336,18 @@ input[type="checkbox"] { cursor: pointer; }
   box-shadow: 0 0 0 2px rgba(37,99,235,0.08);
 }
 
-#page-margin .margin-combined-table input[type="number"] {
+#page-margin .margin-combined-table input.margin-num-input {
   text-align: right;
+  -moz-appearance: textfield;
+}
+#page-margin .margin-combined-table input.margin-num-input::-webkit-outer-spin-button,
+#page-margin .margin-combined-table input.margin-num-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+#page-margin .margin-combined-table input.margin-num-input::placeholder {
+  color: #ccc;
+}
 }
 
 #page-margin .margin-combined-table tfoot td {
@@ -413,6 +423,46 @@ input[type="checkbox"] { cursor: pointer; }
 #page-margin .margin-combined-table input[type="number"],
 #page-margin .margin-combined-table tfoot td:not(:first-child) {
   text-align: right !important;
+}
+
+  /* ===== 마진관리 2단 헤더 ===== */
+#page-margin .margin-combined-header {
+  background: #1e3a5f !important;
+}
+#page-margin .margin-combined-table thead tr.margin-group-row th {
+  background: #eef2f7;
+  text-align: center;
+  font-size: 12px;
+  padding: 9px 6px;
+  border-bottom: 0.5px solid #d5dbe2;
+}
+#page-margin .margin-combined-table thead tr.margin-sub-row th {
+  background: #f5f7fa;
+  font-size: 10.5px;
+  padding: 8px 6px;
+  text-align: right;
+}
+#page-margin .margin-combined-table thead th.margin-name-col {
+  text-align: left;
+  vertical-align: middle;
+  background: #eef2f7;
+}
+#page-margin .margin-combined-table th.grp-purchase { color:#2563eb; }
+#page-margin .margin-combined-table th.grp-sales    { color:#D42020; }
+#page-margin .margin-combined-table th.grp-profit   { color:#0F6E56; }
+
+#page-margin .margin-combined-table td.margin-rate-value {
+  color: #7c3aed;
+  font-weight: 600;
+  text-align: right;
+}
+#page-margin .margin-combined-table tfoot td {
+  background: #f1f3f5;
+  font-weight: 700;
+  border-top: 1.5px solid #ccd2d8;
+}
+#page-margin .margin-kpi-section .summary-card .sub {
+  font-weight: 500;
 }
 
 </style>
@@ -851,29 +901,28 @@ input[type="checkbox"] { cursor: pointer; }
     <div style="font-size:12px;color:#888;">매입과 출고를 품목별로 비교하여 당월 마진 구조를 한눈에 확인합니다</div>
   </div>
 
-  <div class="card-section margin-kpi-section">
+ <div class="card-section margin-kpi-section">
     <div class="summary-card color-red">
-      <div class="label">매입 합계금액</div>
-      <div class="value" id="margin-purchase-total">₩0</div>
-      <div class="sub">당월 매입원가 합계</div>
+      <div class="label">총 매출금액</div>
+      <div class="value" id="margin-output-total">₩0</div>
+      <div class="sub" id="margin-sub-output">전월 데이터 없음</div>
     </div>
     <div class="summary-card color-blue">
-      <div class="label">출고 합계금액</div>
-      <div class="value" id="margin-output-total">₩0</div>
-      <div class="sub">당월 출고금액 합계</div>
+      <div class="label">총 매입금액</div>
+      <div class="value" id="margin-purchase-total">₩0</div>
+      <div class="sub" id="margin-sub-purchase">전월 데이터 없음</div>
     </div>
     <div class="summary-card color-green">
-      <div class="label">최종 마진액</div>
+      <div class="label">총 마진금액</div>
       <div class="value" id="margin-final">₩0</div>
-      <div class="sub">출고합계 − 매입합계</div>
+      <div class="sub" id="margin-sub-final">전월 데이터 없음</div>
     </div>
     <div class="summary-card color-purple">
       <div class="label">마진율</div>
       <div class="value" id="margin-rate">0.0%</div>
-      <div class="sub">최종마진액 ÷ 출고합계</div>
+      <div class="sub" id="margin-sub-rate">전월 데이터 없음</div>
     </div>
   </div>
-
   <div class="filter-bar margin-screen-controls">
     <input type="month" id="margin-month" value="2026-06">
     <button class="search" onclick="loadMarginMonth()">월 불러오기</button>
@@ -882,6 +931,48 @@ input[type="checkbox"] { cursor: pointer; }
 
 
   <div class="table-wrap margin-combined-wrap">
+    <div class="table-header margin-combined-header">
+      <span class="title">■ 월별 상세 마진_매입 · 매출 입력</span>
+      <div class="actions">
+        <button onclick="addMarginCombinedRow()">+ 항목추가</button>
+      </div>
+    </div>
+
+    <datalist id="margin-item-options"></datalist>
+
+    <div class="tbl-scroll margin-table-scroll">
+      <table class="margin-entry-table margin-combined-table">
+        <colgroup>
+          <col style="width:20%;">
+          <col style="width:9%;"><col style="width:9%;"><col style="width:11%;">
+          <col style="width:9%;"><col style="width:9%;"><col style="width:11%;">
+          <col style="width:11%;"><col style="width:7%;">
+          <col style="width:4%;">
+        </colgroup>
+        <thead>
+          <tr class="margin-group-row">
+            <th rowspan="2" class="margin-name-col">품목명</th>
+            <th colspan="3" class="grp-purchase group-divider-left">매입</th>
+            <th colspan="3" class="grp-sales group-divider-left">매출</th>
+            <th colspan="2" class="grp-profit group-divider-left">마진</th>
+            <th rowspan="2" class="margin-action-col"></th>
+          </tr>
+          <tr class="margin-sub-row">
+            <th class="num margin-purchase-col group-divider-left">매입수량</th>
+            <th class="num margin-purchase-col">매입단가</th>
+            <th class="num margin-purchase-col">합계금액</th>
+            <th class="num margin-sales-col group-divider-left">매출수량</th>
+            <th class="num margin-sales-col">매출단가</th>
+            <th class="num margin-sales-col">합계금액</th>
+            <th class="num margin-profit-col group-divider-left">마진금액</th>
+            <th class="num margin-profit-col">마진율</th>
+          </tr>
+        </thead>
+        <tbody id="margin-combined-tbody"></tbody>
+        <tfoot id="margin-combined-tfoot"></tfoot>
+      </table>
+    </div>
+  </div>-combined-wrap">
     <div class="table-header margin-combined-header">
       <span class="title">당월 품목별 매입, 매출 거래 현황</span>
       <div class="actions">
@@ -1775,6 +1866,8 @@ function printContent(){
       display:block !important;
       width:100% !important;
       overflow:visible !important;
+      border:1px solid #dfe3e8 !important;
+      border-radius:8px !important;
     }
 
     #page-margin .margin-combined-table {
@@ -1791,6 +1884,35 @@ function printContent(){
       white-space:nowrap !important;
     }
 
+    /* 2단 그룹 헤더 */
+    #page-margin .margin-combined-table thead tr.margin-group-row th {
+      background:#eef2f7 !important;
+      text-align:center !important;
+      font-size:10px !important;
+      font-weight:700 !important;
+      padding:7px 5px !important;
+      border-bottom:0.5px solid #d5dbe2 !important;
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+    }
+    #page-margin .margin-combined-table thead tr.margin-sub-row th {
+      background:#f5f7fa !important;
+      font-size:9px !important;
+      text-align:right !important;
+      padding:6px 5px !important;
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+    }
+    #page-margin .margin-combined-table thead th.margin-name-col {
+      text-align:left !important;
+      vertical-align:middle !important;
+      background:#eef2f7 !important;
+    }
+    #page-margin .margin-combined-table th.grp-purchase { color:#2563eb !important; }
+    #page-margin .margin-combined-table th.grp-sales    { color:#D42020 !important; }
+    #page-margin .margin-combined-table th.grp-profit   { color:#0F6E56 !important; }
+
+    /* 입력칸 → 텍스트처럼 */
     #page-margin .margin-combined-table input {
       border:0 !important;
       outline:0 !important;
@@ -1805,7 +1927,9 @@ function printContent(){
       appearance:none !important;
       -webkit-appearance:none !important;
     }
-
+    #page-margin .margin-combined-table input.margin-num-input {
+      text-align:right !important;
+    }
     #page-margin .margin-combined-table input[type="number"]::-webkit-inner-spin-button,
     #page-margin .margin-combined-table input[type="number"]::-webkit-outer-spin-button {
       -webkit-appearance:none !important;
@@ -1817,12 +1941,11 @@ function printContent(){
     }
 
     #page-margin .margin-combined-header {
-      background:#2563eb !important;
+      background:#1e3a5f !important;
       color:#fff !important;
       -webkit-print-color-adjust:exact !important;
       print-color-adjust:exact !important;
     }
-
     #page-margin .margin-combined-header .title {
       color:#fff !important;
     }
@@ -1831,30 +1954,57 @@ function printContent(){
     #page-margin .margin-combined-table td.purchase-total {
       color:#2563eb !important;
     }
-
     #page-margin .margin-combined-table th.margin-sales-col,
     #page-margin .margin-combined-table td.sales-total {
       color:#D42020 !important;
     }
-
     #page-margin .margin-combined-table th.margin-profit-col,
     #page-margin .margin-combined-table td.margin-profit-value {
       color:#0F6E56 !important;
     }
+    #page-margin .margin-combined-table td.margin-rate-value {
+      color:#7c3aed !important;
+      font-weight:600 !important;
+      text-align:right !important;
+    }
+
+    /* 합계행 */
+    #page-margin .margin-combined-table tfoot td {
+      background:#f1f3f5 !important;
+      font-weight:700 !important;
+      border-top:1.5px solid #ccd2d8 !important;
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+    }
+
+    /* 삭제 컬럼 인쇄 제외 */
+    #page-margin .margin-combined-table th:last-child,
+    #page-margin .margin-combined-table td:last-child,
+    #page-margin .margin-combined-table tfoot td:last-child {
+      display:none !important;
+    }
+
+    /* KPI 카드 인쇄 */
+    #page-margin .margin-kpi-section {
+      display:grid !important;
+      grid-template-columns:repeat(4,1fr) !important;
+      gap:8px !important;
+      margin-bottom:14px !important;
+    }
+    #page-margin .margin-screen-controls { display:none !important; }
 
     #page-margin * {
       -webkit-print-color-adjust:exact;
       print-color-adjust:exact;
     }
 
-    @page { size: A4 landscape; margin: 8mm; }
-    @media print {
-      thead { display: table-header-group; }
-      tr { page-break-inside: avoid; }
-      #page-margin .table-wrap,
-      #page-margin .summary-card,
-      #page-margin .margin-chart-item { break-inside:avoid; }
+    #page-margin .margin-combined-table colgroup col:last-child {
+      width:0 !important;
     }
+    #page-margin .margin-combined-table colgroup col:first-child {
+      width:22% !important;
+    }
+    
   </style></head>
   <body>
     <div class="print-header">${pageTitle}</div>
@@ -2763,7 +2913,20 @@ function deleteMarginCombinedRow(rowKey) {
 
   renderMarginPage();
 }
+function marginParseNum(v) {
+  return parseFloat(String(v).replace(/[^0-9.\-]/g, '')) || 0;
+}
+function marginUnformat(el) {
+  const n = marginParseNum(el.value);
+  el.value = n === 0 ? '' : String(n);
+  el.select();
+}
+function marginFormat(el) {
+  const n = marginParseNum(el.value);
+  el.value = n === 0 ? '' : n.toLocaleString();
+}
 
+  
 function updateMarginCombinedField(rowKey, side, field, value) {
   const row = ensureMarginPair(rowKey);
   if (!row) return;
@@ -2776,26 +2939,31 @@ function updateMarginCombinedField(rowKey, side, field, value) {
     return;
   }
 
-  const target = side === 'purchase' ? row.purchase : row.output;
-  target[field] = parseFloat(value) || 0;
+ const target = side === 'purchase' ? row.purchase : row.output;
+  target[field] = marginParseNum(value);
 
-  // 입력 중인 행의 계산 결과만 즉시 갱신
+// 입력 중인 행의 계산 결과만 즉시 갱신
   const tr = document.activeElement && document.activeElement.closest('tr');
   if (tr) {
     const purchaseTotal = (row.purchase.qty || 0) * (row.purchase.unitPrice || 0);
     const salesTotal = (row.output.qty || 0) * (row.output.unitPrice || 0);
     const margin = salesTotal - purchaseTotal;
+    const rate = salesTotal !== 0 ? (margin / salesTotal) * 100 : 0;
 
     const purchaseTotalCell = tr.querySelector('.purchase-total');
     const salesTotalCell = tr.querySelector('.sales-total');
     const marginCell = tr.querySelector('.margin-profit-value');
+    const rateCell = tr.querySelector('.margin-rate-value');
 
     if (purchaseTotalCell) purchaseTotalCell.textContent = purchaseTotal.toLocaleString();
     if (salesTotalCell) salesTotalCell.textContent = salesTotal.toLocaleString();
     if (marginCell) {
-      marginCell.textContent =
-        (margin < 0 ? '-' : '') + Math.abs(margin).toLocaleString();
+      marginCell.textContent = (margin < 0 ? '-' : '') + Math.abs(margin).toLocaleString();
       marginCell.style.color = margin >= 0 ? '#0F6E56' : '#D42020';
+    }
+    if (rateCell) {
+      rateCell.textContent = rate.toFixed(0) + '%';
+      rateCell.style.color = rate >= 0 ? '#7c3aed' : '#D42020';
     }
   }
 
@@ -2812,7 +2980,7 @@ function renderMarginCombinedTable() {
   if (!rows.length) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="9" style="text-align:center;color:#aaa;padding:24px;font-size:12px;">
+        <td colspan="10" style="text-align:center;color:#aaa;padding:24px;font-size:12px;">
           '+ 항목추가'를 눌러 품목을 입력하세요
         </td>
       </tr>`;
@@ -2827,64 +2995,59 @@ function renderMarginCombinedTable() {
     const purchaseTotal = (purchase.qty || 0) * (purchase.unitPrice || 0);
     const salesTotal = (output.qty || 0) * (output.unitPrice || 0);
     const margin = salesTotal - purchaseTotal;
+    const rate = salesTotal !== 0 ? (margin / salesTotal) * 100 : 0;
     const marginColor = margin >= 0 ? '#0F6E56' : '#D42020';
 
     return `
       <tr>
         <td>
-          <input
-            type="text"
-            list="margin-item-options"
-            data-margin-name="true"
+          <input type="text" list="margin-item-options" data-margin-name="true"
             value="${escapeMarginHtml(row.name || '')}"
             oninput="updateMarginCombinedField('${row.key}','purchase','name',this.value)"
-            placeholder="기존 품목 선택 또는 새 품목 입력"
-            aria-label="품목명">
+            placeholder="기존 품목 선택 또는 새 품목 입력" aria-label="품목명">
         </td>
 
-        <td class="group-divider-left">
-          <input type="number"
-            value="${purchase.qty || 0}"
+       <td class="group-divider-left">
+          <input type="text" inputmode="numeric" class="margin-num-input"
+            value="${purchase.qty ? purchase.qty.toLocaleString() : ''}"
             oninput="updateMarginCombinedField('${row.key}','purchase','qty',this.value)"
-            aria-label="매입수량">
+            onfocus="marginUnformat(this)" onblur="marginFormat(this)"
+            placeholder="0" aria-label="매입수량">
         </td>
-
         <td>
-          <input type="number"
-            value="${purchase.unitPrice || 0}"
+          <input type="text" inputmode="numeric" class="margin-num-input"
+            value="${purchase.unitPrice ? purchase.unitPrice.toLocaleString() : ''}"
             oninput="updateMarginCombinedField('${row.key}','purchase','unitPrice',this.value)"
-            aria-label="매입단가">
+            onfocus="marginUnformat(this)" onblur="marginFormat(this)"
+            placeholder="0" aria-label="매입단가">
         </td>
-
-        <td class="num purchase-total">
-          ${purchaseTotal.toLocaleString()}
-        </td>
+        <td class="num purchase-total">${purchaseTotal.toLocaleString()}</td>
 
         <td class="group-divider-left">
-          <input type="number"
-            value="${output.qty || 0}"
+          <input type="text" inputmode="numeric" class="margin-num-input"
+            value="${output.qty ? output.qty.toLocaleString() : ''}"
             oninput="updateMarginCombinedField('${row.key}','output','qty',this.value)"
-            aria-label="매출수량">
+            onfocus="marginUnformat(this)" onblur="marginFormat(this)"
+            placeholder="0" aria-label="매출수량">
         </td>
-
         <td>
-          <input type="number"
-            value="${output.unitPrice || 0}"
+          <input type="text" inputmode="numeric" class="margin-num-input"
+            value="${output.unitPrice ? output.unitPrice.toLocaleString() : ''}"
             oninput="updateMarginCombinedField('${row.key}','output','unitPrice',this.value)"
-            aria-label="매출단가">
+            onfocus="marginUnformat(this)" onblur="marginFormat(this)"
+            placeholder="0" aria-label="매출단가">
         </td>
-
-        <td class="num sales-total">
-          ${salesTotal.toLocaleString()}
-        </td>
+        <td class="num sales-total">${salesTotal.toLocaleString()}</td>
 
         <td class="num margin-profit-value group-divider-left" style="color:${marginColor};">
           ${(margin < 0 ? '-' : '') + Math.abs(margin).toLocaleString()}
         </td>
+        <td class="num margin-rate-value" style="color:${rate >= 0 ? '#7c3aed' : '#D42020'};">
+          ${rate.toFixed(0)}%
+        </td>
 
         <td style="text-align:center;">
-          <a href="#"
-             onclick="deleteMarginCombinedRow('${row.key}');return false;"
+          <a href="#" onclick="deleteMarginCombinedRow('${row.key}');return false;"
              style="font-size:11px;color:#D42020;">삭제</a>
         </td>
       </tr>`;
@@ -2919,14 +3082,7 @@ function updateMarginCombinedFooter() {
   const tfoot = document.getElementById('margin-combined-tfoot');
   if (!tfoot) return;
 
-  const {
-    purchaseTotal,
-    outputTotal,
-    purchaseQty,
-    outputQty,
-    margin
-  } = getMarginTotals();
-
+  const { purchaseTotal, outputTotal, purchaseQty, outputQty, margin, rate } = getMarginTotals();
   const marginColor = margin >= 0 ? '#0F6E56' : '#D42020';
 
   tfoot.innerHTML = `
@@ -2935,12 +3091,13 @@ function updateMarginCombinedFooter() {
       <td class="num group-divider-left">${purchaseQty.toLocaleString()}</td>
       <td class="num">-</td>
       <td class="num purchase-total">${purchaseTotal.toLocaleString()}</td>
-      <td class="num group-divider-left" style="color:#D42020;">${outputQty.toLocaleString()}</td>
+      <td class="num group-divider-left">${outputQty.toLocaleString()}</td>
       <td class="num">-</td>
       <td class="num sales-total">${outputTotal.toLocaleString()}</td>
       <td class="num margin-profit-value group-divider-left" style="color:${marginColor};">
         ${(margin < 0 ? '-' : '') + Math.abs(margin).toLocaleString()}
       </td>
+      <td class="num margin-rate-value">${rate.toFixed(1)}%</td>
       <td></td>
     </tr>`;
 }
@@ -2948,15 +3105,11 @@ function updateMarginCombinedFooter() {
 function updateMarginSummary() {
   const { purchaseTotal, outputTotal, margin, rate } = getMarginTotals();
 
-  document.getElementById('margin-purchase-total').textContent =
-    '₩' + purchaseTotal.toLocaleString();
-
-  document.getElementById('margin-output-total').textContent =
-    '₩' + outputTotal.toLocaleString();
+  document.getElementById('margin-purchase-total').textContent = '₩' + purchaseTotal.toLocaleString();
+  document.getElementById('margin-output-total').textContent = '₩' + outputTotal.toLocaleString();
 
   const finalEl = document.getElementById('margin-final');
-  finalEl.textContent =
-    (margin >= 0 ? '' : '-') + '₩' + Math.abs(margin).toLocaleString();
+  finalEl.textContent = (margin >= 0 ? '' : '-') + '₩' + Math.abs(margin).toLocaleString();
   finalEl.style.color = margin >= 0 ? '#0F6E56' : '#D42020';
 
   const rateEl = document.getElementById('margin-rate');
@@ -2964,6 +3117,56 @@ function updateMarginSummary() {
     rateEl.textContent = rate.toFixed(1) + '%';
     rateEl.style.color = rate >= 0 ? '#0F6E56' : '#D42020';
   }
+
+  const ym = curMarginMonth || document.getElementById('margin-month').value || curYearMonth();
+  const [year, month] = ym.split('-');
+  const titleMonth = document.getElementById('margin-title-month');
+  if (titleMonth) titleMonth.textContent = year + '년 ' + month + '월';
+
+  renderMarginPrevDiff(ym, { purchaseTotal, outputTotal, margin, rate });
+}
+
+// 전월 대비 증감률 계산 및 표시
+function renderMarginPrevDiff(ym, cur) {
+  const [y, m] = ym.split('-').map(Number);
+  const pm = m === 1 ? (y - 1) + '-12' : y + '-' + String(m - 1).padStart(2, '0');
+  const prev = marginEntries.find(e => e.yearMonth === pm);
+
+  const setSub = (id, txt, color) => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = txt; el.style.color = color; }
+  };
+
+  if (!prev) {
+    setSub('margin-sub-purchase', '전월 데이터 없음', '#aaa');
+    setSub('margin-sub-output', '전월 데이터 없음', '#aaa');
+    setSub('margin-sub-final', '전월 데이터 없음', '#aaa');
+    setSub('margin-sub-rate', '전월 데이터 없음', '#aaa');
+    return;
+  }
+
+  const pPur = prev.purchaseTotal || 0;
+  const pOut = prev.outputTotal || 0;
+  const pMar = prev.margin || 0;
+  const pRate = pOut !== 0 ? (pMar / pOut) * 100 : 0;
+
+  const pct = (c, p) => p === 0 ? null : ((c - p) / Math.abs(p)) * 100;
+  const disp = v => v === null ? '전월 대비 -' :
+    '전월 대비 ' + (v >= 0 ? '+' : '') + v.toFixed(1) + '%';
+  const col = v => v === null ? '#aaa' : (v >= 0 ? '#0F6E56' : '#D42020');
+
+  const dPur = pct(cur.purchaseTotal, pPur);
+  const dOut = pct(cur.outputTotal, pOut);
+  const dMar = pct(cur.margin, pMar);
+  const dRate = cur.rate - pRate;
+
+  setSub('margin-sub-output', disp(dOut), col(dOut));
+  setSub('margin-sub-purchase', disp(dPur), col(dPur));
+  setSub('margin-sub-final', disp(dMar), col(dMar));
+  setSub('margin-sub-rate',
+    '전월 대비 ' + (dRate >= 0 ? '+' : '') + dRate.toFixed(1) + '%p',
+    dRate >= 0 ? '#0F6E56' : '#D42020');
+}
 
   const ym =
     curMarginMonth ||
