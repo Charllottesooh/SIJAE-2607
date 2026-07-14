@@ -348,7 +348,7 @@ input[type="checkbox"] { cursor: pointer; }
 #page-margin .margin-combined-table input.margin-num-input::placeholder {
   color: #ccc;
 }
-}
+
 
 #page-margin .margin-combined-table tfoot td {
   background: #f8f8f8;
@@ -968,47 +968,7 @@ input[type="checkbox"] { cursor: pointer; }
             <th class="num margin-profit-col">마진율</th>
           </tr>
         </thead>
-        <tbody id="margin-combined-tbody"></tbody>
-        <tfoot id="margin-combined-tfoot"></tfoot>
-      </table>
-    </div>
-  </div>-combined-wrap">
-    <div class="table-header margin-combined-header">
-      <span class="title">당월 품목별 매입, 매출 거래 현황</span>
-      <div class="actions">
-        <button onclick="addMarginCombinedRow()">+ 항목추가</button>
-      </div>
-    </div>
-
-    <datalist id="margin-item-options"></datalist>
-
-    <div class="tbl-scroll margin-table-scroll">
-      <table class="margin-entry-table margin-combined-table">
-        <colgroup>
-          <col style="width:21%;">
-          <col style="width:10%;">
-          <col style="width:11%;">
-          <col style="width:13%;">
-          <col style="width:10%;">
-          <col style="width:11%;">
-          <col style="width:13%;">
-          <col style="width:11%;">
-          <col style="width:4%;">
-        </colgroup>
-        <thead>
-          <tr>
-            <th>품목명</th>
-            <th class="num margin-purchase-col group-divider-left">매입수량</th>
-            <th class="num margin-purchase-col">매입단가</th>
-            <th class="num margin-purchase-col">합계금액</th>
-            <th class="num margin-sales-col group-divider-left">매출수량</th>
-            <th class="num margin-sales-col">매출단가</th>
-            <th class="num margin-sales-col">합계금액</th>
-            <th class="num margin-profit-col group-divider-left">마진금액</th>
-            <th class="margin-action-col"></th>
-          </tr>
-        </thead>
-        <tbody id="margin-combined-tbody"></tbody>
+      <tbody id="margin-combined-tbody"></tbody>
         <tfoot id="margin-combined-tfoot"></tfoot>
       </table>
     </div>
@@ -3163,27 +3123,15 @@ function renderMarginPrevDiff(ym, cur) {
   setSub('margin-sub-output', disp(dOut), col(dOut));
   setSub('margin-sub-purchase', disp(dPur), col(dPur));
   setSub('margin-sub-final', disp(dMar), col(dMar));
-  setSub('margin-sub-rate',
+setSub('margin-sub-rate',
     '전월 대비 ' + (dRate >= 0 ? '+' : '') + dRate.toFixed(1) + '%p',
     dRate >= 0 ? '#0F6E56' : '#D42020');
-}
-
-  const ym =
-    curMarginMonth ||
-    document.getElementById('margin-month').value ||
-    curYearMonth();
-
-  const [year, month] = ym.split('-');
-  const titleMonth = document.getElementById('margin-title-month');
-
-  if (titleMonth) titleMonth.textContent = year + '년 ' + month + '월';
 }
 
 function renderMarginPage() {
   renderMarginCombinedTable();
   updateMarginSummary();
 }
-
 function saveMarginEntry() {
   const ym = document.getElementById('margin-month').value || curYearMonth();
   curMarginMonth = ym;
