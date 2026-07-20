@@ -1239,14 +1239,26 @@ async function initFirebase() {
   try {
     const {initializeApp} = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
     const {getFirestore, collection, getDocs, doc, writeBatch, setDoc, deleteDoc} = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const {getAuth, signInAnonymously, onAuthStateChanged} = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
     fbApp = initializeApp(FIREBASE_CONFIG);
     fbDb = getFirestore(fbApp);
     window._fbFs = {collection, getDocs, doc, writeBatch, setDoc, deleteDoc};
+
+    // 익명 로그인: 인증 완료 후에만 Firestore 접근
+    const auth = getAuth(fbApp);
+    setStatus('fb', true, '인증 중...');
+    await new Promise((resolve, reject) => {
+      onAuthStateChanged(auth, user => {
+        if (user) resolve(user);
+      });
+      signInAnonymously(auth).catch(reject);
+    });
+
     fbReady = true;
     setStatus('fb', true, 'Firebase 연결됨');
     await loadFromFirebase();
   } catch(e) {
-    setStatus('fb', false, 'Firebase 오류');
+    setStatus('fb', false, 'Firebase 인증오류');
     console.error(e);
   }
 }
