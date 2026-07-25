@@ -575,7 +575,7 @@ input[type="checkbox"] { cursor: pointer; }
 <div id="page-sales" class="page active">
   <div id="sales-title-bar" style="background:#E8F4F8;border-radius:10px;padding:24px;text-align:center;margin-bottom:20px;">
     <div style="font-size:22px;font-weight:700;color:#111;margin-bottom:8px;">일일시재보고 · 매출내역</div>
-    <div id="sales-title-date" style="font-size:17px;font-weight:600;color:#2563eb;">2026-06-01 ~ 2026-06-30</div>
+    <div id="sales-title-date" style="font-size:17px;font-weight:600;color:#2563eb;">monthStartStr() ~ 2026-06-30</div>
   </div>
   <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:1.5px solid #e0e0e0;">
     <div class="acc-tab active" onclick="switchSalesTab('sales-daily',this)">일별거래내역</div>
@@ -590,7 +590,7 @@ input[type="checkbox"] { cursor: pointer; }
           <div class="summary-card color-blue"><div class="label">총 출고 합계금액</div><div class="value" id="card-total">₩0</div><div class="sub" id="card-count">0건</div></div>
         </div>
         <div class="filter-bar">
-          <input type="date" id="f-start" value="2026-06-01">
+          <input type="date" id="f-start" value="monthStartStr()">
           <span style="font-size:12px;color:#aaa;">~</span>
           <input type="date" id="f-end" value="2026-06-30">
           <input type="text" id="f-store" placeholder="매장코드/매장명 검색" style="width:180px;">
@@ -631,7 +631,7 @@ input[type="checkbox"] { cursor: pointer; }
 
       <div id="sales-invoice" style="display:none;">
         <div class="filter-bar">
-          <input type="date" id="inv-f-start" value="2026-06-01">
+          <input type="date" id="inv-f-start" value="monthStartStr()">
           <span style="font-size:12px;color:#aaa;">~</span>
           <input type="date" id="inv-f-end" value="2026-06-30">
           <select id="inv-f-type">
@@ -727,7 +727,7 @@ input[type="checkbox"] { cursor: pointer; }
     <!-- ===== 미수금관리 ===== -->
     <div id="page-arpage" class="page">
       <div class="filter-bar">
-        <input type="date" id="ar-f-start" value="2026-06-01">
+        <input type="date" id="ar-f-start" value="monthStartStr()">
         <span style="font-size:12px;color:#aaa;">~</span>
         <input type="date" id="ar-f-end" value="2026-06-30">
         <input type="text" id="ar-f-keyword" placeholder="가맹점코드/명 검색" style="width:180px;">
@@ -838,7 +838,7 @@ input[type="checkbox"] { cursor: pointer; }
     <div id="page-deposit" class="page">
       <div id="dep-title-bar" style="background:#E8F4F8;border-radius:10px;padding:24px;text-align:center;margin-bottom:20px;">
   <div style="font-size:22px;font-weight:700;color:#111;margin-bottom:8px;">일일시재보고 · 입출금내역</div>
-  <div id="dep-title-date" style="font-size:17px;font-weight:600;color:#2563eb;">2026-06-01 ~ 2026-06-30</div>
+  <div id="dep-title-date" style="font-size:17px;font-weight:600;color:#2563eb;">monthStartStr() ~ 2026-06-30</div>
 </div>
       <div class="card-section" style="grid-template-columns:repeat(3,1fr);">
         <div class="summary-card color-red"><div class="label">월 누계 매출</div><div class="value" id="dep-sales">₩0</div><div class="sub" id="dep-sales-sub">당일 0원</div></div>
@@ -846,7 +846,7 @@ input[type="checkbox"] { cursor: pointer; }
         <div class="summary-card color-green"><div class="label">총 예금잔액</div><div class="value" id="dep-bal">₩0</div><div class="sub" id="dep-bal-sub">0개 계좌</div></div>
       </div>
       <div class="filter-bar">
-        <input type="date" id="dep-f-start" value="2026-06-01">
+        <input type="date" id="dep-f-start" value="monthStartStr()">
         <span style="font-size:12px;color:#aaa;">~</span>
         <input type="date" id="dep-f-end" value="2026-06-30">
         <input type="text" id="dep-f-store" placeholder="가맹점코드/명 검색" style="width:160px;">
@@ -890,7 +890,7 @@ input[type="checkbox"] { cursor: pointer; }
 <div id="page-report" class="page">
   <div id="rpt-title-bar" style="background:#E8F4F8;border-radius:10px;padding:24px;text-align:center;margin-bottom:20px;">
     <div style="font-size:22px;font-weight:700;color:#111;margin-bottom:8px;">월별 자금 리포트</div>
-    <div id="rpt-title-date" style="font-size:17px;font-weight:600;color:#2563eb;">2026-06-01 ~ 2026-06-30 &nbsp;|&nbsp; 조회일: <span id="rpt-query-date"></span></div>
+    <div id="rpt-title-date" style="font-size:17px;font-weight:600;color:#2563eb;">monthStartStr() ~ 2026-06-30 &nbsp;|&nbsp; 조회일: <span id="rpt-query-date"></span></div>
   </div>
   <div class="card-section" style="grid-template-columns:repeat(4,1fr);">
     <div class="summary-card color-red"><div class="label">가맹점 매출</div><div class="value" id="rpt-sales-fr">₩0</div><div class="sub" id="rpt-sales-fr-cnt">0건</div></div>
@@ -899,7 +899,7 @@ input[type="checkbox"] { cursor: pointer; }
     <div class="summary-card color-green"><div class="label">계좌잔액</div><div class="value" id="rpt-final">₩0</div><div class="sub">예금 기준</div></div>
   </div>
   <div class="filter-bar">
-    <input type="date" id="rpt-f-start" value="2026-06-01">
+    <input type="date" id="rpt-f-start" value="monthStartStr()">
     <span style="font-size:12px;color:#aaa;">~</span>
     <input type="date" id="rpt-f-end" value="2026-06-30">
     <select id="rpt-f-menu">
@@ -1292,7 +1292,7 @@ async function loadFromFirebase() {
   if(lsNT && lsNT.length) depNoteTypes = migrateNoteTypes(lsNT);
   if(lsMargin && lsMargin.length) marginEntries = lsMargin;
 
-  const today = new Date().toISOString().slice(0,10);
+  const today = todayStr();
   const syncedToday = lastSync && lastSync.slice(0,10) === today;
   if(lsSales && lsSales.length && syncedToday) {
     setStatus('fb', true, '로컬 데이터 로드완료');
@@ -1446,7 +1446,33 @@ function showEmptyHint(tbodyId, colspan) {
   const tf = tb.parentElement ? tb.parentElement.querySelector('tfoot') : null;
   if (tf) tf.innerHTML = '';
 }
+// ===== 기본 날짜 자동설정 =====
+function todayStr(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function monthStartStr(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';
+}
+function monthEndStr(){
+  const d=new Date();
+  const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(last).padStart(2,'0');
+}
+function initDefaultDates(){
+  const s=monthStartStr(), e=monthEndStr();
+  [['f-start',s],['f-end',e],['inv-f-start',s],['inv-f-end',e],
+   ['ar-f-start',s],['ar-f-end',e],['dep-f-start',s],['dep-f-end',e],
+   ['rpt-f-start',s],['rpt-f-end',e]].forEach(([id,v])=>{
+    const el=document.getElementById(id); if(el) el.value=v;
+  });
+  const mm=document.getElementById('margin-month'); if(mm) mm.value=curYearMonth();
+  const st=document.getElementById('sales-title-date'); if(st) st.textContent=s+' ~ '+e;
+  const dt=document.getElementById('dep-title-date'); if(dt) dt.textContent=s+' ~ '+e;
+}
 
+  
 function showPage(key, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+key).classList.add('active');
@@ -1520,8 +1546,8 @@ function applyFilter() {
 }
 
 function resetFilter() {
-  document.getElementById('f-start').value = '2026-06-01';
-  document.getElementById('f-end').value = '2026-06-30';
+  document.getElementById('f-start').value = 'monthStartStr()';
+  document.getElementById('f-end').value = monthEndStr();
   document.getElementById('f-store').value = '';
   document.getElementById('f-product').value = '';
   document.getElementById('f-tax').value = '';
@@ -1545,7 +1571,7 @@ function openAddModal() {
     const el=document.getElementById('f-'+k); if(el) el.value='';
   });
   document.getElementById('f-taxtype').value = '과세';
-  document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('f-date').value = todayStr();
   document.getElementById('modal-form').classList.add('open');
 }
 
@@ -1640,7 +1666,7 @@ async function importExcel(){
   const cnt=uploadedRows.length;
   const newRows=[];
   uploadedRows.forEach(r=>{
-    const rawDate=r[0];let date=new Date().toISOString().slice(0,10);
+    const rawDate=r[0];let date=todayStr();
     if(rawDate){
       if(typeof rawDate==='number'){const d=new Date(Math.round((rawDate-25569)*86400*1000));date=d.toISOString().slice(0,10);}
       else date=String(rawDate).replace(/\./g,'-').replace(/(\d{4})-(\d{1,2})-(\d{1,2})/,(_,y,m,d)=>`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
@@ -2244,7 +2270,7 @@ function showInvDetail(type,key,title){
 }
 
 function closeInvDetail(){document.getElementById('inv-detail-panel').style.display='none';}
-function resetInvoiceFilter(){document.getElementById('inv-f-start').value='2026-06-01';document.getElementById('inv-f-end').value='2026-06-30';document.getElementById('inv-f-type').value='store';document.getElementById('inv-f-tax').value='';document.getElementById('inv-f-keyword').value='';applyInvoiceFilter();}
+function resetInvoiceFilter(){document.getElementById('inv-f-start').value='monthStartStr()';document.getElementById('inv-f-end').value=monthEndStr();document.getElementById('inv-f-type').value='store';document.getElementById('inv-f-tax').value='';document.getElementById('inv-f-keyword').value='';applyInvoiceFilter();}
 function exportInvoiceExcel(){
   const rows=[['매장코드','매장명','상품코드','상품명','날짜','출고수량','출고단가','공급가','부가세','합계금액','과세구분']];
   const start=document.getElementById('inv-f-start').value, end=document.getElementById('inv-f-end').value;
@@ -2439,7 +2465,7 @@ const endDate=document.getElementById('dep-f-end').value;
   document.getElementById('dep-sales').textContent='₩'+salesAmt.toLocaleString();
   document.getElementById('dep-in').textContent='₩'+totIn.toLocaleString();
   document.getElementById('dep-bal').textContent='₩'+totFinal.toLocaleString();
-  const today=new Date().toISOString().slice(0,10);
+  const today=todayStr();
   document.getElementById('dep-in-sub').textContent='당일 '+data.filter(r=>r.date===today&&r.noteType==='가맹점 입금').reduce((s,r)=>s+(r.inAmt||0),0).toLocaleString()+'원';
   document.getElementById('dep-bal-sub').textContent=depAccounts.length+'개 계좌';
 }
@@ -2464,8 +2490,8 @@ function applyDepFilter(){
 }
 
 function resetDepFilter(){
-  document.getElementById('dep-f-start').value='2026-06-01';
-  document.getElementById('dep-f-end').value='2026-06-30';
+  document.getElementById('dep-f-start').value='monthStartStr()';
+  document.getElementById('dep-f-end').value=monthEndStr();
   document.getElementById('dep-f-code').value='';
   document.getElementById('dep-f-type').value='';
   const s=document.getElementById('dep-f-store');if(s)s.value='';
@@ -2477,7 +2503,7 @@ function resetDepFilter(){
 function openDepModal(id){
   editDepId=id||null;
   const r=id?depData.find(x=>x.id===id):null;
-  const today=new Date().toISOString().slice(0,10);
+  const today=todayStr();
   const accOpts=depAccounts.map(a=>`<option value="${a.code}" ${r&&r.code===a.code?'selected':''}>${a.code} - ${a.bank} ${a.accNo}</option>`).join('');
   const typeOpts=buildNoteTypeOptions(r?r.noteType:'');
   const html=`<div class="modal" style="width:560px;">
@@ -2486,14 +2512,14 @@ function openDepModal(id){
       <div class="form-group full"><label>계좌 *</label><select id="dp-code"><option value="">선택</option>${accOpts}</select></div>
       <div class="form-group"><label>일자 *</label><input type="date" id="dp-date" value="${r?r.date:today}"></div>
       <div class="form-group"><label>비고유형</label><select id="dp-type"><option value="">없음</option>${typeOpts}</select></div>
-      <div class="form-group"><label>가맹점코드</label><input id="dp-stcode" value="${r?r.storeCode||'':''}"></div>
-      <div class="form-group"><label>가맹점명</label><input id="dp-stname" value="${r?r.storeName||'':''}"></div>
-      <div class="form-group"><label>전잔액</label><input type="text" inputmode="numeric" id="dp-prev" value="${r?(r.prevBal||''):''}" placeholder="0"></div>
-      <div class="form-group"><label>입금</label><input type="text" inputmode="numeric" id="dp-in" value="${r?(r.inAmt||''):''}" placeholder="0"></div>
-      <div class="form-group"><label>출금</label><input type="text" inputmode="numeric" id="dp-out" value="${r?(r.outAmt||''):''}" placeholder="0"></div>
-      <div class="form-group"><label>최종잔액 (자동)</label><input type="text" inputmode="numeric" id="dp-final" value="${r?(r.finalBal||''):''}" placeholder="0" readonly style="background:#f9f9f9;"></div>
-      <div class="form-group"><label>상세내역</label><input id="dp-detail" type="text" lang="ko" value="${r?r.detail||'':''}"></div>
-      <div class="form-group"><label>비고</label><input id="dp-note" type="text" lang="ko" value="${r?r.note||'':''}"></div>
+      <div class="form-group"><label>가맹점코드</label><input type="text" id="dp-stcode" value="${r?r.storeCode||'':''}"></div>
+      <div class="form-group"><label>가맹점명</label><input type="text" id="dp-stname" value="${r?r.storeName||'':''}"></div>
+      <div class="form-group full"><label>상세내역</label><input type="text" id="dp-detail" value="${r?r.detail||'':''}"></div>
+      <div class="form-group full"><label>비고</label><input type="text" id="dp-note" value="${r?r.note||'':''}"></div>
+      <div class="form-group"><label>전잔액</label><input type="text" inputmode="numeric" id="dp-prev" placeholder="0" value="${r&&r.prevBal?r.prevBal.toLocaleString():''}"></div>
+      <div class="form-group"><label>최종잔액 (자동)</label><input type="text" id="dp-final" placeholder="0" value="${r&&r.finalBal?r.finalBal.toLocaleString():''}" readonly style="background:#f9f9f9;"></div>
+      <div class="form-group"><label>입금</label><input type="text" inputmode="numeric" id="dp-in" placeholder="0" value="${r&&r.inAmt?r.inAmt.toLocaleString():''}"></div>
+      <div class="form-group"><label>출금</label><input type="text" inputmode="numeric" id="dp-out" placeholder="0" value="${r&&r.outAmt?r.outAmt.toLocaleString():''}"></div>
     </div>
     <div class="modal-footer">
       <button onclick="closeAccModal()">취소</button>
@@ -2501,17 +2527,19 @@ function openDepModal(id){
     </div>
   </div>`;
   showDynModal(html);
-  ['dp-prev','dp-in','dp-out'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el)el.addEventListener('input',()=>{
-     const p=marginParseNum(document.getElementById('dp-prev').value);
+  ['dp-prev','dp-in','dp-out'].forEach(fid=>{
+    const el=document.getElementById(fid);
+    if(!el) return;
+    el.addEventListener('focus',()=>marginUnformat(el));
+    el.addEventListener('blur',()=>marginFormat(el));
+    el.addEventListener('input',()=>{
+      const p=marginParseNum(document.getElementById('dp-prev').value);
       const i=marginParseNum(document.getElementById('dp-in').value);
       const o=marginParseNum(document.getElementById('dp-out').value);
-      document.getElementById('dp-final').value=p+i-o;
+      document.getElementById('dp-final').value=(p+i-o).toLocaleString();
     });
   });
 }
-
 async function saveDepRow(){
   const code=document.getElementById('dp-code').value, date=document.getElementById('dp-date').value;
   if(!code||!date){alert('계좌와 일자를 입력해주세요.');return;}
@@ -2646,7 +2674,7 @@ async function importDepExcel(){
   const cnt=depUploadRows.length;
   const newRows=[];
   depUploadRows.forEach(r=>{
-    const rawDate=r[2];let date=new Date().toISOString().slice(0,10);
+    const rawDate=r[2];let date=todayStr();
     if(rawDate){
       if(typeof rawDate==='number'){const d=new Date(Math.round((rawDate-25569)*86400*1000));date=d.toISOString().slice(0,10);}
       else date=String(rawDate).replace(/\./g,'-').replace(/(\d{4})-(\d{1,2})-(\d{1,2})/,(_,y,m,d)=>`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
@@ -2865,7 +2893,7 @@ function renderAr(data){
   document.getElementById('ar-income-cnt').textContent=data.reduce((s,r)=>s+r.incomeCnt,0)+'건';
   document.getElementById('ar-count').textContent=`(${data.length}건)`;
 }
-function resetArFilter(){document.getElementById('ar-f-start').value='2026-06-01';document.getElementById('ar-f-end').value='2026-06-30';document.getElementById('ar-f-keyword').value='';document.getElementById('ar-f-status').value='';document.getElementById('ar-f-ar').value='';applyArFilter();}
+function resetArFilter(){document.getElementById('ar-f-start').value='monthStartStr()';document.getElementById('ar-f-end').value=monthEndStr();document.getElementById('ar-f-keyword').value='';document.getElementById('ar-f-status').value='';document.getElementById('ar-f-ar').value='';applyArFilter();}
 function exportArExcel(){const rows=[['가맹점코드','가맹점명','대표자','상태','한도금액','초기미수금','기간매출','기간입금','미수금','한도잔여','비고1']];document.querySelectorAll('#ar-tbody tr').forEach(tr=>{rows.push([...tr.querySelectorAll('td')].map(td=>td.textContent.trim()));});const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'미수금현황');XLSX.writeFile(wb,'미수금현황_'+new Date().toLocaleDateString('ko-KR')+'.xlsx');}
 
 // ===== [패치3] 마진관리 =====
@@ -3444,7 +3472,7 @@ function applyRptFilter() {
 
   document.getElementById('rpt-title-date').innerHTML =
     start + ' ~ ' + end + ' &nbsp;|&nbsp; 조회일: <span id="rpt-query-date">' +
-    new Date().toISOString().slice(0,10) + '</span>';
+    todayStr() + '</span>';
 
   let salesRows = [];
   if (menu === 'all' || menu === 'sales') {
@@ -3723,8 +3751,8 @@ function buildDetailTable(rows, cols) {
 }
 
 function resetRptFilter() {
-  document.getElementById('rpt-f-start').value = '2026-06-01';
-  document.getElementById('rpt-f-end').value = '2026-06-30';
+  document.getElementById('rpt-f-start').value = 'monthStartStr()';
+  document.getElementById('rpt-f-end').value = monthEndStr();
   document.getElementById('rpt-f-menu').value = 'all';
   document.getElementById('rpt-acc-tbody').innerHTML = '';
   document.getElementById('rpt-loan-tbody').innerHTML = '';
@@ -3806,7 +3834,7 @@ function showFirebaseInfo(el) {
       <div style="background:#fff8e6;border-radius:8px;padding:14px 16px;border-left:3px solid #F5A800;">
         <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:8px;">⚠️ 주의사항</div>
         <div style="font-size:12px;color:#555;line-height:2;">
-          • <strong>계좌 마스터(accounts)의 curAmt</strong> = 2026년 5월 31일 기준잔액 → 절대 수정 금지/본프로그램2026-06-01부터적용됨<br>
+          • <strong>계좌 마스터(accounts)의 curAmt</strong> = 2026년 5월 31일 기준잔액 → 절대 수정 금지/본프로그램monthStartStr()부터적용됨<br>
           • deposit의 prevBal/finalBal은 <strong>앱에서 자동 재계산</strong>됨 (Firebase 저장값 무시)<br>
           • GitHub Pages URL: <strong>https://charllottesooh.github.io/SIJAE-2607/</strong>
         </div>
@@ -3867,6 +3895,7 @@ async function forceSyncToFirebase() {
   }
 }
 
+initDefaultDates();
 initFirebase();
 showEmptyHint('sales-tbody', 16);
 </script>
