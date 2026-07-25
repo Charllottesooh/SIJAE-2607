@@ -980,7 +980,9 @@ input[type="checkbox"] { cursor: pointer; }
   <div class="filter-bar margin-screen-controls">
     <input type="month" id="margin-month" value="2026-06">
     <button class="search" onclick="loadMarginMonth()">월 불러오기</button>
+    <button onclick="copyPrevMarginMonth()" style="border-color:#7c3aed;color:#7c3aed;">📋 전월 복사</button>
     <button class="primary" onclick="saveMarginEntry()">저장</button>
+    <span style="font-size:11px;color:#aaa;margin-left:4px;">전월 복사 후 수정 → 반드시 [저장] 클릭</span>
   </div>
 
 
@@ -2884,10 +2886,66 @@ function escapeMarginHtml(value) {
 function initMarginPage() {
   const el = document.getElementById('margin-month');
   if (el && !el.value) el.value = curYearMonth();
-  if (el && !curMarginMonth) el.value = el.value || curYearMonth();
-  loadMarginMonth();
+
+  curMarginMonth = null;
+  curPurchaseItems = [];
+  curOutputItems = [];
+
+  const tbody = document.getElementById('margin-combined-tbody');
+  if (tbody) tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#aaa;padding:40px 12px;font-size:12px;">🔍 월을 선택한 뒤 '월 불러오기'를 누르세요.</td></tr>`;
+  const tfoot = document.getElementById('margin-combined-tfoot');
+  if (tfoot) tfoot.innerHTML = '';
+
+  ['margin-output-total','margin-purchase-total','margin-final'].forEach(id => {
+    const e = document.getElementById(id);
+    if (e) { e.textContent = '₩0'; e.style.color = ''; }
+  });
+  const rateEl = document.getElementById('margin-rate');
+  if (rateEl) { rateEl.textContent = '0.0%'; rateEl.style.color = ''; }
+  ['margin-sub-output','margin-sub-purchase','margin-sub-final','margin-sub-rate'].forEach(id => {
+    const e = document.getElementById(id);
+    if (e) { e.textContent = '조회 전'; e.style.color = '#aaa'; }
+  });
+  const titleMonth = document.getElementById('margin-title-month');
+  if (titleMonth) titleMonth.textContent = '월을 선택하세요';
 }
 
+  // 전월 자료를 현재 선택된 월로 복사 (화면에만 반영, 저장 버튼 필요)
+function copyPrevMarginMonth() {
+  const ym = document.getElementById('margin-month').value || curYearMonth();
+  const [y, m] = ym.split('-').map(Number);
+  const pm = m === 1 ? (y - 1) + '-12' : y + '-' + String(m - 1).padStart(2, '0');
+
+  const prev = marginEntries.find(e => e.yearMonth === pm);
+  if (!prev || (!(prev.purchaseItems || []).length && !(prev.outputItems || []).length)) {
+    alert(pm + ' 자료가 없습니다.\n먼저 전월 자료를 입력·저장해주세요.');
+    return;
+  }
+
+  const cur = marginEntries.find(e => e.yearMonth === ym);
+  const hasCur = cur && ((cur.purchaseItems || []).length || (cur.outputItems || []).length);
+
+  const msg = hasCur
+    ? `⚠️ ${ym}에 이미 저장된 자료가 있습니다.\n${pm} 자료로 화면을 덮어씁니다.\n\n(저장 버튼을 누르기 전까지 기존 저장분은 유지됩니다)\n계속하시겠습니까?`
+    : `${pm} 자료를 ${ym}(으)로 복사합니다.\n계속하시겠습니까?`;
+  if (!confirm(msg)) return;
+
+  curMarginMonth = ym;
+  curPurchaseItems = (prev.purchaseItems || []).map(it => ({ ...it }));
+  curOutputItems = (prev.outputItems || []).map(it => ({ ...it }));
+
+  marginItemNextId = 1;
+  [...curPurchaseItems, ...curOutputItems].forEach(it => {
+    const n = Number(it.id) || 0;
+    if (n >= marginItemNextId) marginItemNextId = n + 1;
+  });
+
+  renderMarginPage();
+  alert(`${pm} → ${ym} 복사 완료 (${curPurchaseItems.length}개 품목)\n\n필요한 부분을 수정한 뒤 반드시 [저장]을 눌러주세요.`);
+}
+
+
+  
 function loadMarginMonth() {
   const ym = document.getElementById('margin-month').value || curYearMonth();
   curMarginMonth = ym;
