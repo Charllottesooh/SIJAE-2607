@@ -2514,12 +2514,12 @@ function openDepModal(id){
       <div class="form-group"><label>비고유형</label><select id="dp-type"><option value="">없음</option>${typeOpts}</select></div>
       <div class="form-group"><label>가맹점코드</label><input type="text" id="dp-stcode" value="${r?r.storeCode||'':''}"></div>
       <div class="form-group"><label>가맹점명</label><input type="text" id="dp-stname" value="${r?r.storeName||'':''}"></div>
+      <div class="form-group"><label>입금</label><input type="text" inputmode="numeric" id="dp-in" value="${r&&r.inAmt?r.inAmt.toLocaleString():''}"></div>
+      <div class="form-group"><label>출금</label><input type="text" inputmode="numeric" id="dp-out" value="${r&&r.outAmt?r.outAmt.toLocaleString():''}"></div>
+      <div class="form-group"><label>전잔액</label><input type="text" inputmode="numeric" id="dp-prev" value="${r&&r.prevBal?r.prevBal.toLocaleString():''}"></div>
+      <div class="form-group"><label>최종잔액 (자동)</label><input type="text" id="dp-final" value="${r&&r.finalBal?r.finalBal.toLocaleString():''}" readonly style="background:#f9f9f9;"></div>
       <div class="form-group full"><label>상세내역</label><input type="text" id="dp-detail" value="${r?r.detail||'':''}"></div>
       <div class="form-group full"><label>비고</label><input type="text" id="dp-note" value="${r?r.note||'':''}"></div>
-      <div class="form-group"><label>전잔액</label><input type="text" inputmode="numeric" id="dp-prev" placeholder="0" value="${r&&r.prevBal?r.prevBal.toLocaleString():''}"></div>
-      <div class="form-group"><label>최종잔액 (자동)</label><input type="text" id="dp-final" placeholder="0" value="${r&&r.finalBal?r.finalBal.toLocaleString():''}" readonly style="background:#f9f9f9;"></div>
-      <div class="form-group"><label>입금</label><input type="text" inputmode="numeric" id="dp-in" placeholder="0" value="${r&&r.inAmt?r.inAmt.toLocaleString():''}"></div>
-      <div class="form-group"><label>출금</label><input type="text" inputmode="numeric" id="dp-out" placeholder="0" value="${r&&r.outAmt?r.outAmt.toLocaleString():''}"></div>
     </div>
     <div class="modal-footer">
       <button onclick="closeAccModal()">취소</button>
