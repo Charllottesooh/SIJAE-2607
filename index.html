@@ -1278,7 +1278,6 @@ async function loadFromFirebase() {
     nextId = Math.max(...salesData.map(r=>r.id||0)) + 1;
     filteredData = [...salesData];
     filteredData.sort((a,b)=>b.date.localeCompare(a.date));
-    renderTable(filteredData);
   }
   if(lsDep && lsDep.length) {
     depData = lsDep;
@@ -1319,7 +1318,6 @@ async function loadFromFirebase() {
         nextId = Math.max(...salesData.map(r=>r.id||0)) + 1;
         salesData.sort((a,b)=>b.date.localeCompare(a.date));
         filteredData = [...salesData];
-        renderTable(filteredData);
       }
     }
     if(dSnap.length) {
@@ -1438,6 +1436,14 @@ async function saveToSheets(sheetName, data) {
     });
   } catch(e) { console.error(e); }
 }
+// 조회 전 안내문구 표시 (자동로딩 제거용)
+function showEmptyHint(tbodyId, colspan) {
+  const tb = document.getElementById(tbodyId);
+  if (!tb) return;
+  tb.innerHTML = `<tr><td colspan="${colspan}" style="text-align:center;color:#aaa;padding:40px 12px;font-size:12px;">🔍 조회 버튼을 누르면 데이터가 표시됩니다.</td></tr>`;
+  const tf = tb.parentElement ? tb.parentElement.querySelector('tfoot') : null;
+  if (tf) tf.innerHTML = '';
+}
 
 function showPage(key, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1447,11 +1453,10 @@ function showPage(key, el) {
   const titles = {sales:'매출내역',account:'계좌 및 대출',deposit:'입출금내역',report:'리포트',store:'거래처관리',arpage:'미수금관리',margin:'마진관리'};
   document.getElementById('page-title').textContent = titles[key]||key;
   if(key==='account') renderAcc();
-  if(key==='deposit') { recalcDepBalances(); initDepSelects(); depFiltered=[...depData]; depFiltered.sort((a,b)=>b.date.localeCompare(a.date)); renderDep(depFiltered); }
+  if(key==='deposit') { initDepSelects(); depFiltered=[]; showEmptyHint('dep-tbody',14); }
   if(key==='report') { resetRptFilter(); }
-  if(key==='store') { initStoreAccSelect(); storeFiltered=[...storeData]; renderStore(storeFiltered); }
-  if(key==='arpage') { applyArFilter(); }
-  if(key==='margin') { initMarginPage(); }
+  if(key==='store') { initStoreAccSelect(); storeFiltered=[]; showEmptyHint('store-tbody',13); }
+  if(key==='arpage') { showEmptyHint('ar-tbody',11); }
 }
 
 function renderTable(data) {
@@ -2481,12 +2486,12 @@ function openDepModal(id){
       <div class="form-group"><label>비고유형</label><select id="dp-type"><option value="">없음</option>${typeOpts}</select></div>
       <div class="form-group"><label>가맹점코드</label><input id="dp-stcode" value="${r?r.storeCode||'':''}"></div>
       <div class="form-group"><label>가맹점명</label><input id="dp-stname" value="${r?r.storeName||'':''}"></div>
-      <div class="form-group"><label>전잔액</label><input type="number" id="dp-prev" value="${r?(r.prevBal||''):''}" placeholder="0"></div>
-      <div class="form-group"><label>입금</label><input type="number" id="dp-in" value="${r?(r.inAmt||''):''}" placeholder="0"></div>
-      <div class="form-group"><label>출금</label><input type="number" id="dp-out" value="${r?(r.outAmt||''):''}" placeholder="0"></div>
-      <div class="form-group"><label>최종잔액 (자동)</label><input type="number" id="dp-final" value="${r?(r.finalBal||''):''}" placeholder="0" readonly style="background:#f9f9f9;"></div>
-      <div class="form-group"><label>상세내역</label><input id="dp-detail" value="${r?r.detail||'':''}"></div>
-      <div class="form-group"><label>비고</label><input id="dp-note" value="${r?r.note||'':''}"></div>
+      <div class="form-group"><label>전잔액</label><input type="text" inputmode="numeric" id="dp-prev" value="${r?(r.prevBal||''):''}" placeholder="0"></div>
+      <div class="form-group"><label>입금</label><input type="text" inputmode="numeric" id="dp-in" value="${r?(r.inAmt||''):''}" placeholder="0"></div>
+      <div class="form-group"><label>출금</label><input type="text" inputmode="numeric" id="dp-out" value="${r?(r.outAmt||''):''}" placeholder="0"></div>
+      <div class="form-group"><label>최종잔액 (자동)</label><input type="text" inputmode="numeric" id="dp-final" value="${r?(r.finalBal||''):''}" placeholder="0" readonly style="background:#f9f9f9;"></div>
+      <div class="form-group"><label>상세내역</label><input id="dp-detail" type="text" lang="ko" value="${r?r.detail||'':''}"></div>
+      <div class="form-group"><label>비고</label><input id="dp-note" type="text" lang="ko" value="${r?r.note||'':''}"></div>
     </div>
     <div class="modal-footer">
       <button onclick="closeAccModal()">취소</button>
@@ -2497,9 +2502,9 @@ function openDepModal(id){
   ['dp-prev','dp-in','dp-out'].forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.addEventListener('input',()=>{
-      const p=parseFloat(document.getElementById('dp-prev').value)||0;
-      const i=parseFloat(document.getElementById('dp-in').value)||0;
-      const o=parseFloat(document.getElementById('dp-out').value)||0;
+     const p=marginParseNum(document.getElementById('dp-prev').value);
+      const i=marginParseNum(document.getElementById('dp-in').value);
+      const o=marginParseNum(document.getElementById('dp-out').value);
       document.getElementById('dp-final').value=p+i-o;
     });
   });
@@ -2515,8 +2520,8 @@ async function saveDepRow(){
     storeName:document.getElementById('dp-stname').value,
     noteType:document.getElementById('dp-type').value,
     prevBal:0,
-    inAmt:parseFloat(document.getElementById('dp-in').value)||0,
-    outAmt:parseFloat(document.getElementById('dp-out').value)||0,
+    inAmt:marginParseNum(document.getElementById('dp-in').value),
+    outAmt:marginParseNum(document.getElementById('dp-out').value),
     finalBal:0,
     detail:document.getElementById('dp-detail').value,
     note:document.getElementById('dp-note').value,
@@ -3805,7 +3810,7 @@ async function forceSyncToFirebase() {
 }
 
 initFirebase();
-renderTable(filteredData);
+showEmptyHint('sales-tbody', 16);
 </script>
 </body>
 </html>
