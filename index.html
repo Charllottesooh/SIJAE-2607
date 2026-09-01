@@ -1102,25 +1102,19 @@ input[type="checkbox"] { cursor: pointer; }
 // ===== 데이터 =====
 let salesData = [], nextId = 1, filteredData = [], editingId = null, uploadedRows = [];
 
-let depAccounts = [
-  {code:'ACC001', bank:'기업', accNo:'148-023233-04-166', alias:'모계좌1'},
-  {code:'ACC002', bank:'기업', accNo:'148-023233-04-106', alias:''},
-  {code:'ACC003', bank:'기업', accNo:'148-023233-04-021', alias:''},
-  {code:'ACC004', bank:'기업', accNo:'058-0457347-01-011', alias:''},
-  {code:'ACC005', bank:'기업', accNo:'148-023233-04-045', alias:''},
-  {code:'ACC006', bank:'기업', accNo:'148-023233-01-063', alias:''},
-  {code:'ACC007', bank:'기업', accNo:'148-023233-04-077', alias:''},
-  {code:'ACC008', bank:'기업', accNo:'148-023233-04-110', alias:''},
-  {code:'ACC009', bank:'기업', accNo:'148-023233-04-134', alias:''},
-  {code:'ACC010', bank:'기업', accNo:'148-023233-04-141', alias:''},
-  {code:'ACC011', bank:'기업', accNo:'148-023233-04-159', alias:''},
-  {code:'ACC012', bank:'기업', accNo:'148-023233-04-127', alias:''},
-  {code:'ACC013', bank:'기업', accNo:'148-023233-04-095', alias:''},
-  {code:'ACC014', bank:'기업', accNo:'148-023233-04-181', alias:''},
-  {code:'ACC015', bank:'기업', accNo:'148-023233-04-173', alias:''},
-  {code:'ACC016', bank:'하나', accNo:'581-910058-20904', alias:''},
-];
-
+// [일원화] 입출금/거래처의 계좌 목록을 계좌내역(accData) 기준으로 통일.
+// 계좌내역 화면에서 추가/수정한 계좌가 입출금·거래처 드롭다운에 자동 반영됨.
+// 기존 depAccounts.map/find/reduce/slice/length 호출은 수정 없이 그대로 동작.
+Object.defineProperty(window, 'depAccounts', {
+  configurable: true,
+  get() {
+    return accData.slice().sort((a, b) => {
+      const an = parseInt((a.code || '').replace(/\D/g, '')) || 0;
+      const bn = parseInt((b.code || '').replace(/\D/g, '')) || 0;
+      return an - bn;
+    });
+  }
+});
 // [패치5] 대표계정/하위계정 구조: id, parentId 추가.
 // parentId === null  -> 대표계정 (색상 적용)
 // parentId === 숫자  -> 하위계정 (색상 없음, 해당 대표계정에 속함)
