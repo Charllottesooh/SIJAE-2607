@@ -2225,7 +2225,7 @@ function applyInvoiceFilter(){
 
 function renderInvoiceByStore(data){
   document.getElementById('inv-table-title').textContent='매장별 과세/면세 요약';
-  document.getElementById('inv-thead-row').innerHTML='<th>매장코드</th><th>매장명</th><th>과세구분</th><th class="num">품목수</th><th class="num">단가 합계</th><th class="num">부가세 합계</th><th class="num">합계금액</th><th>상세</th>';
+  document.getElementById('inv-thead-row').innerHTML='<th>매장코드</th><th>매장명</th><th>과세구분</th><th class="num">품목수</th><th class="num">출고공급가액 합계</th><th class="num">부가세 합계</th><th class="num">합계금액</th><th>상세</th>';
   const map={};
   data.forEach(r=>{const key=r.storeCode+'||'+r.taxType;if(!map[key])map[key]={storeCode:r.storeCode,storeName:r.storeName,taxType:r.taxType,items:[]};map[key].items.push(r);});
   const tbody=document.getElementById('inv-tbody');tbody.innerHTML='';
@@ -2240,7 +2240,7 @@ function renderInvoiceByStore(data){
 
 function renderInvoiceByProduct(data){
   document.getElementById('inv-table-title').textContent='품목별 과세/면세 요약';
-  document.getElementById('inv-thead-row').innerHTML='<th>상품코드</th><th>상품명</th><th>과세구분</th><th class="num">거래수</th><th class="num">총출고수량</th><th class="num">단가 합계</th><th class="num">부가세 합계</th><th class="num">합계금액</th><th>상세</th>';
+  document.getElementById('inv-thead-row').innerHTML='<th>상품코드</th><th>상품명</th><th>과세구분</th><th class="num">거래수</th><th class="num">총출고수량</th><th class="num">출고공급가액 합계</th><th class="num">부가세 합계</th><th class="num">합계금액</th><th>상세</th>';
   const map={};
   data.forEach(r=>{const key=r.productCode+'||'+r.taxType;if(!map[key])map[key]={productCode:r.productCode,productName:r.productName,taxType:r.taxType,items:[]};map[key].items.push(r);});
   const tbody=document.getElementById('inv-tbody');tbody.innerHTML='';
