@@ -590,7 +590,7 @@ input[type="checkbox"] { cursor: pointer; }
           <div class="summary-card color-blue"><div class="label">총 출고 합계금액</div><div class="value" id="card-total">₩0</div><div class="sub" id="card-count">0건</div></div>
         </div>
         <div class="filter-bar">
-          <input type="date" id="f-start" value="monthStartStr()">
+          <input type="date" id="f-start" value="">
           <span style="font-size:12px;color:#aaa;">~</span>
           <input type="date" id="f-end" value="2026-06-30">
           <input type="text" id="f-store" placeholder="매장코드/매장명 검색" style="width:180px;">
@@ -631,7 +631,7 @@ input[type="checkbox"] { cursor: pointer; }
 
       <div id="sales-invoice" style="display:none;">
         <div class="filter-bar">
-          <input type="date" id="inv-f-start" value="monthStartStr()">
+          <input type="date" id="inv-f-start" value="">
           <span style="font-size:12px;color:#aaa;">~</span>
           <input type="date" id="inv-f-end" value="2026-06-30">
           <select id="inv-f-type">
@@ -738,7 +738,7 @@ input[type="checkbox"] { cursor: pointer; }
     <!-- ===== 미수금관리 ===== -->
     <div id="page-arpage" class="page">
       <div class="filter-bar">
-        <input type="date" id="ar-f-start" value="monthStartStr()">
+        <input type="date" id="ar-f-start" value="">
         <span style="font-size:12px;color:#aaa;">~</span>
         <input type="date" id="ar-f-end" value="2026-06-30">
         <input type="text" id="ar-f-keyword" placeholder="가맹점코드/명 검색" style="width:180px;">
@@ -857,7 +857,7 @@ input[type="checkbox"] { cursor: pointer; }
         <div class="summary-card color-green"><div class="label">총 예금잔액</div><div class="value" id="dep-bal">₩0</div><div class="sub" id="dep-bal-sub">0개 계좌</div></div>
       </div>
       <div class="filter-bar">
-        <input type="date" id="dep-f-start" value="monthStartStr()">
+        <input type="date" id="dep-f-start" value="">
         <span style="font-size:12px;color:#aaa;">~</span>
         <input type="date" id="dep-f-end" value="2026-06-30">
         <input type="text" id="dep-f-store" placeholder="가맹점코드/명 검색" style="width:160px;">
@@ -910,7 +910,7 @@ input[type="checkbox"] { cursor: pointer; }
     <div class="summary-card color-green"><div class="label">계좌잔액</div><div class="value" id="rpt-final">₩0</div><div class="sub">예금 기준</div></div>
   </div>
   <div class="filter-bar">
-    <input type="date" id="rpt-f-start" value="monthStartStr()">
+    <input type="date" id="rpt-f-start" value="">
     <span style="font-size:12px;color:#aaa;">~</span>
     <input type="date" id="rpt-f-end" value="2026-06-30">
     <select id="rpt-f-menu">
