@@ -644,6 +644,16 @@ input[type="checkbox"] { cursor: pointer; }
             <option value="면세">면세만</option>
           </select>
           <input type="text" id="inv-f-keyword" placeholder="매장명/품목명 검색" style="width:150px;">
+          <div style="position:relative;display:inline-block;">
+            <button type="button" onclick="toggleInvProdDropdown()" id="inv-prod-btn" style="font-size:12px;padding:6px 12px;border-radius:6px;border:0.5px solid #ddd;background:#fff;cursor:pointer;color:#333;">품목선택 ▼</button>
+            <div id="inv-prod-dropdown" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:#fff;border:0.5px solid #ddd;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:50;width:260px;max-height:320px;overflow-y:auto;padding:8px;">
+              <div style="display:flex;gap:6px;margin-bottom:8px;padding-bottom:8px;border-bottom:0.5px solid #eee;">
+                <button type="button" onclick="invProdCheckAll(true)" style="flex:1;font-size:11px;padding:5px;border:0.5px solid #ddd;border-radius:5px;background:#f9f9f9;cursor:pointer;">전체선택</button>
+                <button type="button" onclick="invProdCheckAll(false)" style="flex:1;font-size:11px;padding:5px;border:0.5px solid #ddd;border-radius:5px;background:#f9f9f9;cursor:pointer;">전체해제</button>
+              </div>
+              <div id="inv-prod-list"><div style="font-size:11px;color:#aaa;padding:8px;text-align:center;">먼저 [조회]를 누르세요</div></div>
+            </div>
+          </div>
           <button class="search" onclick="applyInvoiceFilter()">조회</button>
           <button onclick="resetInvoiceFilter()">초기화</button>
           <button onclick="exportInvoiceExcel()">합계 엑셀</button>
@@ -2208,17 +2218,68 @@ function switchSalesTab(tab,el){
   if(tab==='sales-invoice') applyInvoiceFilter();
 }
 
+// ===== 매출계산서 품목선택 드롭다운 =====
+let invSelectedProducts = null; // null=전체, Set=선택된 상품코드들
+
+function toggleInvProdDropdown(){
+  const dd=document.getElementById('inv-prod-dropdown');
+  dd.style.display = dd.style.display==='none' ? 'block' : 'none';
+}
+
+// 조회 결과에 존재하는 상품 목록으로 드롭다운 채우기
+function buildInvProdList(data){
+  const map={};
+  data.forEach(r=>{ if(!map[r.productCode]) map[r.productCode]={code:r.productCode,name:r.productName}; });
+  const list=Object.values(map).sort((a,b)=>a.code.localeCompare(b.code));
+  const box=document.getElementById('inv-prod-list');
+  if(!list.length){ box.innerHTML='<div style="font-size:11px;color:#aaa;padding:8px;text-align:center;">해당 조건에 품목이 없습니다</div>'; return; }
+  box.innerHTML=list.map(p=>{
+    const checked = !invSelectedProducts || invSelectedProducts.has(p.code);
+    return `<label style="display:flex;align-items:center;gap:8px;padding:5px 4px;font-size:12px;cursor:pointer;border-radius:4px;">
+      <input type="checkbox" class="inv-prod-chk" value="${p.code}" ${checked?'checked':''}>
+      <span style="color:#888;font-size:11px;">${p.code}</span>
+      <span>${p.name}</span>
+    </label>`;
+  }).join('');
+}
+
+function invProdCheckAll(state){
+  document.querySelectorAll('.inv-prod-chk').forEach(c=>c.checked=state);
+}
+
+// 현재 체크된 상품코드를 invSelectedProducts에 반영
+function syncInvSelectedProducts(){
+  const chks=document.querySelectorAll('.inv-prod-chk');
+  if(!chks.length){ invSelectedProducts=null; return; }
+  const checked=[...chks].filter(c=>c.checked).map(c=>c.value);
+  // 전부 체크면 전체(null)로 취급
+  invSelectedProducts = (checked.length===chks.length) ? null : new Set(checked);
+}
+
+  
 function applyInvoiceFilter(){
   const start=document.getElementById('inv-f-start').value, end=document.getElementById('inv-f-end').value;
   const type=document.getElementById('inv-f-type').value, tax=document.getElementById('inv-f-tax').value;
   const keyword=document.getElementById('inv-f-keyword').value.trim().toLowerCase();
-  let data=salesData.filter(r=>{
+
+  // 날짜·과세·키워드까지 적용한 1차 데이터 (품목 드롭다운 목록의 기준)
+  let baseData=salesData.filter(r=>{
     if(start&&r.date<start)return false;
     if(end&&r.date>end)return false;
     if(tax&&r.taxType!==tax)return false;
     if(keyword&&!r.storeName.toLowerCase().includes(keyword)&&!r.storeCode.toLowerCase().includes(keyword)&&!r.productName.toLowerCase().includes(keyword)&&!r.productCode.toLowerCase().includes(keyword))return false;
     return true;
   });
+
+  // 현재 체크박스 상태를 반영한 뒤, 드롭다운 목록을 1차 데이터로 갱신
+  syncInvSelectedProducts();
+  buildInvProdList(baseData);
+
+  // 품목 선택이 있으면 그 상품코드만 남김
+  let data = invSelectedProducts
+    ? baseData.filter(r=>invSelectedProducts.has(r.productCode))
+    : baseData;
+
   if(type==='store') renderInvoiceByStore(data); else renderInvoiceByProduct(data);
   closeInvDetail();
 }
@@ -2258,14 +2319,14 @@ function showInvDetail(type,key,title){
   document.getElementById('inv-detail-title').textContent='📋 '+title+' 세부내역';
   const tbody=document.getElementById('inv-detail-tbody');tbody.innerHTML='';
   g.items.forEach(r=>{tbody.innerHTML+=`<tr><td>${r.date}</td><td>${r.storeCode}</td><td>${r.storeName}</td><td>${r.productCode}</td><td>${r.productName}</td><td class="num">${(r.outQty||0).toLocaleString()}</td><td class="num">${(r.supply||0).toLocaleString()}</td><td class="num">${(r.outPrice||0).toLocaleString()}</td><td class="num">${(r.outVat||0).toLocaleString()}</td><td class="num" style="font-weight:600;">₩${(r.outTotal||0).toLocaleString()}</td><td><span class="tax-badge ${r.taxType==='과세'?'tax-y':'tax-n'}">${r.taxType}</span></td></tr>`;});
-  const tS=g.items.reduce((s,r)=>s+(r.supply||0),0),tV=g.items.reduce((s,r)=>s+(r.outVat||0),0),tT=g.items.reduce((s,r)=>s+(r.outTotal||0),0);
-  tbody.innerHTML+=`<tr style="background:#f9f9f9;font-weight:600;"><td colspan="7" style="padding:10px 12px;">합계</td><td class="num" style="padding:10px 12px;">${tS.toLocaleString()}</td><td class="num" style="padding:10px 12px;">${tV.toLocaleString()}</td><td class="num" style="padding:10px 12px;">₩${tT.toLocaleString()}</td><td></td></tr>`;
+  const tSupply=g.items.reduce((s,r)=>s+(r.supply||0),0),tOutPrice=g.items.reduce((s,r)=>s+(r.outPrice||0),0),tV=g.items.reduce((s,r)=>s+(r.outVat||0),0),tT=g.items.reduce((s,r)=>s+(r.outTotal||0),0);
+  tbody.innerHTML+=`<tr style="background:#f9f9f9;font-weight:600;"><td colspan="6" style="padding:10px 12px;">합계</td><td class="num" style="padding:10px 12px;">${tSupply.toLocaleString()}</td><td class="num" style="padding:10px 12px;">${tOutPrice.toLocaleString()}</td><td class="num" style="padding:10px 12px;">${tV.toLocaleString()}</td><td class="num" style="padding:10px 12px;">₩${tT.toLocaleString()}</td><td></td></tr>`;
   document.getElementById('inv-detail-panel').style.display='block';
   document.getElementById('inv-detail-panel').scrollIntoView({behavior:'smooth'});
 }
 
 function closeInvDetail(){document.getElementById('inv-detail-panel').style.display='none';}
-function resetInvoiceFilter(){document.getElementById('inv-f-start').value='monthStartStr()';document.getElementById('inv-f-end').value=monthEndStr();document.getElementById('inv-f-type').value='store';document.getElementById('inv-f-tax').value='';document.getElementById('inv-f-keyword').value='';applyInvoiceFilter();}
+function resetInvoiceFilter(){document.getElementById('inv-f-start').value=monthStartStr();document.getElementById('inv-f-end').value=monthEndStr();document.getElementById('inv-f-type').value='store';document.getElementById('inv-f-tax').value='';document.getElementById('inv-f-keyword').value='';invSelectedProducts=null;document.getElementById('inv-prod-list').innerHTML='<div style="font-size:11px;color:#aaa;padding:8px;text-align:center;">먼저 [조회]를 누르세요</div>';applyInvoiceFilter();}
 function exportInvoiceExcel(){
   const map=window._invMap;
   if(!map||!Object.keys(map).length){alert('먼저 [조회]를 눌러주세요.');return;}
@@ -3928,6 +3989,16 @@ async function forceSyncToFirebase() {
 
 initDefaultDates();
 initFirebase();
+
+ document.addEventListener('click', function(e){
+  const dd=document.getElementById('inv-prod-dropdown');
+  const btn=document.getElementById('inv-prod-btn');
+  if(!dd||!btn) return;
+  if(dd.style.display==='block' && !dd.contains(e.target) && e.target!==btn){
+    dd.style.display='none';
+  }
+}); 
+  
 showEmptyHint('sales-tbody', 16);
 </script>
 </body>
