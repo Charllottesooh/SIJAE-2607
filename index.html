@@ -620,7 +620,7 @@ input[type="checkbox"] { cursor: pointer; }
                 <th><input type="checkbox" id="chk-all" onchange="toggleAll(this)"></th>
                 <th>날짜</th><th>매장코드</th><th>매장명</th><th>상품코드</th><th>상품명</th>
                 <th>단위</th><th>입수</th><th>출고횟수</th>
-                <th class="num">공급가</th><th class="num">출고수량</th><th class="num">출고단가</th>
+                <th class="num">단가</th><th class="num">출고수량</th><th class="num">출고공급가액</th>
                 <th class="num">출고부가세</th><th class="num">출고합계금액</th><th>과세구분</th><th>비고</th>
               </tr></thead>
               <tbody id="sales-tbody"></tbody>
@@ -668,8 +668,8 @@ input[type="checkbox"] { cursor: pointer; }
               <table>
                 <thead><tr>
                   <th>날짜</th><th>매장코드</th><th>매장명</th><th>상품코드</th><th>상품명</th>
-                  <th class="num">출고수량</th><th class="num">공급가</th>
-                  <th class="num">출고단가</th><th class="num">부가세</th><th class="num">합계금액</th><th>과세구분</th>
+                  <th class="num">출고수량</th><th class="num">단가</th>
+                  <th class="num">출고공급가액</th><th class="num">부가세</th><th class="num">합계금액</th><th>과세구분</th>
                 </tr></thead>
                 <tbody id="inv-detail-tbody"></tbody>
               </table>
@@ -1051,9 +1051,9 @@ input[type="checkbox"] { cursor: pointer; }
       <div class="form-group"><label>단위</label><input type="text" id="f-unit"></div>
       <div class="form-group"><label>입수</label><input type="number" id="f-inqty" placeholder="0" oninput="calcVat()"></div>
       <div class="form-group"><label>출고횟수</label><input type="number" id="f-outcount" placeholder="0"></div>
-      <div class="form-group"><label>공급가</label><input type="number" id="f-supply" placeholder="0" oninput="calcVat()"></div>
+      <div class="form-group"><label>단가</label><input type="number" id="f-supply" placeholder="0" oninput="calcVat()"></div>
       <div class="form-group"><label>출고수량</label><input type="number" id="f-outqty" placeholder="0" oninput="calcVat()"></div>
-      <div class="form-group"><label>출고단가</label><input type="number" id="f-outprice" placeholder="0" oninput="calcVat()"></div>
+      <div class="form-group"><label>출고공급가액</label><input type="number" id="f-outprice" placeholder="0" oninput="calcVat()"></div>
       <div class="form-group"><label>출고부가세 (자동)</label><input type="number" id="f-outvat" readonly style="background:#f9f9f9;"></div>
       <div class="form-group"><label>출고합계금액 (자동)</label><input type="number" id="f-outtotal" readonly style="background:#f9f9f9;"></div>
       <div class="form-group full"><label>비고</label><input type="text" id="f-note"></div>
@@ -1069,7 +1069,7 @@ input[type="checkbox"] { cursor: pointer; }
 <div class="modal-bg" id="modal-upload">
   <div class="modal" style="width:500px;">
     <h2>엑셀 업로드 (매출)</h2>
-    <p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>날짜</strong> / 매장코드 / 매장명 / 상품코드 / 상품명 / 단위 / 입수 / 출고횟수 / 공급가 / 출고수량 / 출고단가 / 출고부가세 / 출고합계금액 / 비고</p>
+    <p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>날짜</strong> / 매장코드 / 매장명 / 상품코드 / 상품명 / 단위 / 입수 / 출고횟수 / 단가 / 출고수량 / 출고공급가액 / 출고부가세 / 출고합계금액 / 비고</p>
     <p style="font-size:11px;color:#2563eb;margin-bottom:10px;">📋 여러 시트 업로드 가능</p>
     <div class="upload-area" onclick="document.getElementById('excel-input').click()">
       <div style="font-size:24px;">📂</div>
@@ -1682,7 +1682,7 @@ async function importExcel(){
   alert(cnt+'건 업로드 완료');
 }
 function exportExcel(){
-  const rows=[['날짜','매장코드','매장명','상품코드','상품명','단위','입수','출고횟수','공급가','출고수량','출고단가','출고부가세','출고합계금액','과세구분','비고']];
+  const rows=[['날짜','매장코드','매장명','상품코드','상품명','단위','입수','출고횟수','단가','출고수량','출고공급가액','출고부가세','출고합계금액','과세구분','비고']];
   filteredData.forEach(r=>rows.push([r.date,r.storeCode,r.storeName,r.productCode,r.productName,r.unit,r.inQty,r.outCount,r.supply,r.outQty,r.outPrice,r.outVat,r.outTotal,r.taxType,r.note]));
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'매출내역');
   XLSX.writeFile(wb,'시재_매출매입내역_202607부터_내앱백업자료임.xlsx');
@@ -2225,7 +2225,7 @@ function applyInvoiceFilter(){
 
 function renderInvoiceByStore(data){
   document.getElementById('inv-table-title').textContent='매장별 과세/면세 요약';
-  document.getElementById('inv-thead-row').innerHTML='<th>매장코드</th><th>매장명</th><th>과세구분</th><th class="num">품목수</th><th class="num">공급가 합계</th><th class="num">부가세 합계</th><th class="num">합계금액</th><th>상세</th>';
+  document.getElementById('inv-thead-row').innerHTML='<th>매장코드</th><th>매장명</th><th>과세구분</th><th class="num">품목수</th><th class="num">단가 합계</th><th class="num">부가세 합계</th><th class="num">합계금액</th><th>상세</th>';
   const map={};
   data.forEach(r=>{const key=r.storeCode+'||'+r.taxType;if(!map[key])map[key]={storeCode:r.storeCode,storeName:r.storeName,taxType:r.taxType,items:[]};map[key].items.push(r);});
   const tbody=document.getElementById('inv-tbody');tbody.innerHTML='';
@@ -2240,7 +2240,7 @@ function renderInvoiceByStore(data){
 
 function renderInvoiceByProduct(data){
   document.getElementById('inv-table-title').textContent='품목별 과세/면세 요약';
-  document.getElementById('inv-thead-row').innerHTML='<th>상품코드</th><th>상품명</th><th>과세구분</th><th class="num">거래수</th><th class="num">총출고수량</th><th class="num">공급가 합계</th><th class="num">부가세 합계</th><th class="num">합계금액</th><th>상세</th>';
+  document.getElementById('inv-thead-row').innerHTML='<th>상품코드</th><th>상품명</th><th>과세구분</th><th class="num">거래수</th><th class="num">총출고수량</th><th class="num">단가 합계</th><th class="num">부가세 합계</th><th class="num">합계금액</th><th>상세</th>';
   const map={};
   data.forEach(r=>{const key=r.productCode+'||'+r.taxType;if(!map[key])map[key]={productCode:r.productCode,productName:r.productName,taxType:r.taxType,items:[]};map[key].items.push(r);});
   const tbody=document.getElementById('inv-tbody');tbody.innerHTML='';
@@ -2257,7 +2257,7 @@ function showInvDetail(type,key,title){
   const g=window._invMap[key];if(!g)return;
   document.getElementById('inv-detail-title').textContent='📋 '+title+' 세부내역';
   const tbody=document.getElementById('inv-detail-tbody');tbody.innerHTML='';
-  g.items.forEach(r=>{tbody.innerHTML+=`<tr><td>${r.date}</td><td>${r.storeCode}</td><td>${r.storeName}</td><td>${r.productCode}</td><td>${r.productName}</td><td class="num">${(r.outQty||0).toLocaleString()}</td><td class="num">${(r.outPrice||0).toLocaleString()}</td><td class="num">${(r.supply||0).toLocaleString()}</td><td class="num">${(r.outVat||0).toLocaleString()}</td><td class="num" style="font-weight:600;">₩${(r.outTotal||0).toLocaleString()}</td><td><span class="tax-badge ${r.taxType==='과세'?'tax-y':'tax-n'}">${r.taxType}</span></td></tr>`;});
+  g.items.forEach(r=>{tbody.innerHTML+=`<tr><td>${r.date}</td><td>${r.storeCode}</td><td>${r.storeName}</td><td>${r.productCode}</td><td>${r.productName}</td><td class="num">${(r.outQty||0).toLocaleString()}</td><td class="num">${(r.supply||0).toLocaleString()}</td><td class="num">${(r.outPrice||0).toLocaleString()}</td><td class="num">${(r.outVat||0).toLocaleString()}</td><td class="num" style="font-weight:600;">₩${(r.outTotal||0).toLocaleString()}</td><td><span class="tax-badge ${r.taxType==='과세'?'tax-y':'tax-n'}">${r.taxType}</span></td></tr>`;});
   const tS=g.items.reduce((s,r)=>s+(r.supply||0),0),tV=g.items.reduce((s,r)=>s+(r.outVat||0),0),tT=g.items.reduce((s,r)=>s+(r.outTotal||0),0);
   tbody.innerHTML+=`<tr style="background:#f9f9f9;font-weight:600;"><td colspan="7" style="padding:10px 12px;">합계</td><td class="num" style="padding:10px 12px;">${tS.toLocaleString()}</td><td class="num" style="padding:10px 12px;">${tV.toLocaleString()}</td><td class="num" style="padding:10px 12px;">₩${tT.toLocaleString()}</td><td></td></tr>`;
   document.getElementById('inv-detail-panel').style.display='block';
@@ -2274,7 +2274,7 @@ function exportInvoiceExcel(){
   let rows,sheetName;
   if(type==='store'){
     sheetName='매장별합계';
-    rows=[['매장코드','매장명','과세구분','품목수','공급가합계','부가세합계','합계금액']];
+    rows=[['매장코드','매장명','과세구분','품목수','출고공급가액','부가세합계','합계금액']];
     groups.sort((a,b)=>a.storeCode.localeCompare(b.storeCode)).forEach(g=>{
       rows.push([g.storeCode,g.storeName,g.taxType,g.items.length,
         g.items.reduce((s,r)=>s+(r.supply||0),0),
@@ -2283,7 +2283,7 @@ function exportInvoiceExcel(){
     });
   }else{
     sheetName='품목별합계';
-    rows=[['상품코드','상품명','과세구분','거래수','총출고수량','공급가합계','부가세합계','합계금액']];
+    rows=[['상품코드','상품명','과세구분','거래수','총출고수량','출고공급가액','부가세합계','합계금액']];
     groups.sort((a,b)=>a.productCode.localeCompare(b.productCode)).forEach(g=>{
       rows.push([g.productCode,g.productName,g.taxType,g.items.length,
         g.items.reduce((s,r)=>s+(r.outQty||0),0),
@@ -2299,7 +2299,7 @@ function exportInvoiceExcel(){
 function exportInvoiceDetailExcel(){
   const map=window._invMap;
   if(!map||!Object.keys(map).length){alert('먼저 [조회]를 눌러주세요.');return;}
-  const rows=[['매장코드','매장명','상품코드','상품명','날짜','출고수량','출고단가','공급가','부가세','합계금액','과세구분']];
+  const rows=[['매장코드','매장명','상품코드','상품명','날짜','출고수량','단가','출고공급가액','부가세','합계금액','과세구분']];
   const all=[];
   Object.values(map).forEach(g=>g.items.forEach(r=>all.push(r)));
   all.sort((a,b)=>a.storeCode.localeCompare(b.storeCode)||a.date.localeCompare(b.date));
