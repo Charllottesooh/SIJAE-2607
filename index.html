@@ -2291,7 +2291,7 @@ function renderInvoiceByStore(data){
   data.forEach(r=>{const key=r.storeCode+'||'+r.taxType;if(!map[key])map[key]={storeCode:r.storeCode,storeName:r.storeName,taxType:r.taxType,items:[]};map[key].items.push(r);});
   const tbody=document.getElementById('inv-tbody');tbody.innerHTML='';
   Object.values(map).sort((a,b)=>a.storeCode.localeCompare(b.storeCode)).forEach(g=>{
-    const supply=g.items.reduce((s,r)=>s+(r.supply||0),0),vat=g.items.reduce((s,r)=>s+(r.outVat||0),0),total=g.items.reduce((s,r)=>s+(r.outTotal||0),0);
+    const supply=g.items.reduce((s,r)=>s+(r.outPrice||0),0),vat=g.items.reduce((s,r)=>s+(r.outVat||0),0),total=g.items.reduce((s,r)=>s+(r.outTotal||0),0);
     const badge=g.taxType==='과세'?'<span class="tax-badge tax-y">과세</span>':'<span class="tax-badge tax-n">면세</span>';
     const key=g.storeCode+'||'+g.taxType;
     tbody.innerHTML+=`<tr style="cursor:pointer;" onclick="showInvDetail('store','${key}','${g.storeName} - ${g.taxType}')"><td>${g.storeCode}</td><td>${g.storeName}</td><td>${badge}</td><td class="num">${g.items.length}가지</td><td class="num">${supply.toLocaleString()}</td><td class="num">${vat.toLocaleString()}</td><td class="num" style="font-weight:600;">₩${total.toLocaleString()}</td><td><span style="font-size:11px;color:#2563eb;">상세보기 ▼</span></td></tr>`;
@@ -2306,7 +2306,7 @@ function renderInvoiceByProduct(data){
   data.forEach(r=>{const key=r.productCode+'||'+r.taxType;if(!map[key])map[key]={productCode:r.productCode,productName:r.productName,taxType:r.taxType,items:[]};map[key].items.push(r);});
   const tbody=document.getElementById('inv-tbody');tbody.innerHTML='';
   Object.values(map).sort((a,b)=>a.productCode.localeCompare(b.productCode)).forEach(g=>{
-    const qty=g.items.reduce((s,r)=>s+(r.outQty||0),0),supply=g.items.reduce((s,r)=>s+(r.supply||0),0),vat=g.items.reduce((s,r)=>s+(r.outVat||0),0),total=g.items.reduce((s,r)=>s+(r.outTotal||0),0);
+    const qty=g.items.reduce((s,r)=>s+(r.outQty||0),0),supply=g.items.reduce((s,r)=>s+(r.outPrice||0),0),vat=g.items.reduce((s,r)=>s+(r.outVat||0),0),total=g.items.reduce((s,r)=>s+(r.outTotal||0),0);
     const badge=g.taxType==='과세'?'<span class="tax-badge tax-y">과세</span>':'<span class="tax-badge tax-n">면세</span>';
     const key=g.productCode+'||'+g.taxType;
     tbody.innerHTML+=`<tr style="cursor:pointer;" onclick="showInvDetail('product','${key}','${g.productName} - ${g.taxType}')"><td>${g.productCode}</td><td>${g.productName}</td><td>${badge}</td><td class="num">${g.items.length}건</td><td class="num">${qty.toLocaleString()}</td><td class="num">${supply.toLocaleString()}</td><td class="num">${vat.toLocaleString()}</td><td class="num" style="font-weight:600;">₩${total.toLocaleString()}</td><td><span style="font-size:11px;color:#2563eb;">상세보기 ▼</span></td></tr>`;
@@ -2335,20 +2335,20 @@ function exportInvoiceExcel(){
   let rows,sheetName;
   if(type==='store'){
     sheetName='매장별합계';
-    rows=[['매장코드','매장명','과세구분','품목수','출고공급가액','부가세합계','합계금액']];
-    groups.sort((a,b)=>a.storeCode.localeCompare(b.storeCode)).forEach(g=>{
+    rows=[['매장코드','매장명','과세구분','품목수','출고공급가액합계','부가세합계','합계금액']];
+        groups.sort((a,b)=>a.storeCode.localeCompare(b.storeCode)).forEach(g=>{
       rows.push([g.storeCode,g.storeName,g.taxType,g.items.length,
-        g.items.reduce((s,r)=>s+(r.supply||0),0),
+        g.items.reduce((s,r)=>s+(r.outPrice||0),0),
         g.items.reduce((s,r)=>s+(r.outVat||0),0),
         g.items.reduce((s,r)=>s+(r.outTotal||0),0)]);
     });
   }else{
     sheetName='품목별합계';
-    rows=[['상품코드','상품명','과세구분','거래수','총출고수량','출고공급가액','부가세합계','합계금액']];
-    groups.sort((a,b)=>a.productCode.localeCompare(b.productCode)).forEach(g=>{
+    rows=[['상품코드','상품명','과세구분','거래수','총출고수량','출고공급가액합계','부가세합계','합계금액']];
+        groups.sort((a,b)=>a.productCode.localeCompare(b.productCode)).forEach(g=>{
       rows.push([g.productCode,g.productName,g.taxType,g.items.length,
         g.items.reduce((s,r)=>s+(r.outQty||0),0),
-        g.items.reduce((s,r)=>s+(r.supply||0),0),
+        g.items.reduce((s,r)=>s+(r.outPrice||0),0),
         g.items.reduce((s,r)=>s+(r.outVat||0),0),
         g.items.reduce((s,r)=>s+(r.outTotal||0),0)]);
     });
