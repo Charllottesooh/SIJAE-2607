@@ -1295,7 +1295,7 @@ async function loadFromFirebase() {
 
   const today = todayStr();
   const syncedToday = lastSync && lastSync.slice(0,10) === today;
-  if(lsSales && lsSales.length && syncedToday) {
+    if(lsSales && lsSales.length && lsDep && lsDep.length && syncedToday) {
     setStatus('fb', true, '로컬 데이터 로드완료');
     retryPendingSync();
     return;
