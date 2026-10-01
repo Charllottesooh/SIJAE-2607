@@ -1271,14 +1271,10 @@ async function initFirebase() {
 }
 
 async function loadFromFirebase() {
-  const lsSales = loadFromLocal('sales');
-  const lsDep = loadFromLocal('deposit');
-  const lsAcc = loadFromLocal('accounts');
-  const lsLoan = loadFromLocal('loans');
-  const lsStore = loadFromLocal('stores');
-  const lsNT = loadFromLocal('noteTypes');
-  const lsMargin = loadFromLocal('marginEntries');
-  const lastSync = loadFromLocal('lastSync');
+    const [lsSales, lsDep, lsAcc, lsLoan, lsStore, lsNT, lsMargin, lastSync] = await Promise.all([
+    loadFromLocal('sales'), loadFromLocal('deposit'), loadFromLocal('accounts'), loadFromLocal('loans'),
+    loadFromLocal('stores'), loadFromLocal('noteTypes'), loadFromLocal('marginEntries'), loadFromLocal('lastSync')
+  ]);
 
   if(lsSales && lsSales.length) {
     salesData = lsSales;
@@ -3949,21 +3945,69 @@ const LS_KEYS = {
   lastSync: 'sijae_lastSync'
 };
 
+// ===== IndexedDB 로컬 저장소 (localStorage 5MB 한도 해결) =====
+const IDB_NAME = 'sijae_db', IDB_STORE = 'kv';
+let _idbPromise = null;
+function idbOpen() {
+  if (_idbPromise) return _idbPromise;
+  _idbPromise = new Promise((res, rej) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => { _idbPromise = null; rej(req.error); };
+  });
+  return _idbPromise;
+}
+async function idbSet(k, v) {
+  const db = await idbOpen();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(v, k);
+    tx.oncomplete = () => res(true);
+    tx.onerror = () => rej(tx.error);
+    tx.onabort = () => rej(tx.error);
+  });
+}
+async function idbGet(k) {
+  const db = await idbOpen();
+  return new Promise((res, rej) => {
+    const r = db.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(k);
+    r.onsuccess = () => res(r.result === undefined ? null : r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
 function saveToLocal(key, data) {
-  try { localStorage.setItem(LS_KEYS[key], JSON.stringify(data)); } catch(e) { console.error('localStorage 저장 오류', e); }
+  return idbSet(LS_KEYS[key], data).catch(e => { console.error('IndexedDB 저장 오류', key, e); return false; });
 }
-function loadFromLocal(key) {
-  try { const d = localStorage.getItem(LS_KEYS[key]); return d ? JSON.parse(d) : null; } catch(e) { return null; }
+async function loadFromLocal(key) {
+  try {
+    const v = await idbGet(LS_KEYS[key]);
+    if (v !== null) return v;
+    // 1회 이전: localStorage에 남은 자료를 IndexedDB로 옮기고 삭제
+    const ls = localStorage.getItem(LS_KEYS[key]);
+    if (ls) {
+      const d = JSON.parse(ls);
+      if (await idbSet(LS_KEYS[key], d)) localStorage.removeItem(LS_KEYS[key]);
+      return d;
+    }
+    return null;
+  } catch (e) { console.error('로컬 불러오기 오류', key, e); return null; }
 }
-function saveAllToLocal() {
-  saveToLocal('sales', salesData);
-  saveToLocal('deposit', depData);
-  saveToLocal('accounts', accData);
-  saveToLocal('loans', loanData);
-  saveToLocal('stores', storeData);
-  saveToLocal('noteTypes', depNoteTypes);
-  saveToLocal('marginEntries', marginEntries);
-  saveToLocal('lastSync', new Date().toISOString());
+async function saveAllToLocal() {
+  const results = await Promise.all([
+    saveToLocal('sales', salesData),
+    saveToLocal('deposit', depData),
+    saveToLocal('accounts', accData),
+    saveToLocal('loans', loanData),
+    saveToLocal('stores', storeData),
+    saveToLocal('noteTypes', depNoteTypes),
+    saveToLocal('marginEntries', marginEntries)
+  ]);
+  if (results.every(r => r !== false)) {
+    await saveToLocal('lastSync', new Date().toISOString());
+  } else {
+    console.warn('일부 로컬 저장 실패 → lastSync 미기록 (다음 실행 시 Firebase에서 다시 로드)');
+  }
 }
 
 async function forceSyncToFirebase() {
