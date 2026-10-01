@@ -2933,14 +2933,36 @@ function renderStore(data){
 }
 function openStoreModal(id){
   const r=id?storeData.find(x=>x.id===id):null;
+  const v=k=>r?(r[k]||''):'';
   const accOpts=depAccounts.map(a=>`<option value="${a.code}" ${r&&r.parentAcc===a.code?'selected':''}>${a.code} - ${a.bank} ${a.accNo}</option>`).join('');
-  const html=`<div class="modal" style="width:620px;"><h2>${r?'가맹점 수정':'가맹점 추가'}</h2><div class="form-grid"><div class="form-group"><label>가맹점코드 *</label><input id="sm-code" value="${r?r.code:''}"></div><div class="form-group"><label>가맹점명 *</label><input id="sm-name" value="${r?r.name:''}"></div><div class="form-group"><label>대표자명</label><input id="sm-owner" value="${r?r.owner||'':''}"></div><div class="form-group"><label>사업자번호</label><input id="sm-bizno" value="${r?r.bizNo||'':''}" placeholder="000-00-00000"></div><div class="form-group"><label>가상계좌번호</label><input id="sm-vacc" value="${r?r.virtualAccNo||'':''}"></div><div class="form-group"><label>연결 모계좌</label><select id="sm-pacc"><option value="">선택</option>${accOpts}</select></div><div class="form-group"><label>한도금액</label><input type="number" id="sm-limit" value="${r?(r.limit||''):''}" placeholder="0"></div><div class="form-group"><label>초기 미수금잔액</label><input type="number" id="sm-init" value="${r?(r.initBalance||''):''}" placeholder="0"></div><div class="form-group"><label>상태</label><select id="sm-status"><option value="정상" ${r&&r.status==='정상'?'selected':''}>정상</option><option value="휴업" ${r&&r.status==='휴업'?'selected':''}>휴업</option><option value="폐업" ${r&&r.status==='폐업'?'selected':''}>폐업</option></select></div><div class="form-group"></div><div class="form-group"><label>비고1</label><input id="sm-note1" value="${r?r.note1||'':''}"></div><div class="form-group"><label>비고2</label><input id="sm-note2" value="${r?r.note2||'':''}"></div></div><div class="modal-footer"><button onclick="closeAccModal()">취소</button><button class="primary" onclick="saveStore(${id||'null'})">저장</button></div></div>`;
+  const html=`<div class="modal" style="width:620px;"><h2>${r?'가맹점 수정':'가맹점 추가'}</h2><div class="form-grid">
+  <div class="form-group"><label>가맹점코드 *</label><input id="sm-code" value="${v('code')}"></div>
+  <div class="form-group"><label>가맹점명 *</label><input id="sm-name" value="${v('name')}"></div>
+  <div class="form-group"><label>대표자명</label><input id="sm-owner" value="${v('owner')}"></div>
+  <div class="form-group"><label>사업자번호</label><input id="sm-bizno" value="${v('bizNo')}" placeholder="000-00-00000"></div>
+  <div class="form-group"><label>업태</label><input id="sm-biztype" value="${v('bizType')}"></div>
+  <div class="form-group"><label>종목</label><input id="sm-bizitem" value="${v('bizItem')}"></div>
+  <div class="form-group full"><label>주소</label><input id="sm-addr" value="${v('addr')}"></div>
+  <div class="form-group full"><label>이메일</label><input id="sm-email" value="${v('email')}"></div>
+  <div class="form-group"><label>가상계좌번호</label><input id="sm-vacc" value="${v('virtualAccNo')}"></div>
+  <div class="form-group"><label>연결 모계좌</label><select id="sm-pacc"><option value="">선택</option>${accOpts}</select></div>
+  <div class="form-group"><label>한도금액</label><input type="number" id="sm-limit" value="${r?(r.limit||''):''}" placeholder="0"></div>
+  <div class="form-group"><label>초기 미수금잔액</label><input type="number" id="sm-init" value="${r?(r.initBalance||''):''}" placeholder="0"></div>
+  <div class="form-group"><label>상태</label><select id="sm-status"><option value="정상" ${r&&r.status==='정상'?'selected':''}>정상</option><option value="휴업" ${r&&r.status==='휴업'?'selected':''}>휴업</option><option value="폐업" ${r&&r.status==='폐업'?'selected':''}>폐업</option></select></div><div class="form-group"></div>
+  <div class="form-group"><label>비고1</label><input id="sm-note1" value="${v('note1')}"></div>
+  <div class="form-group"><label>비고2</label><input id="sm-note2" value="${v('note2')}"></div>
+  </div><div class="modal-footer"><button onclick="closeAccModal()">취소</button><button class="primary" onclick="saveStore(${id||'null'})">저장</button></div></div>`;
   showDynModal(html);
 }
 function saveStore(id){
-  const code=document.getElementById('sm-code').value.trim(), name=document.getElementById('sm-name').value.trim();
+  const g=k=>document.getElementById(k).value.trim();
+  const code=g('sm-code'), name=g('sm-name');
   if(!code||!name){alert('가맹점코드와 가맹점명은 필수입니다.');return;}
-  const row={id:id&&id!=='null'?id:storeNextId++,code,name,owner:document.getElementById('sm-owner').value.trim(),bizNo:document.getElementById('sm-bizno').value.trim(),virtualAccNo:document.getElementById('sm-vacc').value.trim(),parentAcc:document.getElementById('sm-pacc').value,limit:parseFloat(document.getElementById('sm-limit').value)||0,initBalance:parseFloat(document.getElementById('sm-init').value)||0,status:document.getElementById('sm-status').value,note1:document.getElementById('sm-note1').value,note2:document.getElementById('sm-note2').value};
+  const row={id:id&&id!=='null'?id:storeNextId++,code,name,owner:g('sm-owner'),bizNo:g('sm-bizno'),
+    bizType:g('sm-biztype'),bizItem:g('sm-bizitem'),addr:g('sm-addr'),email:g('sm-email'),
+    virtualAccNo:g('sm-vacc'),parentAcc:document.getElementById('sm-pacc').value,
+    limit:parseFloat(g('sm-limit'))||0,initBalance:parseFloat(g('sm-init'))||0,
+    status:document.getElementById('sm-status').value,note1:g('sm-note1'),note2:g('sm-note2')};
   if(id&&id!=='null'){const i=storeData.findIndex(x=>x.id===id);storeData[i]=row;}else storeData.push(row);
   fbSaveOne('stores', row);
   saveToLocal('stores', storeData);
@@ -2952,7 +2974,7 @@ function getStoreChecked(){return [...document.querySelectorAll('.store-chk:chec
 function editStoreSelected(){const ids=getStoreChecked();if(ids.length!==1){alert('수정할 항목 1건을 선택해주세요.');return;}openStoreModal(ids[0]);}
 function deleteStoreSelected(){const ids=getStoreChecked();if(!ids.length){alert('삭제할 항목을 선택해주세요.');return;}if(confirm(ids.length+'건을 삭제하시겠습니까?')){ids.forEach(id=>fbDeleteOne('stores',id));storeData=storeData.filter(r=>!ids.includes(r.id));saveToLocal('stores',storeData);applyStoreFilter();}}
 function openStoreUpload(){
-  const html=`<div class="modal" style="width:500px;"><h2>거래처 엑셀 업로드</h2><p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>가맹점코드</strong> / 가맹점명 / 대표자명 / 사업자번호 / 가상계좌번호 / 연결모계좌 / 한도금액 / 초기미수금 / 상태 / 비고1 / 비고2</p><div class="upload-area" onclick="document.getElementById('store-xl-input').click()"><div style="font-size:24px;">📂</div><p>클릭하여 엑셀 파일 선택</p><input type="file" id="store-xl-input" accept=".xlsx,.xls,.csv" style="display:none;" onchange="previewStoreExcel(this)"></div><div class="upload-preview" id="store-xl-preview"></div><div class="modal-footer"><button onclick="closeAccModal()">취소</button><button class="primary" onclick="importStoreExcel()">업로드 적용</button></div></div>`;
+  const html=`<div class="modal" style="width:500px;"><h2>거래처 엑셀 업로드</h2><p style="font-size:12px;color:#888;margin-bottom:14px;">컬럼 순서: <strong>가맹점코드</strong> / 가맹점명 / 대표자명 / 사업자번호 / 가상계좌번호 / 연결모계좌 / 한도금액 / 초기미수금 / 상태 / 비고1 / 비고2 / 주소 / 업태 / 종목 / 이메일</p><div class="upload-area" onclick="document.getElementById('store-xl-input').click()"><div style="font-size:24px;">📂</div><p>클릭하여 엑셀 파일 선택</p><input type="file" id="store-xl-input" accept=".xlsx,.xls,.csv" style="display:none;" onchange="previewStoreExcel(this)"></div><div class="upload-preview" id="store-xl-preview"></div><div class="modal-footer"><button onclick="closeAccModal()">취소</button><button class="primary" onclick="importStoreExcel()">업로드 적용</button></div></div>`;
   showDynModal(html);
 }
 function previewStoreExcel(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{const wb=XLSX.read(e.target.result,{type:'binary'});storeUploadRows=[];let info=[];wb.SheetNames.forEach(name=>{const rows=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1});const dr=rows.slice(1).filter(r=>r.length>0);storeUploadRows=storeUploadRows.concat(dr);info.push(`${name}(${dr.length}건)`);});const p=document.getElementById('store-xl-preview');p.style.display='block';p.innerHTML=`✅ 총 <strong>${storeUploadRows.length}건</strong> — 시트: ${info.join(', ')}`;};reader.readAsBinaryString(file);}
@@ -2962,13 +2984,22 @@ function importStoreExcel(){
   storeUploadRows.forEach(r=>{
     const code=String(r[0]||'').trim();if(!code)return;
     const existing=storeData.find(x=>x.code===code);
-    const row={id:existing?existing.id:storeNextId++,code,name:String(r[1]||''),owner:String(r[2]||''),bizNo:String(r[3]||''),virtualAccNo:String(r[4]||''),parentAcc:String(r[5]||''),limit:parseFloat(r[6])||0,initBalance:parseFloat(r[7])||0,status:String(r[8]||'정상'),note1:String(r[9]||''),note2:String(r[10]||'')};
+    const s=i=>String(r[i]??'').trim();
+    const row={id:existing?existing.id:storeNextId++,code,name:s(1),owner:s(2),bizNo:s(3),virtualAccNo:s(4),parentAcc:s(5),
+      limit:parseFloat(r[6])||0,initBalance:parseFloat(r[7])||0,status:s(8)||'정상',note1:s(9),note2:s(10),
+      addr:s(11),bizType:s(12),bizItem:s(13),email:s(14)};
     if(existing){const i=storeData.findIndex(x=>x.code===code);storeData[i]=row;}else storeData.push(row);
     fbSaveOne('stores', row);
   });
+  saveToLocal('stores', storeData);
   storeUploadRows=[];closeAccModal();applyStoreFilter();alert(cnt+'건 업로드 완료');
 }
-function exportStoreExcel(){const rows=[['가맹점코드','가맹점명','대표자명','사업자번호','가상계좌번호','연결모계좌','한도금액','초기미수금','상태','비고1','비고2']];storeFiltered.forEach(r=>rows.push([r.code,r.name,r.owner||'',r.bizNo||'',r.virtualAccNo||'',r.parentAcc||'',r.limit,r.initBalance,r.status,r.note1||'',r.note2||'']));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'거래처');XLSX.writeFile(wb,'거래처목록.xlsx');}
+function exportStoreExcel(){
+  const rows=[['가맹점코드','가맹점명','대표자명','사업자번호','가상계좌번호','연결모계좌','한도금액','초기미수금','상태','비고1','비고2','주소','업태','종목','이메일']];
+  const src=storeFiltered.length?storeFiltered:storeData;
+  src.forEach(r=>rows.push([r.code,r.name,r.owner||'',r.bizNo||'',r.virtualAccNo||'',r.parentAcc||'',r.limit,r.initBalance,r.status,r.note1||'',r.note2||'',r.addr||'',r.bizType||'',r.bizItem||'',r.email||'']));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'거래처');XLSX.writeFile(wb,'거래처목록.xlsx');
+}
 
 function applyArFilter(){
   const start=document.getElementById('ar-f-start').value, end=document.getElementById('ar-f-end').value;
