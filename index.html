@@ -2312,11 +2312,34 @@ function renderInvoiceByProduct(data){
 
 function showInvDetail(type,key,title){
   const g=window._invMap[key];if(!g)return;
-  document.getElementById('inv-detail-title').textContent='📋 '+title+' 세부내역';
   const tbody=document.getElementById('inv-detail-tbody');tbody.innerHTML='';
-  g.items.forEach(r=>{tbody.innerHTML+=`<tr><td>${r.date}</td><td>${r.storeCode}</td><td>${r.storeName}</td><td>${r.productCode}</td><td>${r.productName}</td><td class="num">${(r.outQty||0).toLocaleString()}</td><td class="num">${(r.supply||0).toLocaleString()}</td><td class="num">${(r.outPrice||0).toLocaleString()}</td><td class="num">${(r.outVat||0).toLocaleString()}</td><td class="num" style="font-weight:600;">₩${(r.outTotal||0).toLocaleString()}</td><td><span class="tax-badge ${r.taxType==='과세'?'tax-y':'tax-n'}">${r.taxType}</span></td></tr>`;});
+  const sec=(label)=>`<tr><td colspan="11" style="padding:9px 12px;background:#e8f0fb;color:#1e3a5f;font-weight:700;font-size:12px;">${label}</td></tr>`;
+  const badge=t=>`<span class="tax-badge ${t==='과세'?'tax-y':'tax-n'}">${t}</span>`;
+
+  // ① 매장별 상세일 때만 품목별 소계 표시
+  let prodCnt=0;
+  if(type==='store'){
+    const pm={};
+    g.items.forEach(r=>{
+      if(!pm[r.productCode])pm[r.productCode]={code:r.productCode,name:r.productName,qty:0,price:0,vat:0,total:0};
+      const p=pm[r.productCode];
+      p.qty+=r.outQty||0;p.price+=r.outPrice||0;p.vat+=r.outVat||0;p.total+=r.outTotal||0;
+    });
+    const plist=Object.values(pm).sort((a,b)=>a.code.localeCompare(b.code));
+    prodCnt=plist.length;
+    tbody.innerHTML+=sec(`품목별 소계 (${prodCnt}개 품목)`);
+    plist.forEach(p=>{
+      tbody.innerHTML+=`<tr style="background:#fafcff;"><td style="color:#888;">소계</td><td>${g.storeCode}</td><td>${g.storeName}</td><td>${p.code}</td><td style="font-weight:600;">${p.name}</td><td class="num">${p.qty.toLocaleString()}</td><td class="num" style="color:#bbb;">-</td><td class="num">${p.price.toLocaleString()}</td><td class="num">${p.vat.toLocaleString()}</td><td class="num" style="font-weight:600;">₩${p.total.toLocaleString()}</td><td>${badge(g.taxType)}</td></tr>`;
+    });
+    tbody.innerHTML+=sec('건별 내역');
+  }
+
+  // ② 건별 내역 (기존)
+  g.items.forEach(r=>{tbody.innerHTML+=`<tr><td>${r.date}</td><td>${r.storeCode}</td><td>${r.storeName}</td><td>${r.productCode}</td><td>${r.productName}</td><td class="num">${(r.outQty||0).toLocaleString()}</td><td class="num">${(r.supply||0).toLocaleString()}</td><td class="num">${(r.outPrice||0).toLocaleString()}</td><td class="num">${(r.outVat||0).toLocaleString()}</td><td class="num" style="font-weight:600;">₩${(r.outTotal||0).toLocaleString()}</td><td>${badge(r.taxType)}</td></tr>`;});
   const tSupply=g.items.reduce((s,r)=>s+(r.supply||0),0),tOutPrice=g.items.reduce((s,r)=>s+(r.outPrice||0),0),tV=g.items.reduce((s,r)=>s+(r.outVat||0),0),tT=g.items.reduce((s,r)=>s+(r.outTotal||0),0);
   tbody.innerHTML+=`<tr style="background:#f9f9f9;font-weight:600;"><td colspan="6" style="padding:10px 12px;">합계</td><td class="num" style="padding:10px 12px;">${tSupply.toLocaleString()}</td><td class="num" style="padding:10px 12px;">${tOutPrice.toLocaleString()}</td><td class="num" style="padding:10px 12px;">${tV.toLocaleString()}</td><td class="num" style="padding:10px 12px;">₩${tT.toLocaleString()}</td><td></td></tr>`;
+
+  document.getElementById('inv-detail-title').textContent='📋 '+title+' 세부내역'+(type==='store'?` · 품목 ${prodCnt}개`:'');
   document.getElementById('inv-detail-panel').style.display='block';
   document.getElementById('inv-detail-panel').scrollIntoView({behavior:'smooth'});
 }
@@ -2356,16 +2379,30 @@ function exportInvoiceExcel(){
 function exportInvoiceDetailExcel(){
   const map=window._invMap;
   if(!map||!Object.keys(map).length){alert('먼저 [조회]를 눌러주세요.');return;}
-  const rows=[['매장코드','매장명','상품코드','상품명','날짜','출고수량','단가','출고공급가액','부가세','합계금액','과세구분']];
   const all=[];
   Object.values(map).forEach(g=>g.items.forEach(r=>all.push(r)));
   all.sort((a,b)=>a.storeCode.localeCompare(b.storeCode)||a.date.localeCompare(b.date));
-  all.forEach(r=>rows.push([r.storeCode,r.storeName,r.productCode,r.productName,r.date,r.outQty,r.outPrice,r.supply,r.outVat,r.outTotal,r.taxType]));
+
+  // 시트1: 매장별 품목소계 (계산서 발행용)
+  const sm={};
+  all.forEach(r=>{
+    const k=r.storeCode+'||'+r.taxType+'||'+r.productCode;
+    if(!sm[k])sm[k]={storeCode:r.storeCode,storeName:r.storeName,taxType:r.taxType,productCode:r.productCode,productName:r.productName,qty:0,price:0,vat:0,total:0};
+    const s=sm[k];s.qty+=r.outQty||0;s.price+=r.outPrice||0;s.vat+=r.outVat||0;s.total+=r.outTotal||0;
+  });
+  const sumRows=[['매장코드','매장명','과세구분','상품코드','상품명','출고수량','출고공급가액','부가세','합계금액']];
+  Object.values(sm).sort((a,b)=>a.storeCode.localeCompare(b.storeCode)||a.taxType.localeCompare(b.taxType)||a.productCode.localeCompare(b.productCode))
+    .forEach(s=>sumRows.push([s.storeCode,s.storeName,s.taxType,s.productCode,s.productName,s.qty,s.price,s.vat,s.total]));
+
+  // 시트2: 건별 상세 (기존)
+  const rows=[['매장코드','매장명','상품코드','상품명','날짜','출고수량','단가','출고공급가액','부가세','합계금액','과세구분']];
+  all.forEach(r=>rows.push([r.storeCode,r.storeName,r.productCode,r.productName,r.date,r.outQty,r.supply,r.outPrice,r.outVat,r.outTotal,r.taxType]));
+
   const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sumRows),'매장별품목소계');
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'매출계산서_상세');
   XLSX.writeFile(wb,'매출계산서_상세내역_'+new Date().toLocaleDateString('ko-KR')+'.xlsx');
 }
-
   
 // [패치5] 비고유형 select를 대표계정-하위계정 optgroup 구조로 생성하는 헬퍼
 function buildNoteTypeOptions(selectedName){
