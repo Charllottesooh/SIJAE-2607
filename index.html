@@ -629,7 +629,16 @@ input[type="checkbox"] { cursor: pointer; }
         </div>
       </div>
 
-      <div id="sales-invoice" style="display:none;">
+<div id="sales-invoice" style="display:none;">
+        <div class="card-section">
+          <div class="summary-card color-red"><div class="label">과세 합계</div><div class="value" id="inv-card-taxable">₩0</div><div class="sub" id="inv-card-taxable-sub">공급가 0</div></div>
+          <div class="summary-card color-orange"><div class="label">부가세 합계</div><div class="value" id="inv-card-vat">₩0</div><div class="sub">과세분</div></div>
+          <div class="summary-card color-green"><div class="label">면세 합계</div><div class="value" id="inv-card-exempt">₩0</div><div class="sub" id="inv-card-exempt-sub">0건</div></div>
+          <div class="summary-card color-blue"><div class="label">전체 합계금액</div><div class="value" id="inv-card-total">₩0</div><div class="sub" id="inv-card-total-sub">0건</div></div>
+        </div>
+
+
+  
         <div class="filter-bar">
           <input type="date" id="inv-f-start" value="">
           <span style="font-size:12px;color:#aaa;">~</span>
@@ -2252,6 +2261,19 @@ function syncInvSelectedProducts(){
   invSelectedProducts = (checked.length===chks.length) ? null : new Set(checked);
 }
 
+function updateInvCards(data){
+  const tx=data.filter(r=>r.taxType==='과세'), ex=data.filter(r=>r.taxType==='면세');
+  const sum=(arr,k)=>arr.reduce((s,r)=>s+(r[k]||0),0);
+  document.getElementById('inv-card-taxable').textContent=fmt(sum(tx,'outTotal'));
+  document.getElementById('inv-card-taxable-sub').textContent='공급가 '+sum(tx,'outPrice').toLocaleString()+' · '+tx.length+'건';
+  document.getElementById('inv-card-vat').textContent=fmt(sum(tx,'outVat'));
+  document.getElementById('inv-card-exempt').textContent=fmt(sum(ex,'outTotal'));
+  document.getElementById('inv-card-exempt-sub').textContent=ex.length+'건';
+  document.getElementById('inv-card-total').textContent=fmt(sum(data,'outTotal'));
+  document.getElementById('inv-card-total-sub').textContent=data.length+'건';
+}
+
+  
   
 function applyInvoiceFilter(){
   const start=document.getElementById('inv-f-start').value, end=document.getElementById('inv-f-end').value;
@@ -2276,6 +2298,7 @@ function applyInvoiceFilter(){
     ? baseData.filter(r=>invSelectedProducts.has(r.productCode))
     : baseData;
 
+    updateInvCards(data);
   if(type==='store') renderInvoiceByStore(data); else renderInvoiceByProduct(data);
   closeInvDetail();
 }
