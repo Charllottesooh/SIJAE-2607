@@ -2369,36 +2369,42 @@ function showInvDetail(type,key,title){
 
 function closeInvDetail(){document.getElementById('inv-detail-panel').style.display='none';}
 function resetInvoiceFilter(){document.getElementById('inv-f-start').value=monthStartStr();document.getElementById('inv-f-end').value=monthEndStr();document.getElementById('inv-f-type').value='store';document.getElementById('inv-f-tax').value='';document.getElementById('inv-f-keyword').value='';invSelectedProducts=null;document.getElementById('inv-prod-list').innerHTML='<div style="font-size:11px;color:#aaa;padding:8px;text-align:center;">먼저 [조회]를 누르세요</div>';applyInvoiceFilter();}
+
+  const STORE_INFO_HEAD=['사업자번호','대표자','주소','업태','종목','이메일'];
+function storeInfoCols(code){
+  const s=getStoreByCode(code)||{};
+  return [s.bizNo||'',s.owner||'',s.addr||'',s.bizType||'',s.bizItem||'',s.email||''];
+}
+  
+  
 function exportInvoiceExcel(){
   const map=window._invMap;
   if(!map||!Object.keys(map).length){alert('먼저 [조회]를 눌러주세요.');return;}
   const type=document.getElementById('inv-f-type').value;
   const groups=Object.values(map);
+  const sum=(items,k)=>items.reduce((s,r)=>s+(r[k]||0),0);
   let rows,sheetName;
   if(type==='store'){
     sheetName='매장별합계';
-    rows=[['매장코드','매장명','과세구분','품목수','출고공급가액합계','부가세합계','합계금액']];
-        groups.sort((a,b)=>a.storeCode.localeCompare(b.storeCode)).forEach(g=>{
-      rows.push([g.storeCode,g.storeName,g.taxType,g.items.length,
-        g.items.reduce((s,r)=>s+(r.outPrice||0),0),
-        g.items.reduce((s,r)=>s+(r.outVat||0),0),
-        g.items.reduce((s,r)=>s+(r.outTotal||0),0)]);
+    rows=[['매장코드','매장명',...STORE_INFO_HEAD,'과세구분','품목수','출고공급가액합계','부가세합계','합계금액']];
+    groups.sort((a,b)=>a.storeCode.localeCompare(b.storeCode)).forEach(g=>{
+      rows.push([g.storeCode,g.storeName,...storeInfoCols(g.storeCode),g.taxType,g.items.length,
+        sum(g.items,'outPrice'),sum(g.items,'outVat'),sum(g.items,'outTotal')]);
     });
   }else{
     sheetName='품목별합계';
     rows=[['상품코드','상품명','과세구분','거래수','총출고수량','출고공급가액합계','부가세합계','합계금액']];
-        groups.sort((a,b)=>a.productCode.localeCompare(b.productCode)).forEach(g=>{
+    groups.sort((a,b)=>a.productCode.localeCompare(b.productCode)).forEach(g=>{
       rows.push([g.productCode,g.productName,g.taxType,g.items.length,
-        g.items.reduce((s,r)=>s+(r.outQty||0),0),
-        g.items.reduce((s,r)=>s+(r.outPrice||0),0),
-        g.items.reduce((s,r)=>s+(r.outVat||0),0),
-        g.items.reduce((s,r)=>s+(r.outTotal||0),0)]);
+        sum(g.items,'outQty'),sum(g.items,'outPrice'),sum(g.items,'outVat'),sum(g.items,'outTotal')]);
     });
   }
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),sheetName);
   XLSX.writeFile(wb,'매출계산서_'+sheetName+'_'+new Date().toLocaleDateString('ko-KR')+'.xlsx');
 }
+
+  
 function exportInvoiceDetailExcel(){
   const map=window._invMap;
   if(!map||!Object.keys(map).length){alert('먼저 [조회]를 눌러주세요.');return;}
@@ -2406,20 +2412,20 @@ function exportInvoiceDetailExcel(){
   Object.values(map).forEach(g=>g.items.forEach(r=>all.push(r)));
   all.sort((a,b)=>a.storeCode.localeCompare(b.storeCode)||a.date.localeCompare(b.date));
 
-  // 시트1: 매장별 품목소계 (계산서 발행용)
+  // 시트1: 매장별 품목소계
   const sm={};
   all.forEach(r=>{
     const k=r.storeCode+'||'+r.taxType+'||'+r.productCode;
     if(!sm[k])sm[k]={storeCode:r.storeCode,storeName:r.storeName,taxType:r.taxType,productCode:r.productCode,productName:r.productName,qty:0,price:0,vat:0,total:0};
     const s=sm[k];s.qty+=r.outQty||0;s.price+=r.outPrice||0;s.vat+=r.outVat||0;s.total+=r.outTotal||0;
   });
-  const sumRows=[['매장코드','매장명','과세구분','상품코드','상품명','출고수량','출고공급가액','부가세','합계금액']];
+  const sumRows=[['매장코드','매장명',...STORE_INFO_HEAD,'과세구분','상품코드','상품명','출고수량','출고공급가액','부가세','합계금액']];
   Object.values(sm).sort((a,b)=>a.storeCode.localeCompare(b.storeCode)||a.taxType.localeCompare(b.taxType)||a.productCode.localeCompare(b.productCode))
-    .forEach(s=>sumRows.push([s.storeCode,s.storeName,s.taxType,s.productCode,s.productName,s.qty,s.price,s.vat,s.total]));
+    .forEach(s=>sumRows.push([s.storeCode,s.storeName,...storeInfoCols(s.storeCode),s.taxType,s.productCode,s.productName,s.qty,s.price,s.vat,s.total]));
 
-  // 시트2: 건별 상세 (기존)
-  const rows=[['매장코드','매장명','상품코드','상품명','날짜','출고수량','단가','출고공급가액','부가세','합계금액','과세구분']];
-  all.forEach(r=>rows.push([r.storeCode,r.storeName,r.productCode,r.productName,r.date,r.outQty,r.supply,r.outPrice,r.outVat,r.outTotal,r.taxType]));
+  // 시트2: 건별 상세
+  const rows=[['매장코드','매장명',...STORE_INFO_HEAD,'상품코드','상품명','날짜','출고수량','단가','출고공급가액','부가세','합계금액','과세구분']];
+  all.forEach(r=>rows.push([r.storeCode,r.storeName,...storeInfoCols(r.storeCode),r.productCode,r.productName,r.date,r.outQty,r.supply,r.outPrice,r.outVat,r.outTotal,r.taxType]));
 
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sumRows),'매장별품목소계');
@@ -2427,7 +2433,6 @@ function exportInvoiceDetailExcel(){
   XLSX.writeFile(wb,'매출계산서_상세내역_'+new Date().toLocaleDateString('ko-KR')+'.xlsx');
 }
   
-// [패치5] 비고유형 select를 대표계정-하위계정 optgroup 구조로 생성하는 헬퍼
 function buildNoteTypeOptions(selectedName){
   const parents = depNoteTypes.filter(t=>t.parentId===null);
   return parents.map(p=>{
